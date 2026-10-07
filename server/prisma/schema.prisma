@@ -16,6 +16,11 @@ enum UserRole {
   TECHNICIAN @map("technician")
 }
 
+enum AuthClient {
+  WEB @map("web")
+  MOBILE @map("mobile")
+}
+
 
 model User {
   id       String   @id @default(uuid())
@@ -24,6 +29,28 @@ model User {
   password  String
   phone    String?
   role    UserRole   @default(CUSTOMER)
+  refreshTokens RefreshToken[]
+  EmailVerifyAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+
+}
+
+model RefreshToken {
+  id     String  @id @default(uuid())
+  userId String
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId String
+  token   String @unique
+  deviceInfo String?
+  client AuthClient
+  revoke Boolean @default(false)
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
 }

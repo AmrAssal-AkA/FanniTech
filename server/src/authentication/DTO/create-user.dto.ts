@@ -1,15 +1,13 @@
 import {z} from 'zod';
 
- const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-const nameRegex = /^[a-zA-Z\s]+$/; 
-
 
 export const CreateUserDtoSchema = z.object({
-    email: z.string().regex(emailRegex, 'Invalid email format'),
-    name: z.string().regex(nameRegex, 'Name must contain only letters and spaces').min(1),
-    password: z.string().regex(passwordRegex, 'Password must be at least 8 characters long and contain at least one letter and one number'),
-    phone: z.string().optional()
+  email: z.string().trim().toLowerCase().email('Invalid email format'),
+  name: z.string().trim().min(2).max(20).regex(/^[\p{L}\s'-]+$/u, 'Name must contain only letters and spaces'),
+  password: z.string().min(8).max(20).regex(/^(?=.*\p{L})(?=.*\d).+$/u, 'Password must contain at least one letter and one number'),
+  phone: z.string().trim().regex(/^\+?\d{8,15}$/, 'Invalid phone number').optional(),
+  deviceInfo: z.string().trim().max(200).optional(),
+  role: z.enum(['CUSTOMER']).optional(),
 });
 
 export type CreateUserDtoType = z.infer<typeof CreateUserDtoSchema>;

@@ -16,3 +16,11 @@ export const UserRole = {
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const AuthClient = {
+  WEB: 'WEB',
+  MOBILE: 'MOBILE'
+} as const
+
+export type AuthClient = (typeof AuthClient)[keyof typeof AuthClient]
