@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -62,7 +63,7 @@ export default function LoginScreen() {
           {/* Brand & Intro Section */}
           <View className="items-center text-center mt-6 mb-6">
             <View className="relative mb-3.5 items-center justify-center rounded-2xl bg-surface-container p-3 shadow-sm border border-slate-100">
-              <FanniTechLogo size={56} />
+             <Image source={require('../../../assets/icon.png')} className="h-20 w-20" />
               <View className="absolute -bottom-1 -right-1 h-3.5 w-3.5 items-center justify-center">
                 <View className="absolute h-3.5 w-3.5 rounded-full bg-secondary opacity-75" />
                 <View className="h-3.5 w-3.5 rounded-full bg-secondary" />

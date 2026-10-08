@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { FanniTechLogo } from './FanniTechLogo';
@@ -37,7 +37,7 @@ export const AuthHeader: React.FC<AuthHeaderProps> = ({ title }) => {
       </View>
 
       <View className="items-center justify-center">
-        <FanniTechLogo size={28} />
+        <Image source={require('../../../assets/icon.png')} className="h-8 w-8" />
       </View>
     </View>
   );

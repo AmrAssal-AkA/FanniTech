@@ -3,6 +3,7 @@
     "name": "FanniTech",
     "slug": " Precision Computer & Laptop Diagnostic Hub",
     "version": "1.0.0",
+    "scheme": "FanniTech",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

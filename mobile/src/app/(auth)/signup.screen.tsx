@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -73,7 +74,7 @@ export default function SignupScreen() {
           {/* Header & Brand Intro */}
           <View className="items-center text-center mt-5 mb-5">
             <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-2xl bg-surface-container-low p-2 shadow-sm border border-slate-100">
-              <FanniTechLogo size={48} />
+              <Image source={require('../../../assets/icon.png')} className="h-20 w-20" />
             </View>
 
             <Text className="text-2xl font-bold tracking-tight text-on-surface">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
@@ -71,7 +71,7 @@ export default function WelcomeScreen() {
             <View className="relative mb-4 items-center justify-center">
               <View className="absolute -inset-2 rounded-3xl bg-secondary/15 blur-md" />
               <View className="relative h-28 w-28 items-center justify-center rounded-2xl bg-surface-container-lowest p-2 shadow-lg border border-slate-100">
-                <FanniTechLogo size={76} />
+                <Image source={require('../../assets/icon.png')} className="h-20 w-20" />
               </View>
               <View className="absolute -bottom-1 -right-1 items-center justify-center rounded-full bg-primary p-1.5 shadow-md">
                 <ShieldCheck size={14} color="#ffffff" />

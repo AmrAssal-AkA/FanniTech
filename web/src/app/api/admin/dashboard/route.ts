@@ -1,0 +1,190 @@
+import { NextResponse } from "next/server";
+import type { AdminDashboardData } from "@/types/dashboard";
+
+const MOCK_DASHBOARD_DATA: AdminDashboardData = {
+  metrics: {
+    pendingRequestsCount: 4,
+    activeTicketsCount: 12,
+    inDiagnosisCount: 3,
+    inRepairCount: 5,
+    readyForPickupCount: 4,
+    completedTodayCount: 6,
+    labBenchCapacity: {
+      assigned: 7,
+      total: 10,
+      percentage: 70,
+    },
+    slaRate: "98.4%",
+  },
+  pendingRequests: [
+    {
+      id: "REQ-1048",
+      customerName: "Fatima Zahra",
+      deviceModel: "Lenovo ThinkPad T14",
+      hardwareProblem: "Laptop does not turn on after charging",
+      problemCategory: "power",
+      status: "PENDING",
+      createdAt: "10 mins ago",
+    },
+    {
+      id: "REQ-1049",
+      customerName: "Omar Farooq",
+      deviceModel: "MacBook Pro 14\" M1",
+      hardwareProblem: "Liquid spilled on keyboard, trackpad erratic",
+      problemCategory: "liquid",
+      status: "PENDING",
+      createdAt: "25 mins ago",
+    },
+    {
+      id: "REQ-1051",
+      customerName: "Dr. Khalid Al-Ghamdi",
+      deviceModel: "Dell XPS 15 9520",
+      hardwareProblem: "Screen flickering & thermal shutdown",
+      problemCategory: "thermal",
+      status: "PENDING",
+      createdAt: "45 mins ago",
+    },
+    {
+      id: "REQ-1052",
+      customerName: "Mona Al-Sayed",
+      deviceModel: "HP EliteBook 840 G8",
+      hardwareProblem: "Battery swollen, won't hold charge",
+      problemCategory: "battery",
+      status: "PENDING",
+      createdAt: "1 hour ago",
+    },
+  ],
+  activeTickets: [
+    {
+      id: "TCK-2038",
+      deviceModel: "ASUS ROG Zephyrus G14",
+      customerName: "Rashid Salem",
+      priority: "CRITICAL",
+      slaDue: "2h left",
+      assignedTechName: "Ahmed Zaki",
+      assignedTechRole: "Lead Hardware Tech",
+      status: "IN_REPAIR",
+      currentStageNote: "GPU reballing stage",
+    },
+    {
+      id: "TCK-2041",
+      deviceModel: "Lenovo ThinkPad X1 Carbon",
+      customerName: "Layla Mahmoud",
+      priority: "HIGH",
+      slaDue: "5h left",
+      assignedTechName: "Youssef Mansoor",
+      assignedTechRole: "Sr. Board Tech",
+      status: "DIAGNOSING",
+      currentStageNote: "Schematic power rail check",
+    },
+    {
+      id: "TCK-2034",
+      deviceModel: "Dell Latitude 5420",
+      customerName: "Kareem Adel",
+      priority: "NORMAL",
+      slaDue: "Tomorrow",
+      assignedTechName: "Sarah Al-Otaibi",
+      assignedTechRole: "System Specialist",
+      status: "READY_FOR_PICKUP",
+      currentStageNote: "Bench 02 QA Clean",
+    },
+    {
+      id: "TCK-2029",
+      deviceModel: "MacBook Air M2",
+      customerName: "Noura Al-Bishi",
+      priority: "NORMAL",
+      slaDue: "Tomorrow",
+      assignedTechName: "Youssef Mansoor",
+      assignedTechRole: "Sr. Board Tech",
+      status: "READY_FOR_PICKUP",
+      currentStageNote: "Display assembly replaced",
+    },
+  ],
+  technicians: [
+    {
+      id: "tech-1",
+      name: "Ahmed Zaki",
+      initials: "AZ",
+      role: "Lead Hardware Tech",
+      activeTicketsCount: 3,
+      currentTicketId: "TCK-2038",
+      currentTaskName: "GPU Soldering",
+      status: "BUSY",
+    },
+    {
+      id: "tech-2",
+      name: "Youssef Mansoor",
+      initials: "YM",
+      role: "Sr. Board & Micro-soldering",
+      activeTicketsCount: 2,
+      currentTicketId: "TCK-2041",
+      currentTaskName: "Diagnostics",
+      status: "BUSY",
+    },
+    {
+      id: "tech-3",
+      name: "Sarah Al-Otaibi",
+      initials: "SA",
+      role: "System & OS Specialist",
+      activeTicketsCount: 2,
+      currentTicketId: "TCK-2034",
+      currentTaskName: "QA Final Run",
+      status: "AVAILABLE",
+    },
+  ],
+  recentActivities: [
+    {
+      id: "act-1",
+      referenceId: "TCK-2038",
+      timestamp: "11:45 AM",
+      actionText: "Marked IN_REPAIR by Ahmed Zaki",
+      actorName: "Ahmed Zaki",
+      detailNote: "Thermal paste stripped; applying flux",
+      highlightType: "primary",
+    },
+    {
+      id: "act-2",
+      referenceId: "TCK-2041",
+      timestamp: "11:20 AM",
+      actionText: "Diagnosis phase initiated by Youssef Mansoor",
+      actorName: "Youssef Mansoor",
+      highlightType: "tertiary",
+    },
+    {
+      id: "act-3",
+      referenceId: "REQ-1047 → TCK-2042",
+      timestamp: "10:50 AM",
+      actionText: "Accepted & converted for customer Hassan Nader",
+      actorName: "Tariq Al-Mansoor",
+      highlightType: "primary",
+    },
+    {
+      id: "act-4",
+      referenceId: "TCK-2034",
+      timestamp: "10:15 AM",
+      actionText: "Moved to READY_FOR_PICKUP",
+      actorName: "Sarah Al-Otaibi",
+      detailNote: "Customer notified automatically",
+      highlightType: "secondary",
+      badgeInfo: "SMS Sent",
+    },
+    {
+      id: "act-5",
+      referenceId: "REQ-1052",
+      timestamp: "09:30 AM",
+      actionText: "New intake request logged from Mona Al-Sayed",
+      highlightType: "error",
+    },
+  ],
+};
+
+export async function GET() {
+  try {
+    return NextResponse.json(MOCK_DASHBOARD_DATA);
+  } catch {
+    return NextResponse.json(
+      { message: "Failed to fetch admin dashboard telemetry data" },
+      { status: 500 }
+    );
+  }
+}

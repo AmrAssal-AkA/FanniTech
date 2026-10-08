@@ -30,6 +30,7 @@ The Backend I Build using nestjs framework and TypeScript language. the nestjs p
 - `npm run start:dev` - Start the server in development mode with hot-reloading.
 - `npm run start:prod` - Start the server in production mode.
 - `npm run Start:debug` - Start the server in debug mode.
+- `nest generate <resource>` - Generate a new resource (module, controller, service, etc.) using the NestJS CLI.
 - `npm run lint` - Run the linter to check for code style and formatting issues.
 - `npm run test` - Run the unit tests using Jest.
 - `npm run test:watch` - Run the unit tests in watch mode, re-running tests on file changes.
@@ -300,4 +301,18 @@ src/
 ├── tests/                 # Test files for unit and integration tests
 └── utils/                 # Utility functions and helpers
 ```
+
+---
+
+# Best Practices for Backend Development
+
+- Use nestjs modules to organize the application into cohesive units of functionality, promoting maintainability and scalability.
+- generate resources using the NestJS CLI to ensure consistent code structure and adherence to best practices.
+- Use TypeScript for type safety and improved developer experience, leveraging its features to catch errors at compile time.
+- Implement authentication and authorization mechanisms to secure the application and protect sensitive data.
+- Use Prisma as the ORM for database management, providing a type-safe and efficient way to interact with the PostgreSQL database.
+- Implement unit and integration tests using Jest to ensure code quality and reliability, covering critical functionalities and edge cases.
+- Use Prettier and linting tools to enforce code style and formatting standards, promoting consistency across the codebase.
+
+---
 
