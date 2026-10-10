@@ -25,7 +25,18 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
+          "colors": {
+            "cropToolbarColor": "#E6F4FE",
+            "cropBackgroundColor": "#E6F4FE"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

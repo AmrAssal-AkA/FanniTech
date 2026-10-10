@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import {
   DeviceCard,
   DeviceDetailsSheet,
@@ -7,35 +7,30 @@ import {
   DevicesHeader,
   RegisterDeviceButton,
 } from '../components';
-import { CustomerDevice } from '../types';
+import { DeviceWithRepairState } from '../types';
 
-const activeDevice: CustomerDevice = {
+const activeDevice: DeviceWithRepairState = {
   id: 'dev-1',
-  name: 'Lenovo ThinkPad T14',
+  customerId: 'customer-1',
+  deviceType: 'Laptop',
   brand: 'Lenovo',
   model: 'ThinkPad T14',
-  category: 'Laptop',
   serialNumber: 'PF-2X99L1',
-  addedDate: 'March 14, 2023',
-  locationLabel: 'Bench Rig 04',
   repairState: 'ACTIVE_REPAIR',
-  repairStatusLabel: '1 Active Repair (#SR-1001)',
-  serviceRecordLabel: '2 Completed, 1 Active',
-  activeTicketNumber: 'SR-1001',
+  createdAt: '2023-03-14T00:00:00.000Z',
+  updatedAt: '2023-03-14T00:00:00.000Z',
 };
 
-const healthyDevice: CustomerDevice = {
+const healthyDevice: DeviceWithRepairState = {
   id: 'dev-2',
-  name: 'Apple MacBook Air M2',
+  customerId: 'customer-1',
+  deviceType: 'Laptop',
   brand: 'Apple',
   model: 'MacBook Air M2',
-  category: 'Laptop',
   serialNumber: 'C02G4591MD6R',
-  addedDate: 'January 10, 2024',
-  locationLabel: 'Ready',
   repairState: 'NO_REPAIRS',
-  repairStatusLabel: 'No Active Repairs',
-  serviceRecordLabel: '0 Total',
+  createdAt: '2024-01-10T00:00:00.000Z',
+  updatedAt: '2024-01-10T00:00:00.000Z',
 };
 
 describe('Device Screen Components', () => {
@@ -59,7 +54,7 @@ describe('Device Screen Components', () => {
     const handlePrimary = jest.fn();
     const handleMenu = jest.fn();
 
-    await render(
+    const rendered = await render(
       <DeviceCard
         device={activeDevice}
         onViewDetails={handleDetails}
@@ -71,8 +66,8 @@ describe('Device Screen Components', () => {
     expect(screen.getByText('Lenovo ThinkPad T14')).toBeTruthy();
     expect(screen.getByText('Lenovo')).toBeTruthy();
     expect(screen.getByText('PF-2X99L1')).toBeTruthy();
-    expect(screen.getByText('Bench Rig 04')).toBeTruthy();
-    expect(screen.getByText('1 Active Repair (#SR-1001)')).toBeTruthy();
+    expect(screen.getByText('In service')).toBeTruthy();
+    expect(screen.getByText('Active repair')).toBeTruthy();
     expect(screen.getByText('Track Repair')).toBeTruthy();
 
     fireEvent.press(screen.getByText('View Details'));
@@ -83,7 +78,7 @@ describe('Device Screen Components', () => {
   });
 
   it('renders a healthy DeviceCard with request repair action', async () => {
-    await render(
+    const rendered = await render(
       <DeviceCard
         device={healthyDevice}
         onViewDetails={jest.fn()}
@@ -92,16 +87,16 @@ describe('Device Screen Components', () => {
       />
     );
 
-    expect(screen.getByText('Apple MacBook Air M2')).toBeTruthy();
-    expect(screen.getByText('No Active Repairs')).toBeTruthy();
-    expect(screen.getByText('Request Repair')).toBeTruthy();
+    expect(rendered.getByText('Apple MacBook Air M2')).toBeTruthy();
+    expect(rendered.getByText('No active repairs')).toBeTruthy();
+    expect(rendered.getByText('Request Repair')).toBeTruthy();
   });
 
   it('renders DeviceDetailsSheet and empty state', async () => {
     const handleEdit = jest.fn();
     const handleRemove = jest.fn();
 
-    await render(
+    const rendered = await render(
       <>
         <DeviceDetailsSheet
           device={activeDevice}
@@ -113,13 +108,13 @@ describe('Device Screen Components', () => {
       </>
     );
 
-    expect(screen.getByText('Laptop System')).toBeTruthy();
-    expect(screen.getByText('ThinkPad T14')).toBeTruthy();
-    expect(screen.getByText('Service Record')).toBeTruthy();
-    expect(screen.getByText('2 Completed, 1 Active')).toBeTruthy();
-    expect(screen.getByText('No devices registered')).toBeTruthy();
+    await waitFor(() => expect(rendered.getByText('Laptop System')).toBeTruthy());
+    expect(rendered.getByText('ThinkPad T14')).toBeTruthy();
+    expect(rendered.getByText('Service Record')).toBeTruthy();
+    expect(rendered.getByText('Active repair')).toBeTruthy();
+    expect(rendered.getByText('No devices registered')).toBeTruthy();
 
-    fireEvent.press(screen.getByText('Edit Details'));
+    fireEvent.press(rendered.getByText('Edit Details'));
     expect(handleEdit).toHaveBeenCalledWith(activeDevice);
   });
 });

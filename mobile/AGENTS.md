@@ -45,6 +45,10 @@ The FanniTech mobile application follows a feature oriented Architecture, where 
 
 The application is separate into UI Components, State Management, Hooks, app, feature, utils and Services. the UI Components are responsible for rendering the user interface, while State Management handles the application's state and data flow. Hooks provide reusable logic for various features, and the app module serves as the entry point for the application. The feature modules contain the core functionality of the application, and utils provide utility functions that can be used across different modules. Services handle communication with external APIs and backend services.
 
+the common components that applies on all app preferable to put it in the `src/components` folder, and the feature specific components should be put in the `src/features/<feature-name>/components` folder. the same applies for hooks, utils and services.
+
+the common hooks that applies on all app preferable to put it in the `src/hooks` folder, and the feature specific hooks should be put in the `src/features/<feature-name>/hooks` folder. the same applies for utils and services.
+
 ### Main Layers
 
 the application is structured into several main layers, each serving a specific purpose:
@@ -52,11 +56,12 @@ the application is structured into several main layers, each serving a specific 
 - **src**: The source code of the application, containing all the necessary files and directories for the app's functionality.
 - **app**: The entry point of the application, responsible for initializing the app and setting up navigation.
 - **features**: Contains the core features of the application, organized into separate modules for better maintainability and scalability.
-- **components**: Reusable UI components that can be used across different features and screens, promoting code reusability and consistency in the user interface.
+- **components**: common UI components that can be used across different features and screens, promoting code reusability and consistency in the user interface.
 - **hooks**: Custom hooks that encapsulate reusable logic and state management for various features, allowing for cleaner and more maintainable code.
 - **services**: Handles communication with external APIs and backend services, providing a centralized location for managing data fetching and interactions with the server.
 - **utils**: Utility functions and helpers that can be used across different modules, promoting code reusability and reducing duplication.
 - **types**: TypeScript type definitions and interfaces that provide type safety and improve code quality by catching errors during development.
+- **stores**: Contains Zustand stores for managing local UI state and global application state, allowing for easy access and updates to state across different components and features.
 
 The dependency directions are designed to ensure that higher-level modules can depend on lower-level modules without creating circular dependencies. This allows for a clear separation of concerns and promotes a more maintainable codebase.
 
@@ -64,6 +69,7 @@ The dependency directions are designed to ensure that higher-level modules can d
 app -> features -> hooks/services -> utils
     -> components
     -> types
+    -> stores
 ```
 
 ---

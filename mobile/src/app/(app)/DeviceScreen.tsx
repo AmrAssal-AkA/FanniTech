@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 
 import { HomeHeader } from '../../features/home';
 import {
-  CustomerDevice,
+  DeviceWithRepairState,
   DeviceActionsMenu,
   DeviceCard,
   DeviceDetailsSheet,
@@ -21,6 +21,7 @@ import {
   DevicesErrorState,
   DevicesHeader,
   RegisterDeviceButton,
+  RegisterDeviceSheet,
   useDevices,
 } from '../../features/devices';
 
@@ -39,8 +40,8 @@ export default function DeviceScreen() {
     closeDeviceDetails,
     openDeviceMenu,
     closeDeviceMenu,
-    removeDevice,
   } = useDevices();
+  const [isRegisterSheetVisible, setRegisterSheetVisible] = React.useState(false);
 
   const handleNotificationsPress = () => {
     router.push('/(app)/AlertScreen');
@@ -51,62 +52,43 @@ export default function DeviceScreen() {
   };
 
   const handleRegisterDevice = () => {
-    Alert.alert(
-      'Register Device',
-      'Device registration will open when the add-device flow is available.'
-    );
+    setRegisterSheetVisible(true);
   };
 
-  const handlePrimaryAction = (device: CustomerDevice) => {
+  const handlePrimaryAction = (device: DeviceWithRepairState) => {
+    const deviceName = `${device.brand} ${device.model}`;
     if (device.repairState === 'ACTIVE_REPAIR') {
-      Alert.alert(
-        'Track Repair',
-        `Opening ticket #${device.activeTicketNumber ?? 'active'} for ${device.name}.`
-      );
+      router.push('/(app)/RepairRequestsListScreen' as never);
       return;
     }
 
     if (device.repairState === 'PENDING_REQUEST') {
-      Alert.alert(
-        'Repair Request',
-        `Opening request #${device.pendingRequestNumber ?? 'pending'} for ${device.name}.`
-      );
+      router.push('/(app)/RepairRequestsListScreen' as never);
       return;
     }
 
-    Alert.alert(
-      'Request Repair',
-      `Create a repair request for ${device.name} when the request flow is available.`
-    );
+    router.push({ pathname: '/(app)/RepairRequestScreen', params: { deviceId: device.id, deviceName } } as never);
   };
 
-  const handleEditDevice = (device: CustomerDevice) => {
+  const handleEditDevice = (device: DeviceWithRepairState) => {
     closeDeviceMenu();
     closeDeviceDetails();
     Alert.alert(
       'Edit Details',
-      `Device editor for ${device.name} will open when that flow is available.`
+      `Device editor for ${device.brand} ${device.model} will open when that flow is available.`
     );
   };
 
-  const handleRemoveDevice = (device: CustomerDevice) => {
+  const handleRemoveDevice = (device: DeviceWithRepairState) => {
     closeDeviceMenu();
     closeDeviceDetails();
     Alert.alert(
       'Remove Device',
-      `De-register ${device.name} from your FanniTech account?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => removeDevice(device.id),
-        },
-      ]
+      `${device.brand} ${device.model} cannot be removed yet because the backend does not expose a deletion endpoint.`,
     );
   };
 
-  const renderDevice: ListRenderItem<CustomerDevice> = ({ item }) => (
+  const renderDevice: ListRenderItem<DeviceWithRepairState> = ({ item }) => (
     <DeviceCard
       device={item}
       onViewDetails={openDeviceDetails}
@@ -183,6 +165,7 @@ export default function DeviceScreen() {
         onEdit={handleEditDevice}
         onRemove={handleRemoveDevice}
       />
+      <RegisterDeviceSheet visible={isRegisterSheetVisible} onClose={() => setRegisterSheetVisible(false)} />
     </SafeAreaView>
   );
 }

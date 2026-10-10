@@ -7,6 +7,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule, ObserveInstrument } from './app.module.js';
 import { swaggerConfig } from './swagger/swagger.config.js';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 
 const PORT = process.env.PORT ?? 8080; 
 
@@ -14,9 +15,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     instrument: ObserveInstrument,
   });
-   app.enableCors()
+  app.enableCors();
   app.use(cookieParser());
   app.use(helmet());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document, {

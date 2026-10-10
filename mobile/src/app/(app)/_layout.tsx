@@ -65,6 +65,8 @@ export default function AppLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="RepairRequestScreen" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="RepairRequestsListScreen" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 }

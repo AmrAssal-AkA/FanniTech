@@ -4,6 +4,9 @@ import { Stack } from 'expo-router';
 import '../../global.css';
 import { AuthSessionProvider, useAuthSession } from '../features/auth/session/AuthSession';
 import { Redirect, useSegments } from 'expo-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function SessionGate() {
   const { status } = useAuthSession();
@@ -25,8 +28,10 @@ function SessionGate() {
 
 export default function RootLayout() {
   return (
-    <AuthSessionProvider>
-      <SessionGate />
-    </AuthSessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthSessionProvider>
+        <SessionGate />
+      </AuthSessionProvider>
+    </QueryClientProvider>
   );
 }

@@ -10,7 +10,7 @@ import { AuthenticationController } from './authentication.controller.js';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (c: ConfigService) => ({
-        secret: c.get<string>("Access-Token-Secret"),
+        secret: c.getOrThrow<string>('ACCESS_TOKEN_SECRET'),
       })
     }),
   ],

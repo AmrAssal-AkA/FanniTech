@@ -1,13 +1,13 @@
 import React from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { Pencil, Trash2 } from 'lucide-react-native';
-import { CustomerDevice } from '../types';
+import { DeviceWithRepairState } from '../types';
 
 interface DeviceActionsMenuProps {
-  device: CustomerDevice | null;
+  device: DeviceWithRepairState | null;
   onClose: () => void;
-  onEdit: (device: CustomerDevice) => void;
-  onRemove: (device: CustomerDevice) => void;
+  onEdit: (device: DeviceWithRepairState) => void;
+  onRemove: (device: DeviceWithRepairState) => void;
 }
 
 export const DeviceActionsMenu: React.FC<DeviceActionsMenuProps> = ({
@@ -36,14 +36,14 @@ export const DeviceActionsMenu: React.FC<DeviceActionsMenuProps> = ({
           >
             <View className="w-12 h-1.5 rounded-full bg-outline-variant self-center mb-4" />
             <Text className="text-base font-semibold text-on-surface mb-2 px-1">
-              {device.name}
+              {device.brand} {device.model}
             </Text>
             <TouchableOpacity
               onPress={() => onEdit(device)}
               activeOpacity={0.8}
               className="w-full min-h-[48px] px-4 flex-row items-center gap-2"
               accessibilityRole="button"
-              accessibilityLabel={`Edit details for ${device.name}`}
+              accessibilityLabel={`Edit details for ${device.brand} ${device.model}`}
             >
               <Pencil size={18} color="#131b2e" />
               <Text className="text-sm font-semibold text-on-surface">
@@ -55,7 +55,7 @@ export const DeviceActionsMenu: React.FC<DeviceActionsMenuProps> = ({
               activeOpacity={0.8}
               className="w-full min-h-[48px] px-4 flex-row items-center gap-2"
               accessibilityRole="button"
-              accessibilityLabel={`Remove ${device.name}`}
+              accessibilityLabel={`Remove ${device.brand} ${device.model}`}
             >
               <Trash2 size={18} color="#ba1a1a" />
               <Text className="text-sm font-semibold text-error">

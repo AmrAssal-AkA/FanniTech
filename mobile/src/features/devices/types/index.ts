@@ -1,19 +1,23 @@
-export type DeviceCategory = 'Laptop' | 'Desktop';
-
 export type DeviceRepairState = 'ACTIVE_REPAIR' | 'NO_REPAIRS' | 'PENDING_REQUEST';
 
-export interface CustomerDevice {
+export interface ApiDevice {
   id: string;
-  name: string;
+  customerId: string;
+  deviceType: string;
   brand: string;
   model: string;
-  category: DeviceCategory;
-  serialNumber: string;
-  addedDate: string;
-  locationLabel: string;
+  serialNumber: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RegisterDeviceInput {
+  deviceType: string;
+  brand: string;
+  model: string;
+  serialNumber?: string;
+}
+
+export interface DeviceWithRepairState extends ApiDevice {
   repairState: DeviceRepairState;
-  repairStatusLabel: string;
-  serviceRecordLabel: string;
-  activeTicketNumber?: string;
-  pendingRequestNumber?: string;
 }

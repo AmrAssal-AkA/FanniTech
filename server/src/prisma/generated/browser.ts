@@ -27,3 +27,23 @@ export type User = Prisma.UserModel
  * 
  */
 export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model Customer
+ * 
+ */
+export type Customer = Prisma.CustomerModel
+/**
+ * Model Device
+ * 
+ */
+export type Device = Prisma.DeviceModel
+/**
+ * Model RepairRequest
+ * 
+ */
+export type RepairRequest = Prisma.RepairRequestModel
+/**
+ * Model RepairRequestImage
+ * 
+ */
+export type RepairRequestImage = Prisma.RepairRequestImageModel

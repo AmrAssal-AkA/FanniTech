@@ -30,11 +30,10 @@ model User {
   phone    String?
   role    UserRole   @default(CUSTOMER)
   refreshTokens RefreshToken[]
+  customer Customer?
   EmailVerifyAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-
 }
 
 model RefreshToken {
@@ -53,4 +52,64 @@ model RefreshToken {
   @@index([userId])
   @@index([familyId])
   @@index([expiresAt])
+}
+
+enum RepairRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+model Customer {
+  userId    String         @id
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     String?
+  devices   Device[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Device {
+  id             String          @id @default(uuid())
+  customerId     String
+  customer       Customer        @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  deviceType     String
+  brand          String
+  model          String
+  serialNumber   String?
+  repairRequests RepairRequest[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([customerId])
+}
+
+model RepairRequest {
+  id          String               @id @default(uuid())
+  deviceId    String
+  device      Device               @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  problem     String
+  description String
+  status      RepairRequestStatus  @default(PENDING)
+  images      RepairRequestImage[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([deviceId])
+  @@index([status])
+}
+
+model RepairRequestImage {
+  id        String        @id @default(uuid())
+  requestId String
+  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String
+  fileName  String
+  mimeType  String
+  size      Int
+  createdAt DateTime      @default(now())
+
+  @@index([requestId])
 }

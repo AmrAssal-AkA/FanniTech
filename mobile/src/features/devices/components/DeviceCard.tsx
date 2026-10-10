@@ -5,20 +5,25 @@ import {
   Monitor,
   MoreVertical,
   Info,
-  Activity,
-  Wrench,
-  FileText,
   RefreshCw,
   CheckCircle,
   Clock,
 } from 'lucide-react-native';
-import { CustomerDevice } from '../types';
+import { DeviceWithRepairState } from '../types';
+
+{/* compoents of the UI*/}
+import { getPrimaryAction } from './ui/getPrimaryAction';
+import { getLocationDotClass } from './ui/getLocationDotClass';
+import { getLocationTextClass } from './ui/getLocationTextClass';
+import { getStatusBannerClass } from './ui/getStatusBannerClass';
+import {getStatusTextClass} from './ui/getStatusTextClass'
+
 
 interface DeviceCardProps {
-  device: CustomerDevice;
-  onViewDetails: (device: CustomerDevice) => void;
-  onPrimaryAction: (device: CustomerDevice) => void;
-  onOpenMenu: (device: CustomerDevice) => void;
+  device: DeviceWithRepairState;
+  onViewDetails: (device: DeviceWithRepairState) => void;
+  onPrimaryAction: (device: DeviceWithRepairState) => void;
+  onOpenMenu: (device: DeviceWithRepairState) => void;
 }
 
 export const DeviceCard: React.FC<DeviceCardProps> = ({
@@ -27,7 +32,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   onPrimaryAction,
   onOpenMenu,
 }) => {
-  const isDesktop = device.category === 'Desktop';
+  const name = `${device.brand} ${device.model}`;
+  const isDesktop = device.deviceType.toLowerCase() === 'desktop';
   const DeviceIcon = isDesktop ? Monitor : Laptop;
 
   const primaryAction = getPrimaryAction(device.repairState);
@@ -44,12 +50,12 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
               className="text-lg font-semibold text-on-surface"
               numberOfLines={1}
             >
-              {device.name}
+              {name}
             </Text>
             <View className="flex-row items-center gap-1.5 mt-0.5">
               <View className="px-1.5 py-0.5 rounded bg-surface-container-high">
                 <Text className="text-[11px] font-semibold text-on-surface-variant">
-                  {device.category}
+                  {device.deviceType}
                 </Text>
               </View>
               <Text className="text-[11px] text-outline">•</Text>
@@ -64,7 +70,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           activeOpacity={0.7}
           className="w-11 h-11 -mr-1 items-center justify-center rounded-full"
           accessibilityRole="button"
-          accessibilityLabel={`More actions for ${device.name}`}
+          accessibilityLabel={`More actions for ${name}`}
         >
           <MoreVertical size={20} color="#757682" />
         </TouchableOpacity>
@@ -77,7 +83,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
             className="text-[13px] font-bold text-on-surface tracking-wide"
             numberOfLines={1}
           >
-            {device.serialNumber}
+            {device.serialNumber ?? 'Not provided'}
           </Text>
         </View>
         <View className="flex-row items-center gap-1 ml-2">
@@ -91,7 +97,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
               device.repairState
             )}`}
           >
-            {device.locationLabel}
+            {device.repairState === 'ACTIVE_REPAIR' ? 'In service' : device.repairState === 'PENDING_REQUEST' ? 'Quote review' : 'Ready'}
           </Text>
         </View>
       </View>
@@ -116,7 +122,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           )}`}
           numberOfLines={1}
         >
-          {device.repairStatusLabel}
+          {device.repairState === 'ACTIVE_REPAIR' ? 'Active repair' : device.repairState === 'PENDING_REQUEST' ? 'Repair request pending' : 'No active repairs'}
         </Text>
       </View>
 
@@ -126,7 +132,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           activeOpacity={0.8}
           className="flex-1 min-h-[48px] rounded-lg bg-surface-container-high flex-row items-center justify-center gap-1"
           accessibilityRole="button"
-          accessibilityLabel={`View details for ${device.name}`}
+          accessibilityLabel={`View details for ${name}`}
         >
           <Info size={18} color="#131b2e" />
           <Text className="text-xs font-semibold text-on-surface">
@@ -138,7 +144,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           activeOpacity={0.8}
           className={`flex-1 min-h-[48px] rounded-lg flex-row items-center justify-center gap-1 shadow-sm ${primaryAction.buttonClass}`}
           accessibilityRole="button"
-          accessibilityLabel={`${primaryAction.label} for ${device.name}`}
+          accessibilityLabel={`${primaryAction.label} for ${name}`}
         >
           {primaryAction.icon}
           <Text className={`text-xs font-semibold ${primaryAction.textClass}`}>
@@ -149,70 +155,3 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
     </View>
   );
 };
-
-function getPrimaryAction(repairState: CustomerDevice['repairState']) {
-  if (repairState === 'ACTIVE_REPAIR') {
-    return {
-      label: 'Track Repair',
-      buttonClass: 'bg-secondary-container',
-      textClass: 'text-on-secondary-container',
-      icon: <Activity size={18} color="#fefcff" />,
-    };
-  }
-
-  if (repairState === 'PENDING_REQUEST') {
-    return {
-      label: 'View Request',
-      buttonClass: 'bg-primary-container',
-      textClass: 'text-on-primary',
-      icon: <FileText size={18} color="#ffffff" />,
-    };
-  }
-
-  return {
-    label: 'Request Repair',
-    buttonClass: 'bg-primary',
-    textClass: 'text-on-primary',
-    icon: <Wrench size={18} color="#ffffff" />,
-  };
-}
-
-function getLocationDotClass(repairState: CustomerDevice['repairState']) {
-  if (repairState === 'ACTIVE_REPAIR') {
-    return 'bg-secondary-container';
-  }
-  if (repairState === 'PENDING_REQUEST') {
-    return 'bg-error';
-  }
-  return 'bg-outline';
-}
-
-function getLocationTextClass(repairState: CustomerDevice['repairState']) {
-  if (repairState === 'ACTIVE_REPAIR') {
-    return 'text-secondary-container';
-  }
-  if (repairState === 'PENDING_REQUEST') {
-    return 'text-on-error-container';
-  }
-  return 'text-on-surface-variant';
-}
-
-function getStatusBannerClass(repairState: CustomerDevice['repairState']) {
-  if (repairState === 'ACTIVE_REPAIR') {
-    return 'bg-primary-fixed/40';
-  }
-  if (repairState === 'PENDING_REQUEST') {
-    return 'bg-amber-50';
-  }
-  return 'bg-tertiary-fixed/30';
-}
-
-function getStatusTextClass(repairState: CustomerDevice['repairState']) {
-  if (repairState === 'ACTIVE_REPAIR') {
-    return 'text-primary';
-  }
-  if (repairState === 'PENDING_REQUEST') {
-    return 'text-amber-900';
-  }
-  return 'text-tertiary';
-}

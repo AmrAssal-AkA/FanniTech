@@ -21,40 +21,65 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## FanniTech Backend API
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Central REST API and business logic layer for the FanniTech repair center platform and customer mobile application.
 
-## Project setup
+### Environment Variables
+
+| Variable | Description | Example / Default |
+| --- | --- | --- |
+| `PORT` | HTTP Server port | `8080` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/fannitech` |
+| `ACCESS_TOKEN_SECRET` | Secret for signing JWT access tokens | String |
+| `REFRESH_TOKEN_SECRET` | Secret for signing JWT refresh tokens | String |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud identifier for media storage | String |
+| `CLOUDINARY_API_KEY` | Cloudinary API Key | String |
+| `CLOUDINARY_API_SECRET` | Cloudinary API Secret | String |
+
+### Available Endpoints
+
+#### Authentication (`/api/v1/auth`)
+- `POST /api/v1/auth/mobile/register` - Customer mobile registration
+- `POST /api/v1/auth/mobile/login` - Customer mobile login
+- `POST /api/v1/auth/web/login` - Admin/Technician web login
+- `POST /api/v1/auth/refresh` - Refresh token rotation
+- `POST /api/v1/auth/logout` - Invalidate refresh token
+
+#### Devices (`/api/v1/devices`) - Requires `CUSTOMER` role
+- `POST /api/v1/devices` - Register a device under customer profile
+- `GET /api/v1/devices` - List all devices registered by customer
+- `GET /api/v1/devices/:id` - Get device details with IDOR verification
+
+#### Repair Requests (`/api/v1/repair-requests`) - Requires `CUSTOMER` role
+- `POST /api/v1/repair-requests` - Submit a repair request (`multipart/form-data` with up to 5 images, uploaded to Cloudinary)
+- `GET /api/v1/repair-requests` - List paginated customer requests (`page`, `limit`, `status`)
+- `GET /api/v1/repair-requests/:id` - Get repair request details and attached images
+- `PATCH /api/v1/repair-requests/:id/cancel` - Cancel a `PENDING` repair request
+
+### Project Setup & Commands
 
 ```bash
-$ npm install
-```
+# Install dependencies
+npm install
 
-## Compile and run the project
+# Run database migrations
+npx prisma migrate dev
 
-```bash
-# development
-$ npm run start
+# Generate Prisma client
+npx prisma generate
 
-# watch mode
-$ npm run start:dev
+# Start development server
+npm run start:dev
 
-# production mode
-$ npm run start:prod
-```
+# Run unit tests
+npm run test
 
-## Run tests
+# Run linter
+npm run lint
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Build project
+npm run build
 ```
 
 ## Deployment

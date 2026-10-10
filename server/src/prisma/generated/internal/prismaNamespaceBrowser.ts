@@ -52,7 +52,11 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  RefreshToken: 'RefreshToken'
+  RefreshToken: 'RefreshToken',
+  Customer: 'Customer',
+  Device: 'Device',
+  RepairRequest: 'RepairRequest',
+  RepairRequestImage: 'RepairRequestImage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -100,6 +104,57 @@ export const RefreshTokenScalarFieldEnum = {
 } as const
 
 export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
+export const CustomerScalarFieldEnum = {
+  userId: 'userId',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
+
+
+export const DeviceScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  deviceType: 'deviceType',
+  brand: 'brand',
+  model: 'model',
+  serialNumber: 'serialNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
+
+
+export const RepairRequestScalarFieldEnum = {
+  id: 'id',
+  deviceId: 'deviceId',
+  problem: 'problem',
+  description: 'description',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RepairRequestScalarFieldEnum = (typeof RepairRequestScalarFieldEnum)[keyof typeof RepairRequestScalarFieldEnum]
+
+
+export const RepairRequestImageScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  url: 'url',
+  publicId: 'publicId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  size: 'size',
+  createdAt: 'createdAt'
+} as const
+
+export type RepairRequestImageScalarFieldEnum = (typeof RepairRequestImageScalarFieldEnum)[keyof typeof RepairRequestImageScalarFieldEnum]
 
 
 export const SortOrder = {

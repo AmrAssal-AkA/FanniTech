@@ -5,3 +5,4 @@ export * from './DeviceActionsMenu';
 export * from './DeviceDetailsSheet';
 export * from './DevicesEmptyState';
 export * from './DevicesErrorState';
+export * from './RegisterDeviceSheet';

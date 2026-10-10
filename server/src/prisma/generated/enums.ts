@@ -24,3 +24,13 @@ export const AuthClient = {
 } as const
 
 export type AuthClient = (typeof AuthClient)[keyof typeof AuthClient]
+
+
+export const RepairRequestStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RepairRequestStatus = (typeof RepairRequestStatus)[keyof typeof RepairRequestStatus]

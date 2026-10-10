@@ -71,3 +71,117 @@ export class RegisterResponse {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
   refreshToken!: string;
 }
+
+export class CreateDeviceRequest {
+  @ApiProperty({ example: 'Smartphone' })
+  deviceType!: string;
+
+  @ApiProperty({ example: 'Apple' })
+  brand!: string;
+
+  @ApiProperty({ example: 'iPhone 13 Pro' })
+  model!: string;
+
+  @ApiPropertyOptional({ example: 'SN123456789' })
+  serialNumber?: string;
+}
+
+export class DeviceResponse {
+  @ApiProperty({ example: 'c1d2e3f4-5678-90ab-cdef-1234567890ab' })
+  id!: string;
+
+  @ApiProperty({ example: 'b8c7f8b1-2d7f-4c8e-a6b7-3a4d5e6f7a8b' })
+  customerId!: string;
+
+  @ApiProperty({ example: 'Smartphone' })
+  deviceType!: string;
+
+  @ApiProperty({ example: 'Apple' })
+  brand!: string;
+
+  @ApiProperty({ example: 'iPhone 13 Pro' })
+  model!: string;
+
+  @ApiPropertyOptional({ example: 'SN123456789', nullable: true })
+  serialNumber!: string | null;
+
+  @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
+  createdAt!: string;
+
+  @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
+  updatedAt!: string;
+}
+
+export class CreateRepairRequestMultipart {
+  @ApiProperty({ example: 'c1d2e3f4-5678-90ab-cdef-1234567890ab', description: 'UUID of the customer owned device' })
+  deviceId!: string;
+
+  @ApiProperty({ example: 'Broken OLED display screen', minLength: 3, maxLength: 150 })
+  problem!: string;
+
+  @ApiProperty({ example: 'The screen cracked after dropping it and touches are unresponsive.', minLength: 10, maxLength: 2000 })
+  description!: string;
+
+  @ApiPropertyOptional({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'Up to 5 images (JPEG, PNG, WebP up to 5MB each)',
+  })
+  images?: any[];
+}
+
+export class RepairRequestImageResponse {
+  @ApiProperty({ example: 'img-uuid-123' })
+  id!: string;
+
+  @ApiProperty({ example: 'req-uuid-456' })
+  requestId!: string;
+
+  @ApiProperty({ example: 'https://res.cloudinary.com/fannitech/image/upload/v123456/sample.jpg' })
+  url!: string;
+
+  @ApiProperty({ example: 'fannitech/repair-requests/sample' })
+  publicId!: string;
+
+  @ApiProperty({ example: 'damage.jpg' })
+  fileName!: string;
+
+  @ApiProperty({ example: 'image/jpeg' })
+  mimeType!: string;
+
+  @ApiProperty({ example: 1048576 })
+  size!: number;
+
+  @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
+  createdAt!: string;
+}
+
+export class RepairRequestResponse {
+  @ApiProperty({ example: 'req-uuid-456' })
+  id!: string;
+
+  @ApiProperty({ example: 'c1d2e3f4-5678-90ab-cdef-1234567890ab' })
+  deviceId!: string;
+
+  @ApiProperty({ example: 'Broken OLED display screen' })
+  problem!: string;
+
+  @ApiProperty({ example: 'The screen cracked after dropping it and touches are unresponsive.' })
+  description!: string;
+
+  @ApiProperty({ example: 'PENDING', enum: ['PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED'] })
+  status!: string;
+
+  @ApiProperty({ type: () => [RepairRequestImageResponse] })
+  images!: RepairRequestImageResponse[];
+
+  @ApiPropertyOptional({ type: () => DeviceResponse })
+  device?: DeviceResponse;
+
+  @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
+  createdAt!: string;
+
+  @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
+  updatedAt!: string;
+}
+

@@ -14,13 +14,13 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react-native';
-import { CustomerDevice } from '../types';
+import { DeviceWithRepairState } from '../types';
 
 interface DeviceDetailsSheetProps {
-  device: CustomerDevice | null;
+  device: DeviceWithRepairState | null;
   onClose: () => void;
-  onEdit: (device: CustomerDevice) => void;
-  onRemove: (device: CustomerDevice) => void;
+  onEdit: (device: DeviceWithRepairState) => void;
+  onRemove: (device: DeviceWithRepairState) => void;
 }
 
 export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
@@ -51,7 +51,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
             <View className="flex-row items-center justify-between mt-1">
               <View className="flex-row items-center gap-2 flex-1 min-w-0">
                 <View className="w-9 h-9 rounded-lg bg-surface-container items-center justify-center">
-                  {device.category === 'Desktop' ? (
+                  {device.deviceType.toLowerCase() === 'desktop' ? (
                     <Monitor size={20} color="#00236f" />
                   ) : (
                     <Laptop size={20} color="#00236f" />
@@ -62,10 +62,10 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                     className="text-lg font-bold text-on-surface"
                     numberOfLines={1}
                   >
-                    {device.name}
+                    {device.brand} {device.model}
                   </Text>
                   <Text className="text-[11px] font-semibold text-outline">
-                    {device.category} System
+                    {device.deviceType} System
                   </Text>
                 </View>
               </View>
@@ -105,7 +105,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                   Serial Number
                 </Text>
                 <Text className="text-[13px] font-bold text-primary tracking-wide">
-                  {device.serialNumber}
+                  {device.serialNumber ?? 'Not provided'}
                 </Text>
               </View>
               <View className="w-1/2 pl-2 mt-2">
@@ -113,7 +113,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                   Added Date
                 </Text>
                 <Text className="text-sm font-semibold text-on-surface">
-                  {device.addedDate}
+                  {new Date(device.createdAt).toLocaleDateString()}
                 </Text>
               </View>
             </View>
@@ -126,7 +126,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                 </Text>
               </View>
               <Text className="text-xs font-bold text-primary">
-                {device.serviceRecordLabel}
+                {device.repairState === 'NO_REPAIRS' ? 'No active repairs' : device.repairState === 'PENDING_REQUEST' ? 'Request pending' : 'Active repair'}
               </Text>
             </View>
 
@@ -136,7 +136,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                 activeOpacity={0.8}
                 className="flex-1 min-h-[48px] rounded-lg bg-surface-container-high flex-row items-center justify-center gap-2"
                 accessibilityRole="button"
-                accessibilityLabel={`Edit details for ${device.name}`}
+                accessibilityLabel={`Edit details for ${device.brand} ${device.model}`}
               >
                 <Pencil size={18} color="#131b2e" />
                 <Text className="text-xs font-semibold text-on-surface">
@@ -148,7 +148,7 @@ export const DeviceDetailsSheet: React.FC<DeviceDetailsSheetProps> = ({
                 activeOpacity={0.8}
                 className="min-h-[48px] px-4 rounded-lg bg-error-container flex-row items-center justify-center gap-1"
                 accessibilityRole="button"
-                accessibilityLabel={`Remove ${device.name}`}
+                accessibilityLabel={`Remove ${device.brand} ${device.model}`}
               >
                 <Trash2 size={18} color="#93000a" />
                 <Text className="text-xs font-semibold text-on-error-container">
