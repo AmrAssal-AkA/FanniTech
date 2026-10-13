@@ -18,7 +18,6 @@ export const DevicesService = {
     return serverClient
       .post<ApiResponse<ApiDevice>>('/api/v1/devices', payload)
       .then((response) => response.data.data).then((device) => {
-        console.log('Registered device:', device);
         return device;
       }).catch((error) => {
         console.error('Error registering device:', error);

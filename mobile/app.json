@@ -27,6 +27,17 @@
       "expo-status-bar",
       "expo-secure-store",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0051D5",
+          "sounds": [],
+          "mode": "production",
+          "androidMode": "default",
+          "iosDisplayInForeground": true
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",

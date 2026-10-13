@@ -27,7 +27,7 @@ async function refreshAccessToken(): Promise<string> {
     const refreshToken = await tokenStorage.getRefresh();
     if (!refreshToken) throw new Error('No refresh token available');
 
-    const {data} = await axios.post(`${baseURL}/api/v1/auth/mobile/refresh`, { refreshToken }, {
+    const {data} = await axios.post(`${baseURL}/api/v1/auth/refresh`, { refreshToken, service: 'mobile' }, {
         headers: {
             'Content-Type': 'application/json',
         },

@@ -1,91 +1,33 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertItem, AlertCategory } from '../types';
-
-export const INITIAL_ALERTS: AlertItem[] = [
-  {
-    id: 'alert-1',
-    category: 'repairs',
-    type: 'diagnostic',
-    referenceId: 'SR-1001',
-    tag: 'Diagnostics',
-    timeAgo: '15m ago',
-    title: 'Diagnostics in Progress: VRM voltage drop detected',
-    description:
-      'VRM voltage drop isolated on Lenovo ThinkPad T14 mother-rail. Assigned to Tech Tariq at Central Bench 04.',
-    isUnread: true,
-    section: 'today',
-    technician: 'Tech Tariq M.',
-    action: {
-      label: 'View Ticket',
-      type: 'ticket',
-      target: 'SR-1001',
-    },
-  },
-  {
-    id: 'alert-2',
-    category: 'repairs',
-    type: 'status',
-    referenceId: 'REQ-8840',
-    tag: 'Approved',
-    timeAgo: '2h ago',
-    title: 'Repair Request Accepted: Custom Rig',
-    description:
-      'Your intake form for Custom Gaming Desktop was reviewed and accepted. Please drop off the device at Central Hub.',
-    isUnread: true,
-    section: 'today',
-    location: 'FanniTech Central Lab (Gate 2)',
-    action: {
-      label: 'Drop-off Info',
-      type: 'info',
-      infoDetails:
-        'Lab Intake Address:\nCentral Hub, Bldg 4B, King Fahd Way.\nHours: 08:00 - 20:00',
-    },
-  },
-  {
-    id: 'alert-3',
-    category: 'repairs',
-    type: 'intake',
-    referenceId: 'SR-1001',
-    tag: 'Intake',
-    timeAgo: 'Oct 25, 09:15 AM',
-    title: 'Device Checked-In at Central Lab',
-    description:
-      'Intake barcode verified. Outer chassis scanned for surface blemishes. Tamper-evident seals applied.',
-    isUnread: false,
-    section: 'earlier',
-  },
-  {
-    id: 'alert-4',
-    category: 'devices',
-    type: 'thermal',
-    referenceId: 'ThinkPad T14',
-    tag: 'Report',
-    timeAgo: 'Oct 24',
-    title: 'Thermal Inspection Completed',
-    description:
-      'Lenovo ThinkPad T14 thermal pad degraded by 38%. Review diagnostic report to approve repasting.',
-    isUnread: false,
-    section: 'earlier',
-  },
-  {
-    id: 'alert-5',
-    category: 'devices',
-    type: 'security',
-    referenceId: 'Auth Audit',
-    tag: 'Security',
-    timeAgo: 'Oct 22',
-    title: 'New Sign-in Recognized',
-    description:
-      'Intake portal accessed from iPhone 15 Pro via Safari, Riyadh Region (IP: 178.80.**.**).',
-    isUnread: false,
-    section: 'earlier',
-  },
-];
+import { useNotificationStore } from '../../../stores/notificationStore';
+import { NotificationsService } from '../services/NotificationsService';
+import { mapNotificationToAlert } from '../utils/mapNotificationToAlert';
 
 export function useAlerts() {
-  const [alerts, setAlerts] = useState<AlertItem[]>(INITIAL_ALERTS);
+  const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState<AlertCategory>('all');
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const {
+    notifications,
+    markAsRead: markStoreRead,
+    markAllAsRead: markAllStoreRead,
+  } = useNotificationStore();
+
+  const { data, isRefetching, refetch } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => NotificationsService.list({ page: 1, limit: 50 }),
+    staleTime: 30_000,
+  });
+
+  const alerts = useMemo<AlertItem[]>(() => {
+    const serverAlerts = (data?.items ?? []).map(mapNotificationToAlert);
+    const realtimeIds = new Set(serverAlerts.map((a) => a.id));
+    const realtimeOnly = notifications
+      .filter((n) => !realtimeIds.has(n.id))
+      .map(mapNotificationToAlert);
+    return [...realtimeOnly, ...serverAlerts];
+  }, [data, notifications]);
 
   const unreadCount = useMemo(
     () => alerts.filter((alert) => alert.isUnread).length,
@@ -116,28 +58,36 @@ export function useAlerts() {
     [filteredAlerts]
   );
 
-  const markAllAsRead = useCallback(() => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.map((alert) =>
-        alert.isUnread ? { ...alert, isUnread: false } : alert
-      )
-    );
-  }, []);
+  const markAllReadMutation = useMutation({
+    mutationFn: NotificationsService.markAllAsRead,
+    onSuccess: () => {
+      markAllStoreRead();
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
 
-  const markAsRead = useCallback((alertId: string) => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.map((alert) =>
-        alert.id === alertId ? { ...alert, isUnread: false } : alert
-      )
-    );
-  }, []);
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => NotificationsService.markAsRead(id),
+    onSuccess: (_, id) => {
+      markStoreRead(id);
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const markAllAsRead = useCallback(() => {
+    markAllReadMutation.mutate();
+  }, [markAllReadMutation]);
+
+  const markAsRead = useCallback(
+    (alertId: string) => {
+      markAsReadMutation.mutate(alertId);
+    },
+    [markAsReadMutation]
+  );
 
   const refreshAlerts = useCallback(() => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 600);
-  }, []);
+    void refetch();
+  }, [refetch]);
 
   return {
     alerts,
@@ -148,7 +98,7 @@ export function useAlerts() {
     counts,
     activeFilter,
     setActiveFilter,
-    isRefreshing,
+    isRefreshing: isRefetching,
     refreshAlerts,
     markAllAsRead,
     markAsRead,

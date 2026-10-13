@@ -5,12 +5,15 @@ import '../../global.css';
 import { AuthSessionProvider, useAuthSession } from '../features/auth/session/AuthSession';
 import { Redirect, useSegments } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useNotifications } from '../hooks/useNotifications';
 
 const queryClient = new QueryClient();
 
 function SessionGate() {
   const { status } = useAuthSession();
   const segments = useSegments();
+  useNotifications();
+
   const inAuth = segments[0] === '(auth)';
   const inApp = segments[0] === '(app)';
 

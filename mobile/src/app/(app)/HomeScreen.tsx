@@ -13,9 +13,11 @@ import {
   LaboratoryStandardsCard,
   useHomeData,
 } from '../../features/home';
+import { useNotificationStore } from '../../stores/notificationStore';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { unreadCount } = useNotificationStore();
   const {
     userName,
     isLabOnline,
@@ -68,7 +70,7 @@ export default function HomeScreen() {
 
       {/* Top Header Bar */}
       <HomeHeader
-        hasUnreadNotifications={true}
+        hasUnreadNotifications={unreadCount > 0}
         onNotificationsPress={handleNotificationsPress}
         onProfilePress={handleProfilePress}
       />

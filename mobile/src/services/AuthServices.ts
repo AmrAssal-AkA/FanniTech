@@ -38,7 +38,7 @@ export const AuthServices = {
   ),
   logout: async (refreshToken: string | null) => {
     if (!refreshToken) return;
-    try { await serverClient.post('/api/v1/auth/mobile/logout', { refreshToken }); } catch { /* local cleanup still runs */ }
+    try { await serverClient.post('/api/v1/auth/logout', { refreshToken }); } catch { /* local cleanup still runs */ }
   },
 };
 
