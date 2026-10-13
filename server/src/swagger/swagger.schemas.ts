@@ -36,6 +36,8 @@ export class LoginRequest {
 export class RefreshTokenRequest {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
   refreshToken!: string;
+  @ApiPropertyOptional({ enum: ['mobile', 'web'], default: 'mobile' })
+  service?: 'mobile' | 'web';
 }
 
 export class PublicUser {
@@ -184,4 +186,3 @@ export class RepairRequestResponse {
   @ApiProperty({ example: '2026-10-10T12:00:00.000Z', format: 'date-time' })
   updatedAt!: string;
 }
-

@@ -30,12 +30,10 @@ export class DevicesService {
   }
 
   async getCustomerDevices(customerId: string) {
-    console.log(`Fetching devices for customerId: ${customerId}`);
     const devices = await this.prisma.device.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
     })
-    console.log(`Found ${devices.length} devices for customerId: ${customerId}`);
     return devices;
   }
 

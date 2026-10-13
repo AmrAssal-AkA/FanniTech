@@ -4,9 +4,15 @@ import { RepairRequestsService } from './repair-requests.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { StorageModule } from '../storage/storage.module.js';
 import { AuthenticationModule } from '../authentication/authentication.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
-  imports: [PrismaModule, StorageModule, AuthenticationModule],
+  imports: [
+    PrismaModule,
+    StorageModule,
+    AuthenticationModule,
+    NotificationsModule,
+  ],
   controllers: [RepairRequestsController],
   providers: [RepairRequestsService],
   exports: [RepairRequestsService],

@@ -2,7 +2,7 @@ import {
   Injectable,
   ConflictException,
   InternalServerErrorException,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
@@ -10,10 +10,11 @@ import { ConfigService } from '@nestjs/config';
 
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateUserDtoType } from './DTO/create-user.dto.js';
-import { LoginUserDtoSchema, LoginUserDtoType } from './DTO/login-user.dto.js';
+import { LoginUserDtoType } from './DTO/login-user.dto.js';
 import { hashPassword, comparePassword } from '../utils/password-hash.js';
 import { AuthClient, Prisma } from '../prisma/generated/client.js';
 import { isPublicUser } from '../types/Auth.types.js';
+
 
 type Aud = 'mobile' | 'web';
 
@@ -77,6 +78,7 @@ export class AuthenticationService {
           password: hashedPassword,
           phone: dto.phone,
           role: 'CUSTOMER',
+          customer: {create: {}}
         },
       });
       const { accessToken, refreshToken } = await this.createTokens(
@@ -104,6 +106,9 @@ export class AuthenticationService {
       if (!user) {
         throw new ConflictException('Invalid credentials');
       }
+      if (user.role === 'CUSTOMER' && aud !== 'mobile') {
+        throw new ForbiddenException('Customers can only log in from mobile App');
+      }
       const isPasswordValid = await comparePassword(
         dto.password,
         user.password,
@@ -123,6 +128,9 @@ export class AuthenticationService {
         error.code === 'P2002'
       ) {
         throw new ConflictException();
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
       }
       throw new InternalServerErrorException();
     }

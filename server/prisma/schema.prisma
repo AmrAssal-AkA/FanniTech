@@ -21,6 +21,19 @@ enum AuthClient {
   MOBILE @map("mobile")
 }
 
+enum NotificationType {
+  REPAIR_REQUEST_RECEIVED
+  REPAIR_REQUEST_ACCEPTED
+  REPAIR_REQUEST_REJECTED
+  REPAIR_REQUEST_CANCELLED
+  TECHNICIAN_ASSIGNED
+  DIAGNOSTICS_COMPLETED
+  REPAIR_STATUS_UPDATED
+  REPAIR_READY_FOR_PICKUP
+  REPAIR_COMPLETED
+  NEW_REPAIR_REQUEST
+}
+
 
 model User {
   id       String   @id @default(uuid())
@@ -31,9 +44,27 @@ model User {
   role    UserRole   @default(CUSTOMER)
   refreshTokens RefreshToken[]
   customer Customer?
+  admin Admin?
+  technician Technician?
+  notifications Notification[]
   EmailVerifyAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, readAt])
 }
 
 model RefreshToken {
@@ -112,4 +143,24 @@ model RepairRequestImage {
   createdAt DateTime      @default(now())
 
   @@index([requestId])
+}
+
+model Admin {
+  id String @id @default(uuid())
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+  employeeId String @unique @default(dbgenerated("next_admin_employee_id()"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Technician {
+  id String @id @default(uuid())
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+  employeeId String @unique @default(dbgenerated("next_technician_employee_id()"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
 }

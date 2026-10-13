@@ -9,12 +9,15 @@ import { StorageService } from '../storage/storage.service.js';
 import { CreateRepairRequestDtoType } from './dto/create-repair-request.dto.js';
 import { RepairRequestQueryDtoType } from './dto/repair-request-query.dto.js';
 import { RepairRequestStatus } from '../prisma/generated/client.js';
+import { NotificationType } from '../prisma/generated/client.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class RepairRequestsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly notificationsService?: NotificationsService,
   ) {}
 
   async submitRequest(
@@ -36,7 +39,8 @@ export class RepairRequestsService {
     }
 
     // 2. Upload images to Cloudinary (validates mime types and file limits)
-    const uploadedImages = await this.storageService.uploadMultipleImages(files);
+    const uploadedImages =
+      await this.storageService.uploadMultipleImages(files);
 
     // 3. Persist RepairRequest and images in DB with compensation rollback
     try {
@@ -62,6 +66,22 @@ export class RepairRequestsService {
         },
       });
 
+      if (this.notificationsService) {
+        await this.notificationsService.createAndSend({
+          userId,
+          type: NotificationType.REPAIR_REQUEST_RECEIVED,
+          title: 'Request Received',
+          body: 'Your repair request has been submitted successfully.',
+          data: { repairRequestId: createdRequest.id },
+        });
+        this.notificationsService.broadcastToAdmins({
+          type: NotificationType.NEW_REPAIR_REQUEST,
+          title: 'New Repair Request',
+          body: 'A new repair request has been submitted.',
+          data: { repairRequestId: createdRequest.id },
+        });
+      }
+
       return createdRequest;
     } catch (error) {
       // Downstream failure: compensate by destroying uploaded assets in Cloudinary
@@ -74,10 +94,7 @@ export class RepairRequestsService {
     }
   }
 
-  async listCustomerRequests(
-    userId: string,
-    query: RepairRequestQueryDtoType,
-  ) {
+  async listCustomerRequests(userId: string, query: RepairRequestQueryDtoType) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
@@ -155,7 +172,7 @@ export class RepairRequestsService {
       throw new ConflictException('Only pending requests can be cancelled');
     }
 
-    return this.prisma.repairRequest.update({
+    const cancelledRequest = await this.prisma.repairRequest.update({
       where: { id: requestId },
       data: { status: RepairRequestStatus.CANCELLED },
       include: {
@@ -163,5 +180,14 @@ export class RepairRequestsService {
         device: true,
       },
     });
+
+    this.notificationsService?.broadcastToAdmins({
+      type: NotificationType.REPAIR_REQUEST_CANCELLED,
+      title: 'Request Cancelled',
+      body: 'A customer has cancelled their repair request.',
+      data: { repairRequestId: requestId },
+    });
+
+    return cancelledRequest;
   }
 }

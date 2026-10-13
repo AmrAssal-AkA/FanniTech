@@ -174,9 +174,9 @@ describe('Authentication (e2e)', () => {
     });
   });
 
-  // ─── POST /api/v1/auth/mobile/refresh ─────────────────────────────────────
+  // ─── POST /api/v1/auth/refresh ─────────────────────────────────────
 
-  describe('POST /api/v1/auth/mobile/refresh', () => {
+  describe('POST /api/v1/auth/refresh', () => {
     it('200 — should rotate tokens and set new cookies', async () => {
       mockAuthService.refreshTokens.mockResolvedValue({
         user: mockPublicUser,
@@ -185,7 +185,7 @@ describe('Authentication (e2e)', () => {
       });
 
       const res = await request(app.getHttpServer())
-        .post('/api/v1/auth/mobile/refresh')
+        .post('/api/v1/auth/refresh')
         .send({ refreshToken: 'old-refresh-token' })
         .expect(HttpStatus.OK);
 
@@ -200,20 +200,20 @@ describe('Authentication (e2e)', () => {
       mockAuthService.refreshTokens.mockRejectedValue(new Error('invalid token'));
 
       await request(app.getHttpServer())
-        .post('/api/v1/auth/mobile/refresh')
+        .post('/api/v1/auth/refresh')
         .send({ refreshToken: 'bad-token' })
         .expect(HttpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 
-  // ─── POST /api/v1/auth/mobile/logout ──────────────────────────────────────
+  // ─── POST /api/v1/auth/logout ──────────────────────────────────────
 
-  describe('POST /api/v1/auth/mobile/logout', () => {
+  describe('POST /api/v1/auth/logout', () => {
     it('200 — should logout successfully with a refresh token', async () => {
       mockAuthService.logout.mockResolvedValue(undefined);
 
       await request(app.getHttpServer())
-        .post('/api/v1/auth/mobile/logout')
+        .post('/api/v1/auth/logout')
         .send({ refreshToken: 'some-refresh-token' })
         .expect(HttpStatus.OK);
 
@@ -222,7 +222,7 @@ describe('Authentication (e2e)', () => {
 
     it('200 — should respond 200 even without a refresh token body', async () => {
       await request(app.getHttpServer())
-        .post('/api/v1/auth/mobile/logout')
+        .post('/api/v1/auth/logout')
         .send({})
         .expect(HttpStatus.OK);
 

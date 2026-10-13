@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { AuthenticationService } from './authentication.service.js';
@@ -157,6 +161,14 @@ describe('AuthenticationService', () => {
       vi.spyOn(passwordHash, 'comparePassword').mockResolvedValue(false);
 
       await expect(service.loginUser(dto, 'mobile')).rejects.toThrow(InternalServerErrorException);
+    });
+
+    it('should reject customers from the web audience', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(makeUser({ role: 'CUSTOMER' }));
+
+      await expect(service.loginUser(dto, 'web')).rejects.toThrow(ForbiddenException);
+      expect(passwordHash.comparePassword).not.toHaveBeenCalled();
+      expect(mockJwt.signAsync).not.toHaveBeenCalled();
     });
 
     it('should sign tokens with the correct audience', async () => {

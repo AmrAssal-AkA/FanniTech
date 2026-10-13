@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { DevicesModule } from './devices/devices.module.js';
 import { RepairRequestsModule } from './repair-requests/repair-requests.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -20,6 +21,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     StorageModule,
     DevicesModule,
     RepairRequestsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

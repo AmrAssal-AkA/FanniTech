@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model RefreshToken
  * 
  */
@@ -71,3 +76,13 @@ export type RepairRequest = Prisma.RepairRequestModel
  * 
  */
 export type RepairRequestImage = Prisma.RepairRequestImageModel
+/**
+ * Model Admin
+ * 
+ */
+export type Admin = Prisma.AdminModel
+/**
+ * Model Technician
+ * 
+ */
+export type Technician = Prisma.TechnicianModel
