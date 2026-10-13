@@ -11,17 +11,23 @@ import {
   Wrench,
   Bell,
   Settings,
-  CircleDot,
+  DoorOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+import { useSession } from "@/Providers/SessionProvider";
 
 interface AdminSidebarProps {
   pendingCount?: number;
   ticketsCount?: number;
 }
 
-export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSidebarProps) {
+export function AdminSidebar({
+  pendingCount = 4,
+  ticketsCount = 12,
+}: AdminSidebarProps) {
   const pathname = usePathname();
+  const { logout } = useSession();
 
   const adminNavItems = [
     {
@@ -43,14 +49,16 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
       href: "/repair-requests",
       icon: Inbox,
       badge: pendingCount > 0 ? pendingCount : null,
-      badgeColor: "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400 border border-red-200 dark:border-red-900",
+      badgeColor:
+        "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400 border border-red-200 dark:border-red-900",
     },
     {
       title: "Tickets",
       href: "/repair-tickets",
       icon: Ticket,
       badge: ticketsCount > 0 ? ticketsCount : null,
-      badgeColor: "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-900",
+      badgeColor:
+        "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-900",
     },
     {
       title: "Technicians",
@@ -64,7 +72,8 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
       href: "/notifications",
       icon: Bell,
       badge: 3,
-      badgeColor: "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
+      badgeColor:
+        "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
     },
     {
       title: "Settings",
@@ -74,6 +83,16 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
       badgeColor: "",
     },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Optionally, you can redirect the user to the login page or home page after logout
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-zinc-950 border-r border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto">
@@ -100,29 +119,6 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
           </div>
         </div>
 
-        {/* View Mode Switcher */}
-        <div className="px-4 py-3">
-          <div className="p-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-xl flex items-center justify-between border border-zinc-200/60 dark:border-zinc-800">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold px-1.5">
-              VIEW MODE
-            </span>
-            <div className="inline-flex p-0.5 bg-zinc-200/80 dark:bg-zinc-800 rounded-lg">
-              <button
-                type="button"
-                className="px-2.5 py-1 rounded-md text-xs font-semibold bg-sky-700 text-white shadow-sm"
-              >
-                Admin
-              </button>
-              <Link
-                href="/"
-                className="px-2.5 py-1 rounded-md text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-              >
-                Tech
-              </Link>
-            </div>
-          </div>
-        </div>
-
         {/* Administration Nav Section */}
         <div className="px-3 py-1">
           <div className="px-3 py-1.5 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider font-mono">
@@ -144,7 +140,7 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
                     "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all group",
                     isActive
                       ? "bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 font-semibold border border-sky-100 dark:border-sky-900/50"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100",
                   )}
                 >
                   <div className="flex items-center gap-2.5">
@@ -153,7 +149,7 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
                         "w-4 h-4 transition-colors",
                         isActive
                           ? "text-sky-700 dark:text-sky-400"
-                          : "text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300"
+                          : "text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300",
                       )}
                     />
                     <span>{item.title}</span>
@@ -162,7 +158,7 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
                     <span
                       className={cn(
                         "px-1.5 py-0.5 rounded-full text-[11px] font-bold",
-                        item.badgeColor
+                        item.badgeColor,
                       )}
                     >
                       {item.badge}
@@ -175,19 +171,17 @@ export function AdminSidebar({ pendingCount = 4, ticketsCount = 12 }: AdminSideb
         </div>
       </div>
 
-      {/* Lab Station Telemetry Footer in Sidebar */}
-      <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200/80 dark:border-zinc-850">
-        <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
-          <CircleDot className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-              Lab Network: Active
-            </span>
-            <span className="font-mono text-[11px] text-zinc-500 truncate">
-              Node 192.168.1.14
-            </span>
-          </div>
-        </div>
+      {/* Footer Section */}
+      <div className="px-3 py-4 border-t border-zinc-200/80 dark:border-zinc-800/80">
+        <button
+          type="button"
+          aria-label="logoutButton"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xl font-medium bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
+          onClick={handleLogout}
+        >
+          <DoorOpen className="w-4 h-4" />
+          Logout
+        </button>
       </div>
     </aside>
   );

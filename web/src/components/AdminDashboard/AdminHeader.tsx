@@ -2,6 +2,7 @@
 
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { useAdminDashboardUIStore } from "@/Portal/adminDashboardUIStore";
+import { useSession } from "@/Providers/SessionProvider";
 
 interface AdminHeaderProps {
   benchCapacity?: string;
@@ -15,7 +16,20 @@ export function AdminHeader({
   unreadNotifications = 3,
 }: AdminHeaderProps) {
   const searchQuery = useAdminDashboardUIStore((state) => state.searchQuery);
-  const setSearchQuery = useAdminDashboardUIStore((state) => state.setSearchQuery);
+  const setSearchQuery = useAdminDashboardUIStore(
+    (state) => state.setSearchQuery,
+  );
+  const { user } = useSession();
+  const displayName = user?.name || "Staff member";
+  const initials =
+    displayName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "SF";
+  const roleLabel = user?.role ? String(user.role).replace("_", " ") : "Staff";
 
   return (
     <header className="fixed top-0 left-64 right-0 h-16 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 z-40 flex items-center justify-between px-6 shadow-xs">
@@ -72,14 +86,14 @@ export function AdminHeader({
         {/* User profile dropdown snippet */}
         <div className="flex items-center gap-3 pl-2 border-l border-zinc-200/80 dark:border-zinc-800">
           <div className="w-8 h-8 rounded-full bg-sky-700 text-white flex items-center justify-center font-bold text-xs ring-1 ring-zinc-200 dark:ring-zinc-700">
-            TM
+            {initials}
           </div>
           <div className="hidden md:flex flex-col text-left">
             <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50 leading-tight">
-              Tariq Al-Mansoor
+              {displayName}
             </span>
             <span className="text-[11px] text-zinc-500 leading-tight">
-              Owner / Admin
+              {roleLabel}
             </span>
           </div>
           <button

@@ -1,62 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Shield,
-  Wrench,
-  BadgeCheck,
-  Cpu,
   User as UserIcon,
   Lock,
   Eye,
   EyeOff,
   LogIn,
   KeyRound,
-  MailCheck,
-  Scale,
-  Radio,
   Loader2,
-  PackageCheck,
-  TerminalSquare,
   CheckCircle2,
+  ShieldAlert,
 } from "lucide-react";
 import { authenticateStaff } from "@/services/auth.service";
 import type { LoginResponse } from "@/types/auth";
 
-type RoleType = "admin" | "tech";
-
-interface DemoProfile {
-  name: string;
-  role: RoleType;
-  roleLabel: string;
-  email: string;
-}
-
-const DEMO_PROFILES: DemoProfile[] = [
-  {
-    name: "T. Al-Mansoor",
-    role: "admin",
-    roleLabel: "Owner / Admin",
-    email: "tariq@fannitech.lab",
-  },
-  {
-    name: "Ahmed Zaki",
-    role: "tech",
-    roleLabel: "Lead Bench Tech",
-    email: "ahmed.z@fannitech.lab",
-  },
-  {
-    name: "Sarah Al-Otaibi",
-    role: "tech",
-    roleLabel: "System Specialist",
-    email: "sarah.o@fannitech.lab",
-  },
-];
-
 export function StaffLoginForm() {
-  const [role, setRole] = useState<RoleType>("admin");
-  const [identifier, setIdentifier] = useState("tariq@fannitech.lab");
-  const [passphrase, setPassphrase] = useState("secretbench2024");
+  const router = useRouter();
+
+  const [identifier, setIdentifier] = useState("admin@fannitech.com");
+  const [passphrase, setPassphrase] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberWorkstation, setRememberWorkstation] = useState(true);
 
@@ -64,34 +28,34 @@ export function StaffLoginForm() {
   const [authSuccess, setAuthSuccess] = useState<LoginResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [redirectDestination, setRedirectDestination] = useState<string | null>(null);
+
+  // Check URL parameters for redirection or middleware errors
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const errorParam = params.get("error");
+      const redirectParam = params.get("redirect");
+
+      if (redirectParam) {
+        setRedirectDestination(redirectParam);
+      }
+
+      if (errorParam === "unauthorized") {
+        setErrorMessage("Access Denied: Administrative privileges (role: ADMIN) required.");
+      } else if (errorParam === "session_expired") {
+        setErrorMessage("Your session has expired. Please sign in again.");
+      } else if (errorParam === "missing_token") {
+        setErrorMessage("Authentication required. Please sign in to access the admin portal.");
+      }
+    }
+  }, []);
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
     }, 3500);
-  };
-
-  const handleRoleChange = (newRole: RoleType) => {
-    setRole(newRole);
-    setErrorMessage(null);
-    if (newRole === "admin") {
-      if (identifier.includes("TECH-") || identifier === "ahmed.z@fannitech.lab" || identifier === "sarah.o@fannitech.lab") {
-        setIdentifier("tariq@fannitech.lab");
-      }
-    } else {
-      if (identifier === "tariq@fannitech.lab") {
-        setIdentifier("TECH-402");
-      }
-    }
-  };
-
-  const handlePrefill = (profile: DemoProfile) => {
-    setRole(profile.role);
-    setIdentifier(profile.email);
-    setPassphrase("secretbench2024");
-    setErrorMessage(null);
-    triggerToast(`Loaded pre-filled credentials for ${profile.name}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,14 +65,23 @@ export function StaffLoginForm() {
 
     try {
       const response = await authenticateStaff({
-        identifier,
-        passphrase,
-        role,
+        email: identifier,
+        password: passphrase,
         rememberWorkstation,
       });
 
       setAuthSuccess(response);
-      triggerToast(`Welcome back, ${response.user.name}. Directing to Lab Workbench...`);
+      const roleNormalized = (response.user.role || "").toUpperCase();
+
+      if (roleNormalized === "ADMIN") {
+        triggerToast(`Welcome back, ${response.user.name}. Directing to Admin Dashboard...`);
+        setTimeout(() => {
+          router.push(redirectDestination || "/dashboard");
+          router.refresh();
+        }, 700);
+      } else {
+        triggerToast(`Welcome, ${response.user.name}. Portal session initialized.`);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed. Check credentials.";
       setErrorMessage(msg);
@@ -125,22 +98,6 @@ export function StaffLoginForm() {
 
       {/* Main Authentication Card */}
       <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 shadow-[0_20px_45px_-15px_rgba(11,28,48,0.08)] dark:shadow-none rounded-2xl overflow-hidden relative transition-all duration-300">
-        {/* Top Diagnostic Telemetry Strip */}
-        <div className="bg-sky-50/70 dark:bg-zinc-900/90 border-b border-sky-100/80 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 font-mono text-zinc-600 dark:text-zinc-400">
-            <span className="w-2 h-2 rounded-full bg-sky-600 dark:bg-sky-400 animate-ping" />
-            <span className="font-semibold text-sky-700 dark:text-sky-400">
-              SEC-AUTH://V1.04
-            </span>
-            <span className="text-zinc-300 dark:text-zinc-700">•</span>
-            <span>STATION-ID: #DX-902</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 font-medium">
-            <Radio className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-            <span>LATENCY: 4ms</span>
-          </div>
-        </div>
-
         <div className="p-6 sm:p-8 flex flex-col gap-6">
           {/* Header & Bilingual Identity */}
           <div className="flex flex-col gap-1.5">
@@ -157,55 +114,6 @@ export function StaffLoginForm() {
             </p>
           </div>
 
-          {/* Role Selector Tabs */}
-          <div className="flex flex-col gap-2">
-            <div className="bg-zinc-100 dark:bg-zinc-950 p-1 rounded-xl flex items-center gap-1 border border-zinc-200/60 dark:border-zinc-800">
-              <button
-                type="button"
-                onClick={() => handleRoleChange("admin")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  role === "admin"
-                    ? "bg-white dark:bg-zinc-900 text-sky-700 dark:text-sky-400 shadow-sm"
-                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                <span>Owner / Admin</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRoleChange("tech")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  role === "tech"
-                    ? "bg-white dark:bg-zinc-900 text-sky-700 dark:text-sky-400 shadow-sm"
-                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-                }`}
-              >
-                <Wrench className="w-4 h-4" />
-                <span>Technician</span>
-              </button>
-            </div>
-
-            {/* Dynamic Clearance Banner */}
-            <div className="bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200/60 dark:border-zinc-800 px-3.5 py-2 rounded-lg flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                {role === "admin" ? (
-                  <BadgeCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                ) : (
-                  <Cpu className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                )}
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                  {role === "admin"
-                    ? "Full Operations Clearance"
-                    : "Bench & Diagnostics Station"}
-                </span>
-              </div>
-              <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
-                {role === "admin" ? "TIER-0 LAB ROOT" : "WORKBENCH_ACCESS_ONLY"}
-              </span>
-            </div>
-          </div>
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Staff Identifier */}
@@ -214,8 +122,8 @@ export function StaffLoginForm() {
                 htmlFor="staff-identifier"
                 className="text-xs uppercase tracking-wider font-semibold text-zinc-700 dark:text-zinc-300 flex items-center justify-between"
               >
-                <span>Staff Email or Tech ID</span>
-                <span className="text-[10px] font-mono text-zinc-400">AUTH_UID</span>
+                <span>Staff Email Address</span>
+                <span className="text-[10px] font-mono text-zinc-400">AUTH_EMAIL</span>
               </label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-zinc-400 pointer-events-none">
@@ -223,15 +131,11 @@ export function StaffLoginForm() {
                 </span>
                 <input
                   id="staff-identifier"
-                  type="text"
+                  type="email"
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={
-                    role === "admin"
-                      ? "admin@fannitech.lab or email"
-                      : "TECH-402 or technician email"
-                  }
+                  placeholder="admin@fannitech.com"
                   className="w-full h-11 pl-10 pr-3.5 bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20 transition-all"
                 />
               </div>
@@ -298,7 +202,7 @@ export function StaffLoginForm() {
                     Remember this workstation
                   </span>
                   <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Enables 8-hour cached auth token for shared benches
+                    Enables extended cached session token for bench stations
                   </span>
                 </div>
               </label>
@@ -307,8 +211,11 @@ export function StaffLoginForm() {
             {/* Error Feedback */}
             {errorMessage && (
               <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs p-3 rounded-lg flex items-center gap-2">
-                <span className="font-semibold">Authentication Error:</span>
-                <span>{errorMessage}</span>
+                <ShieldAlert className="w-4 h-4 shrink-0 text-red-600" />
+                <div>
+                  <span className="font-semibold mr-1">Authentication Notice:</span>
+                  <span>{errorMessage}</span>
+                </div>
               </div>
             )}
 
@@ -322,7 +229,7 @@ export function StaffLoginForm() {
                   </span>
                 </div>
                 <span className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400">
-                  {authSuccess.stationId}
+                  {authSuccess.user.email}
                 </span>
               </div>
             )}
@@ -341,11 +248,7 @@ export function StaffLoginForm() {
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  <span>
-                    {role === "admin"
-                      ? "Sign In to Lab OS"
-                      : "Connect to Workbench Queue"}
-                  </span>
+                  <span>Sign In to Lab OS</span>
                   <kbd className="hidden sm:inline-block bg-sky-800/80 text-sky-100 px-1.5 py-0.5 rounded text-[10px] font-mono ml-1">
                     ↵ ENTER
                   </kbd>
@@ -353,108 +256,6 @@ export function StaffLoginForm() {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Profiles */}
-          <div className="flex flex-col gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800/80">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-                Quick Demo Profiles
-              </span>
-              <span className="text-[10px] font-mono text-zinc-400">TAP TO PREFILL</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {DEMO_PROFILES.map((profile) => (
-                <button
-                  key={profile.email}
-                  type="button"
-                  onClick={() => handlePrefill(profile)}
-                  className="flex flex-col items-start p-2.5 bg-zinc-50 hover:bg-sky-50/60 dark:bg-zinc-950 dark:hover:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 rounded-lg text-left transition-all"
-                >
-                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate w-full">
-                    {profile.name}
-                  </span>
-                  <span className="text-[11px] text-sky-700 dark:text-sky-400 font-medium">
-                    {profile.roleLabel}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Staff Activation Callout */}
-          <div className="bg-sky-50/50 dark:bg-zinc-950 border border-sky-100 dark:border-zinc-800 p-3 rounded-lg flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
-            <div className="flex items-center gap-2">
-              <MailCheck className="w-4 h-4 text-sky-700 dark:text-sky-400" />
-              <span>New technician or bench engineer?</span>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                triggerToast("Redirecting to Lab OS Invitation Token validator...")
-              }
-              className="text-xs font-semibold text-sky-700 dark:text-sky-400 hover:underline"
-            >
-              Activate Invite
-            </button>
-          </div>
-        </div>
-
-        {/* Station Node Security Footer */}
-        <div className="bg-zinc-50 dark:bg-zinc-950/80 border-t border-zinc-200/70 dark:border-zinc-800 px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500">
-          <div className="flex items-center gap-1.5">
-            <Scale className="w-3.5 h-3.5 text-zinc-400" />
-            <span>
-              Workstation logins audited on{" "}
-              <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
-                Node 192.168.1.14
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-              Lab Systems Online (98.4%)
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Hardware Diagnostic Anchors */}
-      <div className="w-full max-w-xl mt-4 grid grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 p-3 rounded-xl shadow-sm flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 flex items-center justify-center text-sky-700 dark:text-sky-400 shrink-0">
-            <Cpu className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
-              14 Devices
-            </span>
-            <span className="text-[10px] text-zinc-500 truncate">Active on Bench</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 p-3 rounded-xl shadow-sm flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 flex items-center justify-center text-sky-700 dark:text-sky-400 shrink-0">
-            <PackageCheck className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
-              6 Dispatched
-            </span>
-            <span className="text-[10px] text-zinc-500 truncate">Parts in Transit</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 p-3 rounded-xl shadow-sm flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 flex items-center justify-center text-sky-700 dark:text-sky-400 shrink-0">
-            <TerminalSquare className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
-              v1.0.4 Rev
-            </span>
-            <span className="text-[10px] text-zinc-500 truncate">Lab OS Core</span>
-          </div>
         </div>
       </div>
 
