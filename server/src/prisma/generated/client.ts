@@ -86,3 +86,13 @@ export type Admin = Prisma.AdminModel
  * 
  */
 export type Technician = Prisma.TechnicianModel
+/**
+ * Model RepairTicket
+ * 
+ */
+export type RepairTicket = Prisma.RepairTicketModel
+/**
+ * Model RepairStatusHistory
+ * 
+ */
+export type RepairStatusHistory = Prisma.RepairStatusHistoryModel

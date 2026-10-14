@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PowerOff,
   Droplets,
@@ -10,8 +10,10 @@ import {
   AlertCircle,
   Check,
   X,
+  Loader2,
 } from "lucide-react";
 import type { RepairRequestItem } from "@/types/dashboard";
+import { quickAcceptRequest, rejectRepairRequest } from "@/services/requests.service";
 
 interface PendingRequestsQueueProps {
   requests: RepairRequestItem[];
@@ -20,17 +22,41 @@ interface PendingRequestsQueueProps {
 export function PendingRequestsQueue({ requests }: PendingRequestsQueueProps) {
   const [items, setItems] = useState<RepairRequestItem[]>(requests);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handleAccept = (reqId: string, customer: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== reqId));
-    setFeedbackMessage(`Accepted ${reqId} for ${customer}. Converted into Repair Ticket.`);
-    setTimeout(() => setFeedbackMessage(null), 4000);
+  useEffect(() => {
+    setItems(requests);
+  }, [requests]);
+
+  const handleAccept = async (reqId: string, customer: string) => {
+    setLoadingId(reqId);
+    try {
+      await quickAcceptRequest(reqId);
+      setItems((prev) => prev.filter((item) => item.id !== reqId));
+      setFeedbackMessage(`Accepted ${reqId} for ${customer}. Converted into Repair Ticket.`);
+    } catch {
+      setFeedbackMessage(`Failed to accept ${reqId}. Please try again.`);
+    } finally {
+      setLoadingId(null);
+      setTimeout(() => setFeedbackMessage(null), 4000);
+    }
   };
 
-  const handleReject = (reqId: string, customer: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== reqId));
-    setFeedbackMessage(`Rejected intake ${reqId} for ${customer}. Notification sent.`);
-    setTimeout(() => setFeedbackMessage(null), 4000);
+  const handleReject = async (reqId: string, customer: string) => {
+    setLoadingId(reqId);
+    try {
+      await rejectRepairRequest({
+        requestId: reqId,
+        reason: "Hardware issue out of current repair scope",
+      });
+      setItems((prev) => prev.filter((item) => item.id !== reqId));
+      setFeedbackMessage(`Rejected intake ${reqId} for ${customer}. Customer notified.`);
+    } catch {
+      setFeedbackMessage(`Failed to reject ${reqId}. Please try again.`);
+    } finally {
+      setLoadingId(null);
+      setTimeout(() => setFeedbackMessage(null), 4000);
+    }
   };
 
   const getProblemIcon = (category?: string) => {

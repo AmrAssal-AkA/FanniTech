@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   AlertTriangle,
   FlaskConical,
@@ -110,7 +111,12 @@ export function ActiveTicketsPipeline({ tickets }: ActiveTicketsPipelineProps) {
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-500 font-medium">Sorted by Lab Priority</span>
+          <Link
+            href="/repair-tickets"
+            className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-semibold"
+          >
+            Open All Tickets &rarr;
+          </Link>
         </div>
       </div>
 

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { useSession } from "@/Providers/SessionProvider";
+import { useAuth } from "@/Hooks/useAuth";
 
 interface AdminSidebarProps {
   pendingCount?: number;
@@ -27,7 +27,7 @@ export function AdminSidebar({
   ticketsCount = 12,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { logout } = useSession();
+  const { logout } = useAuth();
 
   const adminNavItems = [
     {
@@ -46,7 +46,7 @@ export function AdminSidebar({
     },
     {
       title: "Requests",
-      href: "/repair-requests",
+      href: "/dashboard/Requests",
       icon: Inbox,
       badge: pendingCount > 0 ? pendingCount : null,
       badgeColor:

@@ -1,6 +1,4 @@
 
-
-
 generator client {
   provider = "prisma-client"
   output   = "../src/prisma/generated"
@@ -8,6 +6,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+
 }
 
 enum UserRole {
@@ -92,6 +91,22 @@ enum RepairRequestStatus {
   CANCELLED
 }
 
+enum RepairTicketStatus {
+  ACCEPTED
+  DIAGNOSING
+  IN_REPAIR
+  READY_FOR_PICKUP
+  COMPLETED
+  UNREPAIRABLE
+  CANCELLED
+}
+
+enum RepairTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model Customer {
   userId    String         @id
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -124,6 +139,7 @@ model RepairRequest {
   description String
   status      RepairRequestStatus  @default(PENDING)
   images      RepairRequestImage[]
+  repairTicket RepairTicket?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
@@ -161,6 +177,39 @@ model Technician {
   employeeId String @unique @default(dbgenerated("next_technician_employee_id()"))
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  repairTickets RepairTicket[]
 
   @@index([id])
+}
+
+model RepairTicket {
+  id            String               @id @default(uuid())
+  requestId     String               @unique
+  request       RepairRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  technicianId  String?
+  technician    Technician?          @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+  ticketNumber  String               @unique @default(dbgenerated("next_repair_ticket_number()"))
+  priority      RepairTicketPriority @default(MEDIUM)
+  status        RepairTicketStatus   @default(ACCEPTED)
+  diagnosis     String?
+  repairNotes   String?
+  statusHistory RepairStatusHistory[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  completedAt   DateTime?
+
+  @@index([technicianId])
+  @@index([status])
+  @@index([requestId])
+}
+
+model RepairStatusHistory {
+  id        String             @id @default(uuid())
+  ticketId  String
+  ticket    RepairTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  status    RepairTicketStatus
+  notes     String?
+  changedAt DateTime           @default(now())
+
+  @@index([ticketId])
 }

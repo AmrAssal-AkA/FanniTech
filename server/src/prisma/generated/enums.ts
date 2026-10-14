@@ -50,3 +50,25 @@ export const RepairRequestStatus = {
 } as const
 
 export type RepairRequestStatus = (typeof RepairRequestStatus)[keyof typeof RepairRequestStatus]
+
+
+export const RepairTicketStatus = {
+  ACCEPTED: 'ACCEPTED',
+  DIAGNOSING: 'DIAGNOSING',
+  IN_REPAIR: 'IN_REPAIR',
+  READY_FOR_PICKUP: 'READY_FOR_PICKUP',
+  COMPLETED: 'COMPLETED',
+  UNREPAIRABLE: 'UNREPAIRABLE',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RepairTicketStatus = (typeof RepairTicketStatus)[keyof typeof RepairTicketStatus]
+
+
+export const RepairTicketPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH'
+} as const
+
+export type RepairTicketPriority = (typeof RepairTicketPriority)[keyof typeof RepairTicketPriority]

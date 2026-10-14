@@ -294,6 +294,40 @@ export type IntWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntFilter<$PrismaModel>
 }
 
+export type EnumRepairTicketPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketPriority | Prisma.EnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel> | $Enums.RepairTicketPriority
+}
+
+export type EnumRepairTicketStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketStatus | Prisma.EnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel> | $Enums.RepairTicketStatus
+}
+
+export type EnumRepairTicketPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketPriority | Prisma.EnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketPriorityWithAggregatesFilter<$PrismaModel> | $Enums.RepairTicketPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel>
+}
+
+export type EnumRepairTicketStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketStatus | Prisma.EnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketStatusWithAggregatesFilter<$PrismaModel> | $Enums.RepairTicketStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -558,6 +592,40 @@ export type NestedFloatFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatFilter<$PrismaModel> | number
+}
+
+export type NestedEnumRepairTicketPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketPriority | Prisma.EnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel> | $Enums.RepairTicketPriority
+}
+
+export type NestedEnumRepairTicketStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketStatus | Prisma.EnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel> | $Enums.RepairTicketStatus
+}
+
+export type NestedEnumRepairTicketPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketPriority | Prisma.EnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketPriority[] | Prisma.ListEnumRepairTicketPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketPriorityWithAggregatesFilter<$PrismaModel> | $Enums.RepairTicketPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRepairTicketPriorityFilter<$PrismaModel>
+}
+
+export type NestedEnumRepairTicketStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RepairTicketStatus | Prisma.EnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RepairTicketStatus[] | Prisma.ListEnumRepairTicketStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRepairTicketStatusWithAggregatesFilter<$PrismaModel> | $Enums.RepairTicketStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRepairTicketStatusFilter<$PrismaModel>
 }
 
 

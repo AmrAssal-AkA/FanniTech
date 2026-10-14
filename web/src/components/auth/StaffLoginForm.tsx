@@ -13,11 +13,12 @@ import {
   CheckCircle2,
   ShieldAlert,
 } from "lucide-react";
-import { authenticateStaff } from "@/services/auth.service";
-import type { LoginResponse } from "@/types/auth";
+import { useAuth } from "@/Hooks/useAuth";
+import type { User } from "@/types/auth";
 
 export function StaffLoginForm() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [identifier, setIdentifier] = useState("admin@fannitech.com");
   const [passphrase, setPassphrase] = useState("admin123");
@@ -25,7 +26,7 @@ export function StaffLoginForm() {
   const [rememberWorkstation, setRememberWorkstation] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [authSuccess, setAuthSuccess] = useState<LoginResponse | null>(null);
+  const [authSuccess, setAuthSuccess] = useState<User | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [redirectDestination, setRedirectDestination] = useState<string | null>(null);
@@ -64,23 +65,23 @@ export function StaffLoginForm() {
     setErrorMessage(null);
 
     try {
-      const response = await authenticateStaff({
+      const user = await login({
         email: identifier,
         password: passphrase,
         rememberWorkstation,
       });
 
-      setAuthSuccess(response);
-      const roleNormalized = (response.user.role || "").toUpperCase();
+      setAuthSuccess(user);
+      const roleNormalized = (user.role || "").toUpperCase();
 
       if (roleNormalized === "ADMIN") {
-        triggerToast(`Welcome back, ${response.user.name}. Directing to Admin Dashboard...`);
+        triggerToast(`Welcome back, ${user.name}. Directing to Admin Dashboard...`);
         setTimeout(() => {
           router.push(redirectDestination || "/dashboard");
           router.refresh();
         }, 700);
       } else {
-        triggerToast(`Welcome, ${response.user.name}. Portal session initialized.`);
+        triggerToast(`Welcome, ${user.name}. Portal session initialized.`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed. Check credentials.";
@@ -150,15 +151,6 @@ export function StaffLoginForm() {
                 >
                   Access Key / Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    triggerToast(`Password recovery link dispatched to ${identifier}`)
-                  }
-                  className="text-xs font-semibold text-sky-700 dark:text-sky-400 hover:underline"
-                >
-                  Forgot Password?
-                </button>
               </div>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-zinc-400 pointer-events-none">
@@ -225,11 +217,11 @@ export function StaffLoginForm() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>
-                    Authenticated as <strong>{authSuccess.user.name}</strong> ({authSuccess.user.role})
+                    Authenticated as <strong>{authSuccess.name}</strong> ({authSuccess.role})
                   </span>
                 </div>
                 <span className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400">
-                  {authSuccess.user.email}
+                  {authSuccess.email}
                 </span>
               </div>
             )}

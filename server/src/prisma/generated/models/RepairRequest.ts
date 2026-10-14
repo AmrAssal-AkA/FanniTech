@@ -200,6 +200,7 @@ export type RepairRequestWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"RepairRequest"> | Date | string
   device?: Prisma.XOR<Prisma.DeviceScalarRelationFilter, Prisma.DeviceWhereInput>
   images?: Prisma.RepairRequestImageListRelationFilter
+  repairTicket?: Prisma.XOR<Prisma.RepairTicketNullableScalarRelationFilter, Prisma.RepairTicketWhereInput> | null
 }
 
 export type RepairRequestOrderByWithRelationInput = {
@@ -212,6 +213,7 @@ export type RepairRequestOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   device?: Prisma.DeviceOrderByWithRelationInput
   images?: Prisma.RepairRequestImageOrderByRelationAggregateInput
+  repairTicket?: Prisma.RepairTicketOrderByWithRelationInput
 }
 
 export type RepairRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -227,6 +229,7 @@ export type RepairRequestWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"RepairRequest"> | Date | string
   device?: Prisma.XOR<Prisma.DeviceScalarRelationFilter, Prisma.DeviceWhereInput>
   images?: Prisma.RepairRequestImageListRelationFilter
+  repairTicket?: Prisma.XOR<Prisma.RepairTicketNullableScalarRelationFilter, Prisma.RepairTicketWhereInput> | null
 }, "id">
 
 export type RepairRequestOrderByWithAggregationInput = {
@@ -264,6 +267,7 @@ export type RepairRequestCreateInput = {
   updatedAt?: Date | string
   device: Prisma.DeviceCreateNestedOneWithoutRepairRequestsInput
   images?: Prisma.RepairRequestImageCreateNestedManyWithoutRequestInput
+  repairTicket?: Prisma.RepairTicketCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestUncheckedCreateInput = {
@@ -275,6 +279,7 @@ export type RepairRequestUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.RepairRequestImageUncheckedCreateNestedManyWithoutRequestInput
+  repairTicket?: Prisma.RepairTicketUncheckedCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestUpdateInput = {
@@ -286,6 +291,7 @@ export type RepairRequestUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   device?: Prisma.DeviceUpdateOneRequiredWithoutRepairRequestsNestedInput
   images?: Prisma.RepairRequestImageUpdateManyWithoutRequestNestedInput
+  repairTicket?: Prisma.RepairTicketUpdateOneWithoutRequestNestedInput
 }
 
 export type RepairRequestUncheckedUpdateInput = {
@@ -297,6 +303,7 @@ export type RepairRequestUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.RepairRequestImageUncheckedUpdateManyWithoutRequestNestedInput
+  repairTicket?: Prisma.RepairTicketUncheckedUpdateOneWithoutRequestNestedInput
 }
 
 export type RepairRequestCreateManyInput = {
@@ -433,6 +440,20 @@ export type RepairRequestUpdateOneRequiredWithoutImagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.RepairRequestUpdateToOneWithWhereWithoutImagesInput, Prisma.RepairRequestUpdateWithoutImagesInput>, Prisma.RepairRequestUncheckedUpdateWithoutImagesInput>
 }
 
+export type RepairRequestCreateNestedOneWithoutRepairTicketInput = {
+  create?: Prisma.XOR<Prisma.RepairRequestCreateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedCreateWithoutRepairTicketInput>
+  connectOrCreate?: Prisma.RepairRequestCreateOrConnectWithoutRepairTicketInput
+  connect?: Prisma.RepairRequestWhereUniqueInput
+}
+
+export type RepairRequestUpdateOneRequiredWithoutRepairTicketNestedInput = {
+  create?: Prisma.XOR<Prisma.RepairRequestCreateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedCreateWithoutRepairTicketInput>
+  connectOrCreate?: Prisma.RepairRequestCreateOrConnectWithoutRepairTicketInput
+  upsert?: Prisma.RepairRequestUpsertWithoutRepairTicketInput
+  connect?: Prisma.RepairRequestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RepairRequestUpdateToOneWithWhereWithoutRepairTicketInput, Prisma.RepairRequestUpdateWithoutRepairTicketInput>, Prisma.RepairRequestUncheckedUpdateWithoutRepairTicketInput>
+}
+
 export type RepairRequestCreateWithoutDeviceInput = {
   id?: string
   problem: string
@@ -441,6 +462,7 @@ export type RepairRequestCreateWithoutDeviceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.RepairRequestImageCreateNestedManyWithoutRequestInput
+  repairTicket?: Prisma.RepairTicketCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestUncheckedCreateWithoutDeviceInput = {
@@ -451,6 +473,7 @@ export type RepairRequestUncheckedCreateWithoutDeviceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.RepairRequestImageUncheckedCreateNestedManyWithoutRequestInput
+  repairTicket?: Prisma.RepairTicketUncheckedCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestCreateOrConnectWithoutDeviceInput = {
@@ -500,6 +523,7 @@ export type RepairRequestCreateWithoutImagesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   device: Prisma.DeviceCreateNestedOneWithoutRepairRequestsInput
+  repairTicket?: Prisma.RepairTicketCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestUncheckedCreateWithoutImagesInput = {
@@ -510,6 +534,7 @@ export type RepairRequestUncheckedCreateWithoutImagesInput = {
   status?: $Enums.RepairRequestStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  repairTicket?: Prisma.RepairTicketUncheckedCreateNestedOneWithoutRequestInput
 }
 
 export type RepairRequestCreateOrConnectWithoutImagesInput = {
@@ -536,6 +561,7 @@ export type RepairRequestUpdateWithoutImagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   device?: Prisma.DeviceUpdateOneRequiredWithoutRepairRequestsNestedInput
+  repairTicket?: Prisma.RepairTicketUpdateOneWithoutRequestNestedInput
 }
 
 export type RepairRequestUncheckedUpdateWithoutImagesInput = {
@@ -546,6 +572,67 @@ export type RepairRequestUncheckedUpdateWithoutImagesInput = {
   status?: Prisma.EnumRepairRequestStatusFieldUpdateOperationsInput | $Enums.RepairRequestStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  repairTicket?: Prisma.RepairTicketUncheckedUpdateOneWithoutRequestNestedInput
+}
+
+export type RepairRequestCreateWithoutRepairTicketInput = {
+  id?: string
+  problem: string
+  description: string
+  status?: $Enums.RepairRequestStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  device: Prisma.DeviceCreateNestedOneWithoutRepairRequestsInput
+  images?: Prisma.RepairRequestImageCreateNestedManyWithoutRequestInput
+}
+
+export type RepairRequestUncheckedCreateWithoutRepairTicketInput = {
+  id?: string
+  deviceId: string
+  problem: string
+  description: string
+  status?: $Enums.RepairRequestStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  images?: Prisma.RepairRequestImageUncheckedCreateNestedManyWithoutRequestInput
+}
+
+export type RepairRequestCreateOrConnectWithoutRepairTicketInput = {
+  where: Prisma.RepairRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.RepairRequestCreateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedCreateWithoutRepairTicketInput>
+}
+
+export type RepairRequestUpsertWithoutRepairTicketInput = {
+  update: Prisma.XOR<Prisma.RepairRequestUpdateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedUpdateWithoutRepairTicketInput>
+  create: Prisma.XOR<Prisma.RepairRequestCreateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedCreateWithoutRepairTicketInput>
+  where?: Prisma.RepairRequestWhereInput
+}
+
+export type RepairRequestUpdateToOneWithWhereWithoutRepairTicketInput = {
+  where?: Prisma.RepairRequestWhereInput
+  data: Prisma.XOR<Prisma.RepairRequestUpdateWithoutRepairTicketInput, Prisma.RepairRequestUncheckedUpdateWithoutRepairTicketInput>
+}
+
+export type RepairRequestUpdateWithoutRepairTicketInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  problem?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumRepairRequestStatusFieldUpdateOperationsInput | $Enums.RepairRequestStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.DeviceUpdateOneRequiredWithoutRepairRequestsNestedInput
+  images?: Prisma.RepairRequestImageUpdateManyWithoutRequestNestedInput
+}
+
+export type RepairRequestUncheckedUpdateWithoutRepairTicketInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  deviceId?: Prisma.StringFieldUpdateOperationsInput | string
+  problem?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumRepairRequestStatusFieldUpdateOperationsInput | $Enums.RepairRequestStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.RepairRequestImageUncheckedUpdateManyWithoutRequestNestedInput
 }
 
 export type RepairRequestCreateManyDeviceInput = {
@@ -565,6 +652,7 @@ export type RepairRequestUpdateWithoutDeviceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.RepairRequestImageUpdateManyWithoutRequestNestedInput
+  repairTicket?: Prisma.RepairTicketUpdateOneWithoutRequestNestedInput
 }
 
 export type RepairRequestUncheckedUpdateWithoutDeviceInput = {
@@ -575,6 +663,7 @@ export type RepairRequestUncheckedUpdateWithoutDeviceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.RepairRequestImageUncheckedUpdateManyWithoutRequestNestedInput
+  repairTicket?: Prisma.RepairTicketUncheckedUpdateOneWithoutRequestNestedInput
 }
 
 export type RepairRequestUncheckedUpdateManyWithoutDeviceInput = {
@@ -627,6 +716,7 @@ export type RepairRequestSelect<ExtArgs extends runtime.Types.Extensions.Interna
   updatedAt?: boolean
   device?: boolean | Prisma.DeviceDefaultArgs<ExtArgs>
   images?: boolean | Prisma.RepairRequest$imagesArgs<ExtArgs>
+  repairTicket?: boolean | Prisma.RepairRequest$repairTicketArgs<ExtArgs>
   _count?: boolean | Prisma.RepairRequestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["repairRequest"]>
 
@@ -666,6 +756,7 @@ export type RepairRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalA
 export type RepairRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   device?: boolean | Prisma.DeviceDefaultArgs<ExtArgs>
   images?: boolean | Prisma.RepairRequest$imagesArgs<ExtArgs>
+  repairTicket?: boolean | Prisma.RepairRequest$repairTicketArgs<ExtArgs>
   _count?: boolean | Prisma.RepairRequestCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RepairRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -680,6 +771,7 @@ export type $RepairRequestPayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     device: Prisma.$DevicePayload<ExtArgs>
     images: Prisma.$RepairRequestImagePayload<ExtArgs>[]
+    repairTicket: Prisma.$RepairTicketPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1085,6 +1177,7 @@ export interface Prisma__RepairRequestClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   device<T extends Prisma.DeviceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeviceDefaultArgs<ExtArgs>>): Prisma.Prisma__DeviceClient<runtime.Types.Result.GetResult<Prisma.$DevicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   images<T extends Prisma.RepairRequest$imagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairRequest$imagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepairRequestImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  repairTicket<T extends Prisma.RepairRequest$repairTicketArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairRequest$repairTicketArgs<ExtArgs>>): Prisma.Prisma__RepairTicketClient<runtime.Types.Result.GetResult<Prisma.$RepairTicketPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1543,6 +1636,25 @@ export type RepairRequest$imagesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.RepairRequestImageScalarFieldEnum | Prisma.RepairRequestImageScalarFieldEnum[]
+}
+
+/**
+ * RepairRequest.repairTicket
+ */
+export type RepairRequest$repairTicketArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RepairTicket
+   */
+  select?: Prisma.RepairTicketSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RepairTicket
+   */
+  omit?: Prisma.RepairTicketOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RepairTicketInclude<ExtArgs> | null
+  where?: Prisma.RepairTicketWhereInput
 }
 
 /**

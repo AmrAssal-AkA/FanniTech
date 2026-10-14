@@ -59,7 +59,9 @@ export const ModelName = {
   RepairRequest: 'RepairRequest',
   RepairRequestImage: 'RepairRequestImage',
   Admin: 'Admin',
-  Technician: 'Technician'
+  Technician: 'Technician',
+  RepairTicket: 'RepairTicket',
+  RepairStatusHistory: 'RepairStatusHistory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -192,6 +194,34 @@ export const TechnicianScalarFieldEnum = {
 } as const
 
 export type TechnicianScalarFieldEnum = (typeof TechnicianScalarFieldEnum)[keyof typeof TechnicianScalarFieldEnum]
+
+
+export const RepairTicketScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  technicianId: 'technicianId',
+  ticketNumber: 'ticketNumber',
+  priority: 'priority',
+  status: 'status',
+  diagnosis: 'diagnosis',
+  repairNotes: 'repairNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type RepairTicketScalarFieldEnum = (typeof RepairTicketScalarFieldEnum)[keyof typeof RepairTicketScalarFieldEnum]
+
+
+export const RepairStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  ticketId: 'ticketId',
+  status: 'status',
+  notes: 'notes',
+  changedAt: 'changedAt'
+} as const
+
+export type RepairStatusHistoryScalarFieldEnum = (typeof RepairStatusHistoryScalarFieldEnum)[keyof typeof RepairStatusHistoryScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -2,7 +2,7 @@
 
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { useAdminDashboardUIStore } from "@/Portal/adminDashboardUIStore";
-import { useSession } from "@/Providers/SessionProvider";
+import { useAuth } from "@/Hooks/useAuth";
 
 interface AdminHeaderProps {
   benchCapacity?: string;
@@ -19,7 +19,7 @@ export function AdminHeader({
   const setSearchQuery = useAdminDashboardUIStore(
     (state) => state.setSearchQuery,
   );
-  const { user } = useSession();
+  const { user } = useAuth();
   const displayName = user?.name || "Staff member";
   const initials =
     displayName
@@ -44,12 +44,6 @@ export function AdminHeader({
             placeholder="Universal search (Ticket #, Serial, IMEI, Customer, Model)..."
             className="w-full h-9.5 pl-9 pr-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/15 transition-all"
           />
-        </div>
-        <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 rounded-full shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-600 dark:bg-sky-400" />
-          <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-            Branch #01 - Main Lab
-          </span>
         </div>
       </div>
 
