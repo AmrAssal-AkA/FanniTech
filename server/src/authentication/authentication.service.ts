@@ -181,4 +181,23 @@ export class AuthenticationService {
       data: { revoke: true },
     });
   }
+  async me(userId: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new ConflictException('User not found');
+      }
+      return isPublicUser(user);
+    }catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException();
+      }
+      throw new InternalServerErrorException();
+    }
+  }
 }

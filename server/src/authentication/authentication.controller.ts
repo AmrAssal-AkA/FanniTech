@@ -1,5 +1,6 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, Res, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, Res, Get, Req, UseGuards } from '@nestjs/common';
 import type {Request, Response} from 'express';
+import {AuthenticationGuard} from './authentication.guard.js'
 
 import { AuthenticationService } from './authentication.service.js';
 import { CreateUserDtoSchema, type CreateUserDtoType } from './DTO/create-user.dto.js';
@@ -148,4 +149,28 @@ export class AuthenticationController {
         }
     }
 
+    @Get('me')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Get the currently authenticated user' })
+    @ApiOkResponse({ description: 'Returns the currently authenticated user.' })
+    @ApiInternalServerErrorResponse({ description: 'The operation failed.' })
+    @UseGuards(AuthenticationGuard)
+    async getMe(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
+        try {
+            const userId = (req as Request & { user?: { sub?: string } }).user?.sub;
+            if (!userId) {
+                throw new BadRequestException('User ID not found in request');
+            }
+            const user = await this.authenticationService.me(userId);
+            return user;
+        } catch (error) {
+            if (error instanceof ForbiddenException) {
+                throw error;
+            }
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            throw new HttpException('Failed to get current user', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

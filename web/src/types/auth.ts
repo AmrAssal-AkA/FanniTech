@@ -1,33 +1,37 @@
-export type UserRole = "ADMIN" | "TECHNICIAN" | "CUSTOMER" | "admin" | "tech";
+export type UserRole = "ADMIN" | "TECHNICIAN";
 
 export interface User {
   id: string;
-  email: string;
   name: string;
-  phone?: string | null;
-  role: string;
-  EmailVerifyAt?: string | null;
+  email: string;
+  role: UserRole;
+  token?: string | null;
+  Access_token?: string | null;
   createdAt?: string;
   updatedAt?: string;
-  branch?: string;
-  token?: string;
+  node?: string;
+  expiresIn?: number;
 }
 
 export interface LoginCredentials {
-  email?: string;
-  identifier?: string;
-  password?: string;
-  passphrase?: string;
+  email: string;
+  password: string;
   deviceInfo?: string;
-  role?: string;
   rememberWorkstation?: boolean;
+  data?: {
+    email: string;
+    password: string;
+    deviceInfo?: string;
+    rememberWorkstation?: boolean;
+  };
 }
 
 export interface LoginResponse {
   user: User;
   accessToken: string;
   refreshToken: string;
-  stationId?: string;
   node?: string;
   expiresIn?: number;
 }
+
+
