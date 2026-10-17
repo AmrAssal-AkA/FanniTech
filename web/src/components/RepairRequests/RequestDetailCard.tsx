@@ -323,7 +323,11 @@ export function RequestDetailCard({
                 <option value="">-- Unassigned (Assign later) --</option>
                 {technicians.map((tech) => (
                   <option key={tech.id} value={tech.id}>
-                    {tech.name} {tech.activeTicketsCount !== undefined ? `(${tech.activeTicketsCount} active)` : ""}
+                    {tech.name}
+                    {tech.employeeId ? ` (${tech.employeeId})` : ""}
+                    {tech.activeTicketsCount !== undefined
+                      ? ` • ${tech.activeTicketsCount} active`
+                      : ""}
                   </option>
                 ))}
               </select>

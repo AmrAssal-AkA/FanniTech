@@ -39,7 +39,7 @@ export function AdminSidebar({
     },
     {
       title: "Customers",
-      href: "/customers",
+      href: "/dashboard/Customers",
       icon: Users,
       badge: null,
       badgeColor: "",
@@ -62,7 +62,7 @@ export function AdminSidebar({
     },
     {
       title: "Technicians",
-      href: "/technicians",
+      href: "/dashboard/technicians",
       icon: Wrench,
       badge: null,
       badgeColor: "",

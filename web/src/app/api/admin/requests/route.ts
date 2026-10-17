@@ -13,7 +13,9 @@ import {
 } from "@/services/session.service";
 import {
   adaptBackendRequestToDetailed,
+  adaptBackendTechnicianToOption,
   type BackendRepairRequest,
+  type BackendTechnicianResponse,
   type DetailedRepairRequest,
   type RequestsSummaryMetrics,
   type TechnicianOption,
@@ -80,10 +82,13 @@ export async function GET(request: NextRequest) {
           headers,
         }),
         serverClient
-          .get<TechnicianOption[]>("/api/v1/repair-request-management/technicians", {
-            headers,
-          })
-          .catch(() => ({ data: [] as TechnicianOption[] })),
+          .get<BackendTechnicianResponse[]>(
+            "/api/v1/admin/technicians/getAllTechnicians",
+            {
+              headers,
+            }
+          )
+          .catch(() => ({ data: [] as BackendTechnicianResponse[] })),
       ]);
       return { reqData: reqResponse.data, techData: techResponse.data };
     };
@@ -108,6 +113,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { reqData, techData } = resultData;
+    const adaptedTechnicians: TechnicianOption[] = Array.isArray(techData)
+      ? techData.map(adaptBackendTechnicianToOption)
+      : [];
     let adaptedRequests: DetailedRepairRequest[] = (reqData.items || []).map(
       adaptBackendRequestToDetailed
     );
@@ -142,7 +150,7 @@ export async function GET(request: NextRequest) {
       requests: adaptedRequests,
       items: adaptedRequests,
       metrics,
-      technicians: techData,
+      technicians: adaptedTechnicians,
       pagination: reqData.pagination,
     });
 

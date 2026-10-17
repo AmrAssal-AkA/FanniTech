@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback,  useEffect, useMemo, useState, type ReactNode } from "react";
 import { authService } from "@/services/auth.service";
 import { isAdmin as checkIsAdmin, isTechnician as checkIsTechnician } from "@/lib/auth/roles";
 import type { LoginCredentials, User } from "@/types/auth";

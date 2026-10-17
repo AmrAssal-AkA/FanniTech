@@ -15,8 +15,13 @@ import type {
   AdminDashboardData,
   RepairRequestItem,
   ActiveTicketItem,
+  TechnicianWorkloadItem,
 } from "@/types/dashboard";
-import type { BackendRepairRequest } from "@/types/requests";
+import {
+  adaptBackendTechnicianToOption,
+  type BackendRepairRequest,
+  type BackendTechnicianResponse,
+} from "@/types/requests";
 import type { ListTicketsResponse, RepairTicket } from "@/types/tickets";
 
 const cookieOptions = {
@@ -55,7 +60,7 @@ export async function GET() {
     const fetchDashboardEntities = async (token: string, currentRefreshToken?: string) => {
       const activeRefreshToken = currentRefreshToken || refreshToken;
       const headers = getAuthHeaders(token, activeRefreshToken);
-      const [pendingReqsRes, ticketsRes] = await Promise.all([
+      const [pendingReqsRes, ticketsRes, techsRes] = await Promise.all([
         serverClient
           .get<{
             items: BackendRepairRequest[];
@@ -71,10 +76,17 @@ export async function GET() {
             headers,
           })
           .catch(() => ({ data: { items: [], pagination: { total: 0 } } })),
+        serverClient
+          .get<BackendTechnicianResponse[]>(
+            "/api/v1/admin/technicians/getAllTechnicians",
+            { headers }
+          )
+          .catch(() => ({ data: [] as BackendTechnicianResponse[] })),
       ]);
       return {
         pendingData: pendingReqsRes.data,
         ticketsData: ticketsRes.data,
+        techsData: techsRes.data,
       };
     };
 
@@ -96,9 +108,12 @@ export async function GET() {
       }
     }
 
-    const { pendingData, ticketsData } = result;
+    const { pendingData, ticketsData, techsData } = result;
     const allTickets: RepairTicket[] = ticketsData.items || [];
     const pendingReqs: BackendRepairRequest[] = pendingData.items || [];
+    const rawTechnicians: BackendTechnicianResponse[] = Array.isArray(techsData)
+      ? techsData
+      : [];
 
     const inDiagnosis = allTickets.filter((t) => t.status === "DIAGNOSING").length;
     const inRepair = allTickets.filter((t) => t.status === "IN_REPAIR").length;
@@ -165,6 +180,42 @@ export async function GET() {
       };
     });
 
+    const mappedTechnicians: TechnicianWorkloadItem[] = rawTechnicians.map((raw) => {
+      const option = adaptBackendTechnicianToOption(raw);
+      const initials = option.name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() || "")
+        .join("") || "TX";
+
+      const currentBenchTicket = allTickets.find(
+        (t) =>
+          t.technicianId === option.id &&
+          t.status !== "COMPLETED" &&
+          t.status !== "UNREPAIRABLE" &&
+          t.status !== "CANCELLED"
+      );
+
+      const activeCount = option.activeTicketsCount ?? 0;
+
+      return {
+        id: option.id,
+        name: option.name,
+        initials,
+        role: option.employeeId
+          ? `Hardware Specialist • ${option.employeeId}`
+          : "Hardware Specialist",
+        activeTicketsCount: activeCount,
+        currentTicketId: currentBenchTicket?.ticketNumber || "IDLE",
+        currentTaskName: currentBenchTicket
+          ? `${currentBenchTicket.request?.device?.brand || ""} ${currentBenchTicket.request?.device?.model || ""}`.trim() ||
+            currentBenchTicket.status
+          : "Ready for assignment",
+        status: activeCount > 0 ? "BUSY" : "AVAILABLE",
+      };
+    });
+
     const recentActivities = allTickets.slice(0, 5).map((t, idx) => ({
       id: `act-${t.id || idx}`,
       referenceId: t.ticketNumber || t.id,
@@ -200,7 +251,7 @@ export async function GET() {
       },
       pendingRequests: mappedPendingRequests,
       activeTickets: mappedActiveTickets,
-      technicians: [],
+      technicians: mappedTechnicians,
       recentActivities,
     };
 

@@ -18,7 +18,7 @@ import type { User } from "@/types/auth";
 
 export function StaffLoginForm() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading, isAdmin, isTechnician } = useAuth();
 
   const [identifier, setIdentifier] = useState("admin@fannitech.com");
   const [passphrase, setPassphrase] = useState("admin123");
@@ -30,6 +30,17 @@ export function StaffLoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [redirectDestination, setRedirectDestination] = useState<string | null>(null);
+
+  // If already authenticated, redirect to appropriate role dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      if (isAdmin) {
+        router.replace(redirectDestination || "/dashboard");
+      } else if (isTechnician) {
+        router.replace(redirectDestination || "/technician/dashboard");
+      }
+    }
+  }, [loading, isAuthenticated, isAdmin, isTechnician, router, redirectDestination]);
 
   // Check URL parameters for redirection or middleware errors
   useEffect(() => {
@@ -43,11 +54,11 @@ export function StaffLoginForm() {
       }
 
       if (errorParam === "unauthorized") {
-        setErrorMessage("Access Denied: Administrative privileges (role: ADMIN) required.");
+        setErrorMessage("Access Denied: Administrative or technician privileges required.");
       } else if (errorParam === "session_expired") {
         setErrorMessage("Your session has expired. Please sign in again.");
       } else if (errorParam === "missing_token") {
-        setErrorMessage("Authentication required. Please sign in to access the admin portal.");
+        setErrorMessage("Authentication required. Please sign in to access the portal.");
       }
     }
   }, []);
@@ -78,6 +89,12 @@ export function StaffLoginForm() {
         triggerToast(`Welcome back, ${user.name}. Directing to Admin Dashboard...`);
         setTimeout(() => {
           router.push(redirectDestination || "/dashboard");
+          router.refresh();
+        }, 700);
+      } else if (roleNormalized === "TECHNICIAN") {
+        triggerToast(`Welcome back, ${user.name}. Directing to Technician Workbench...`);
+        setTimeout(() => {
+          router.push(redirectDestination || "/technician/dashboard");
           router.refresh();
         }, 700);
       } else {

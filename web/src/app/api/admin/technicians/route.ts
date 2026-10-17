@@ -11,7 +11,10 @@ import {
   getAuthHeaders,
   type TokenPair,
 } from "@/services/session.service";
-import type { TechnicianOption } from "@/types/requests";
+import {
+  adaptBackendTechnicianToOption,
+  type BackendTechnicianResponse,
+} from "@/types/requests";
 
 const cookieOptions = {
   httpOnly: true,
@@ -48,8 +51,8 @@ export async function GET() {
   try {
     const fetchTechnicians = async (token: string, currentRefreshToken?: string) => {
       const activeRefreshToken = currentRefreshToken || refreshToken;
-      return serverClient.get<TechnicianOption[]>(
-        "/api/v1/repair-request-management/technicians",
+      return serverClient.get<BackendTechnicianResponse[]>(
+        "/api/v1/admin/technicians/getAllTechnicians",
         { headers: getAuthHeaders(token, activeRefreshToken) }
       );
     };
@@ -72,10 +75,13 @@ export async function GET() {
       }
     }
 
+    const rawTechnicians = Array.isArray(result.data) ? result.data : [];
+    const adaptedTechnicians = rawTechnicians.map(adaptBackendTechnicianToOption);
+
     const response = NextResponse.json({
       success: true,
-      items: result.data,
-      technicians: result.data,
+      items: adaptedTechnicians,
+      technicians: adaptedTechnicians,
     });
 
     if (refreshed) {
@@ -91,6 +97,7 @@ export async function GET() {
 
     return response;
   } catch (error: unknown) {
+    console.error("Error fetching technicians:", error);
     const message =
       axios.isAxiosError(error) &&
       typeof error.response?.data?.message === "string"

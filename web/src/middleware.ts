@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Retrieve JWT access token from HttpOnly cookies
-  let token = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  const token = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
   if (!token) {
@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request, "unauthorized", pathname);
   }
 
-  let payload = decodeJwtPayload(token);
+  const payload = decodeJwtPayload(token);
   if (!payload) return redirectToLogin(request, "unauthorized", pathname);
 
   if (isJwtExpired(payload)) {
@@ -43,6 +43,12 @@ export async function middleware(request: NextRequest) {
   }
 
   const role = String(payload.role || "").toUpperCase();
+
+  // If a technician accesses /dashboard, direct them to their technician dashboard
+  if (role === "TECHNICIAN" && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) {
+    return NextResponse.redirect(new URL("/technician/dashboard", request.url));
+  }
+
   const isTechnicianRoute =
     pathname.startsWith("/technician") || pathname.startsWith("/bench");
   const isAdminRoute = !isTechnicianRoute;
@@ -73,6 +79,36 @@ async function refreshAndContinue(request: NextRequest, refreshToken: string) {
     const isTechnicianRoute =
       request.nextUrl.pathname.startsWith("/technician") ||
       request.nextUrl.pathname.startsWith("/bench");
+
+    if (
+      role === "TECHNICIAN" &&
+      (request.nextUrl.pathname === "/dashboard" ||
+        request.nextUrl.pathname.startsWith("/dashboard/"))
+    ) {
+      const redirectResponse = NextResponse.redirect(
+        new URL("/technician/dashboard", request.url)
+      );
+      redirectResponse.cookies.set({
+        name: ACCESS_TOKEN_COOKIE,
+        value: tokens.accessToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: ACCESS_TOKEN_MAX_AGE,
+      });
+      redirectResponse.cookies.set({
+        name: REFRESH_TOKEN_COOKIE,
+        value: tokens.refreshToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: REFRESH_TOKEN_MAX_AGE,
+      });
+      return redirectResponse;
+    }
+
     const allowed = isTechnicianRoute
       ? role === "ADMIN" || role === "TECHNICIAN"
       : role === "ADMIN";
@@ -122,6 +158,8 @@ export const config = {
     "/notifications/:path*",
     "/admin/:path*",
     "/technician/:path*",
+    "/technician",
     "/bench/:path*",
+    "/bench",
   ],
 };

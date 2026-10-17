@@ -71,11 +71,82 @@ export interface RejectRequestPayload {
 export interface TechnicianOption {
   id: string;
   name: string;
+  employeeId?: string;
+  role?: string;
   specialty?: string;
   email?: string;
   phone?: string | null;
   activeTicketsCount?: number;
   isAvailable: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BackendTechnicianResponse {
+  id: string;
+  employeeId?: string;
+  name?: string;
+  email?: string;
+  phone?: string | null;
+  role?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: string;
+  };
+  technician?: {
+    id: string;
+    employeeId: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  repairTickets?: Array<{
+    id: string;
+    status: string;
+  }>;
+}
+
+const CLOSED_TICKET_STATUSES = new Set([
+  "COMPLETED",
+  "UNREPAIRABLE",
+  "CANCELLED",
+]);
+
+export function adaptBackendTechnicianToOption(
+  raw: BackendTechnicianResponse,
+): TechnicianOption {
+  const id = raw.technician?.id ?? raw.id;
+  const name = raw.user?.name ?? raw.name ?? "Technician";
+  const email = raw.user?.email ?? raw.email;
+  const phone = raw.user?.phone ?? raw.phone ?? null;
+  const role = raw.user?.role ?? raw.role ?? "TECHNICIAN";
+  const employeeId = raw.employeeId ?? raw.technician?.employeeId;
+  const createdAt = raw.createdAt ?? raw.technician?.createdAt;
+  const updatedAt = raw.updatedAt ?? raw.technician?.updatedAt;
+
+  const activeTicketsCount = Array.isArray(raw.repairTickets)
+    ? raw.repairTickets.filter(
+        (t) => !CLOSED_TICKET_STATUSES.has((t.status || "").toUpperCase()),
+      ).length
+    : 0;
+
+  return {
+    id,
+    name,
+    employeeId,
+    role,
+    specialty: employeeId ? `Hardware Specialist (${employeeId})` : "Hardware Specialist",
+    email,
+    phone,
+    activeTicketsCount,
+    isAvailable: activeTicketsCount < 5,
+    createdAt,
+    updatedAt,
+  };
 }
 
 export interface BackendRepairRequestImage {

@@ -209,7 +209,11 @@ export function TicketActionModal({
               >
                 {technicians.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name} {t.activeTicketsCount !== undefined ? `(${t.activeTicketsCount} active)` : ""}
+                    {t.name}
+                    {t.employeeId ? ` (${t.employeeId})` : ""}
+                    {t.activeTicketsCount !== undefined
+                      ? ` • ${t.activeTicketsCount} active`
+                      : ""}
                   </option>
                 ))}
               </select>
