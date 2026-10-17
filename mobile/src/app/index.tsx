@@ -12,7 +12,6 @@ import {
   Lock,
 } from 'lucide-react-native';
 
-import { FanniTechLogo } from '../components/common/FanniTechLogo';
 
 export default function WelcomeScreen() {
   const router = useRouter();

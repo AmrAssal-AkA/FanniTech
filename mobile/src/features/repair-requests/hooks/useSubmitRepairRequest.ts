@@ -8,12 +8,12 @@ import { DEVICES_QUERY_KEY } from '../../devices/hooks/useDevices';
 
 export const MAX_REPAIR_REQUEST_IMAGES = 5;
 
-interface RepairRequestFormValues {
+export interface RepairRequestFormValues {
   problem: string;
   description: string;
 }
 
-export function useSubmitRepairRequest(deviceId: string) {
+export function useSubmitRepairRequest(defaultDeviceId?: string) {
   const queryClient = useQueryClient();
   const form = useForm<RepairRequestFormValues>({ defaultValues: { problem: '', description: '' } });
   const [pickedImages, setPickedImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
@@ -33,10 +33,11 @@ export function useSubmitRepairRequest(deviceId: string) {
   };
 
   const mutation = useMutation({
-    mutationFn: (values: RepairRequestFormValues) =>
+    mutationFn: (values: RepairRequestFormValues & { deviceId: string }) =>
       RepairRequestsService.submitRequest({
-        deviceId,
-        ...values,
+        deviceId: values.deviceId,
+        problem: values.problem,
+        description: values.description,
         images: pickedImages.map((image, index) => ({
           uri: image.uri,
           name: image.fileName ?? `repair-image-${index + 1}.jpg`,
@@ -54,9 +55,19 @@ export function useSubmitRepairRequest(deviceId: string) {
     pickedImages,
     pickImages,
     removeImage: (uri: string) => setPickedImages((current) => current.filter((image) => image.uri !== uri)),
-    submit: form.handleSubmit((values) => mutation.mutate(values)),
+    submitWithDevice: (targetDeviceId: string) =>
+      form.handleSubmit((values) => mutation.mutate({ ...values, deviceId: targetDeviceId }))(),
+    submit: form.handleSubmit((values) => {
+      if (!defaultDeviceId) return;
+      mutation.mutate({ ...values, deviceId: defaultDeviceId });
+    }),
     isSubmitting: mutation.isPending,
     isSuccess: mutation.isSuccess,
     error: mutation.error,
+    reset: () => {
+      form.reset();
+      setPickedImages([]);
+      mutation.reset();
+    },
   };
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
-import { FanniTechLogo } from './FanniTechLogo';
+
 
 interface AuthHeaderProps {
   title: string;
