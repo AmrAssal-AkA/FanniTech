@@ -5,6 +5,7 @@ import {
   ConflictException,
   ForbiddenException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
@@ -202,11 +203,11 @@ describe('AuthenticationService', () => {
     it('should return new tokens for a valid refresh token', async () => {
       mockJwt.verify.mockReturnValue({ sub: 'user-id-1' });
       mockPrisma.refreshToken.findUnique.mockResolvedValue(makeStoredToken());
-      mockPrisma.refreshToken.update.mockResolvedValue({});
+      mockPrisma.refreshToken.updateMany.mockResolvedValue({ count: 1 });
 
       const result = await service.refreshTokens(refreshToken, 'mobile');
 
-      expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith(
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({ data: { revoke: true } }),
       );
       expect(result).toMatchObject({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
@@ -217,7 +218,7 @@ describe('AuthenticationService', () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue(null);
 
       await expect(service.refreshTokens(refreshToken, 'mobile')).rejects.toThrow(
-        InternalServerErrorException,
+        UnauthorizedException,
       );
     });
 
@@ -226,7 +227,7 @@ describe('AuthenticationService', () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue(makeStoredToken({ revoke: true }));
 
       await expect(service.refreshTokens(refreshToken, 'mobile')).rejects.toThrow(
-        InternalServerErrorException,
+        UnauthorizedException,
       );
     });
 
@@ -237,7 +238,7 @@ describe('AuthenticationService', () => {
       );
 
       await expect(service.refreshTokens(refreshToken, 'mobile')).rejects.toThrow(
-        InternalServerErrorException,
+        UnauthorizedException,
       );
     });
 

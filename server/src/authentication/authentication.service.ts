@@ -3,6 +3,8 @@ import {
   ConflictException,
   InternalServerErrorException,
   ForbiddenException,
+  Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
@@ -14,6 +16,7 @@ import { LoginUserDtoType } from './DTO/login-user.dto.js';
 import { hashPassword, comparePassword } from '../utils/password-hash.js';
 import { AuthClient, Prisma } from '../prisma/generated/client.js';
 import { isPublicUser } from '../types/Auth.types.js';
+
 
 
 type Aud = 'mobile' | 'web';
@@ -28,11 +31,13 @@ export class AuthenticationService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
   ) {}
+  private readonly logger = new Logger(AuthenticationService.name);
 
   private async createTokens(
     user: { id: string; role: string },
     aud: Aud,
     deviceInfo?: string,
+    familyId: string = randomUUID(),
   ) {
     const accessToken = await this.jwt.signAsync(
       { sub: user.id, role: user.role },
@@ -54,7 +59,7 @@ export class AuthenticationService {
       data: {
         userId: String(user.id),
         token: refreshToken,
-        familyId: randomUUID(),
+        familyId,
         deviceInfo: deviceInfo,
         client: aud === 'mobile' ? AuthClient.MOBILE : AuthClient.WEB,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -142,36 +147,33 @@ export class AuthenticationService {
         secret: this.config.get<string>('REFRESH_TOKEN_SECRET'),
         audience: aud,
       });
+    }catch (error) {
+      throw new InternalServerErrorException('Failed to refresh tokens');
+    }
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+    if (!storedToken || storedToken.revoke || storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token is invalid or expired');
+    }
 
-      const storedToken = await this.prisma.refreshToken.findUnique({
-        where: { token: refreshToken },
-        include: { user: true },
-      });
-      if (
-        !storedToken ||
-        storedToken.revoke ||
-        storedToken.expiresAt < new Date()
-      ) {
-        throw new ConflictException('Invalid refresh token');
+    try {
+    await this.prisma.refreshToken.updateMany({
+      where: {token: refreshToken},
+      data: {revoke: true},
+    })
+    return await this.createTokens(
+      storedToken.user,
+      aud,
+      storedToken.deviceInfo ?? undefined,
+    )
+    }catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Refresh token is invalid or expired');
       }
-
-      await this.prisma.refreshToken.update({
-        where: { token: refreshToken },
-        data: { revoke: true },
-      });
-      return this.createTokens(
-        storedToken.user,
-        aud,
-        storedToken.deviceInfo ?? undefined,
-      );
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        throw new ConflictException();
-      }
-      throw new InternalServerErrorException();
+      this.logger.error('Error refreshing tokens:', error);
+      throw new InternalServerErrorException('Failed to refresh tokens');
     }
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, Res, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, UnauthorizedException, Res, Get, Req, UseGuards } from '@nestjs/common';
 import type {Request, Response} from 'express';
 import {AuthenticationGuard} from './authentication.guard.js'
 
@@ -92,19 +92,23 @@ export class AuthenticationController {
         @Res({ passthrough: true }) res: Response,
         @Body('service') service: 'mobile' | 'web' = 'mobile',
     ) {
-        try {
             if (service !== 'mobile' && service !== 'web') {
                 throw new BadRequestException('Service must be either mobile or web');
             }
-            const tokens = await this.authenticationService.refreshTokens(refreshToken, service);
-            this.setCookies(res, tokens, service);
-            return tokens;
-        }catch (error) {
-            if (error instanceof ForbiddenException || error instanceof BadRequestException) {
-                throw error;
+            try {
+                const tokens = await this.authenticationService.refreshTokens(refreshToken, service);
+                this.setCookies(res, tokens, service);
+                return tokens;
+            } catch (error) {
+                if (
+                    error instanceof ForbiddenException ||
+                    error instanceof BadRequestException ||
+                    error instanceof UnauthorizedException
+                ) {
+                    throw error;
+                }
+                throw new HttpException('Failed to refresh tokens', HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            throw new HttpException('Failed to refresh tokens', HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @Post('/logout')

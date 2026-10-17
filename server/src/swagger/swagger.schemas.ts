@@ -88,6 +88,57 @@ export class CreateDeviceRequest {
   serialNumber?: string;
 }
 
+export class CreateTechnicianRequest {
+  @ApiProperty({ example: 'Alex Technician', minLength: 1 })
+  name!: string;
+
+  @ApiProperty({ example: 'alex.technician@example.com', format: 'email' })
+  email!: string;
+
+  @ApiProperty({ example: 'SecurePassword1', minLength: 6, format: 'password' })
+  password!: string;
+
+  @ApiPropertyOptional({ example: '+201012345678', pattern: '^\\+?\\d{8,15}$' })
+  phone?: string;
+
+  @ApiPropertyOptional({ example: 'TECHNICIAN', enum: ['TECHNICIAN'], default: 'TECHNICIAN' })
+  role?: 'TECHNICIAN';
+}
+
+export class TechnicianProfileResponse {
+  @ApiProperty({ example: 'b8c7f8b1-2d7f-4c8e-a6b7-3a4d5e6f7a8b' })
+  id!: string;
+
+  @ApiProperty({ example: 'TECH-001' })
+  employeeId!: string;
+
+  @ApiProperty({ example: '2026-10-17T12:00:00.000Z', format: 'date-time' })
+  createdAt!: string;
+
+  @ApiProperty({ example: '2026-10-17T12:00:00.000Z', format: 'date-time' })
+  updatedAt!: string;
+}
+
+export class TechnicianResponse {
+  @ApiProperty({ example: 'b8c7f8b1-2d7f-4c8e-a6b7-3a4d5e6f7a8b' })
+  id!: string;
+
+  @ApiProperty({ example: 'Alex Technician' })
+  name!: string;
+
+  @ApiProperty({ example: 'alex.technician@example.com', format: 'email' })
+  email!: string;
+
+  @ApiPropertyOptional({ example: '+201012345678', nullable: true })
+  phone!: string | null;
+
+  @ApiProperty({ example: 'TECHNICIAN', enum: ['TECHNICIAN'] })
+  role!: 'TECHNICIAN';
+
+  @ApiProperty({ type: () => TechnicianProfileResponse })
+  technician!: TechnicianProfileResponse;
+}
+
 export class DeviceResponse {
   @ApiProperty({ example: 'c1d2e3f4-5678-90ab-cdef-1234567890ab' })
   id!: string;

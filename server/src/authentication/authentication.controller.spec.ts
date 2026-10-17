@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { AuthenticationController } from './authentication.controller.js';
@@ -36,7 +37,10 @@ describe('AuthenticationController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthenticationController],
-      providers: [{ provide: AuthenticationService, useValue: mockAuthService }],
+      providers: [
+        { provide: AuthenticationService, useValue: mockAuthService },
+        { provide: JwtService, useValue: { verify: vi.fn() } },
+      ],
     }).compile();
 
     controller = module.get<AuthenticationController>(AuthenticationController);

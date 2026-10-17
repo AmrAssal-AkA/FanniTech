@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -59,39 +60,6 @@ export class RepairRequestManagmentService {
     return request;
   }
 
-  async listTechnicians() {
-    const items = await this.prisma.technician.findMany({
-      include: {
-        user: { select: { id: true, name: true, email: true, phone: true } },
-        _count: {
-          select: {
-            repairTickets: {
-              where: {
-                status: {
-                  in: [
-                    RepairTicketStatus.ACCEPTED,
-                    RepairTicketStatus.DIAGNOSING,
-                    RepairTicketStatus.IN_REPAIR,
-                    RepairTicketStatus.READY_FOR_PICKUP,
-                  ],
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    return items.map((tech) => ({
-      id: tech.id,
-      employeeId: tech.employeeId,
-      name: tech.user.name,
-      email: tech.user.email,
-      phone: tech.user.phone,
-      activeTicketsCount: tech._count.repairTickets,
-      isAvailable: tech._count.repairTickets < 10,
-    }));
-  }
 
   async acceptRequest(id: string, dto: AcceptRepairRequestDtoType) {
     const request = await this.getRequestById(id);
@@ -192,6 +160,27 @@ export class RepairRequestManagmentService {
       include: this.ticketInclude,
     });
     await this.notifyTechnicianAssigned(updated);
+    return updated;
+  }
+
+  async unassignTechnician(ticketId: string, notes?: string) {
+    const ticket = await this.findTicket(ticketId);
+    if (!ticket.technicianId) {
+      throw new BadRequestException('Ticket is not assigned to any technician');
+    }
+    const previousTechnician = ticket.technician;
+    const updated = await this.prisma.repairTicket.update({
+      where: { id: ticketId },
+      data: { technicianId: null },
+      include: this.ticketInclude,
+    });
+    await this.prisma.repairStatusHistory.create({
+      data: {
+        ticketId,
+        status: ticket.status,
+        notes: notes ?? `Technician ${previousTechnician?.user?.name ?? ''} unassigned by Admin`,
+      },
+    });
     return updated;
   }
 

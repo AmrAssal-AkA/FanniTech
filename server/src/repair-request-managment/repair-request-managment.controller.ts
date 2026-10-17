@@ -21,6 +21,7 @@ import { RepairRequestManagmentService } from './repair-request-managment.servic
 import {
   AcceptRepairRequestDtoSchema,
   AssignTechnicianDtoSchema,
+  UnassignTechnicianDtoSchema,
   ListRepairRequestsQueryDtoSchema,
   ListTicketsQueryDtoSchema,
   MarkReadyForPickupDtoSchema,
@@ -31,6 +32,7 @@ import {
   UpdateTicketStatusDtoSchema,
   type AcceptRepairRequestDtoType,
   type AssignTechnicianDtoType,
+  type UnassignTechnicianDtoType,
   type ListRepairRequestsQueryDtoType,
   type ListTicketsQueryDtoType,
   type MarkReadyForPickupDtoType,
@@ -62,10 +64,6 @@ export class RepairRequestManagmentController {
     }
   }
 
-  @ApiOperation({ summary: 'List all technicians For Admin and Technician' })
-  @Get('technicians') @Roles('ADMIN', 'TECHNICIAN') listTechnicians() {
-    return this.service.listTechnicians();
-  }
   @ApiOperation({ summary: 'Get a specific repair request by ID' })
   @ApiConsumes('application/json')
   @Get('requests/:id') @Roles('ADMIN', 'TECHNICIAN') getRequest(
@@ -118,6 +116,15 @@ export class RepairRequestManagmentController {
     d: AssignTechnicianDtoType,
   ) {
     return this.service.assignTechnician(id, d);
+  }
+
+  @ApiOperation({ summary: 'Unassign a technician from a ticket For Admin' })
+  @Patch('tickets/:id/unassign-technician') @Roles('ADMIN') unassign(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(UnassignTechnicianDtoSchema))
+    d: UnassignTechnicianDtoType,
+  ) {
+    return this.service.unassignTechnician(id, d.notes);
   }
   @ApiOperation({ summary: 'Diagnose a ticket For Admin and Technician' }) 
   @Patch('tickets/:id/diagnose') @Roles('ADMIN', 'TECHNICIAN') diagnose(

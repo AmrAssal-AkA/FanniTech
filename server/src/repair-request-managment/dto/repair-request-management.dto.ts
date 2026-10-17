@@ -19,6 +19,9 @@ export type RejectRepairRequestDtoType = z.infer<typeof RejectRepairRequestDtoSc
 export const AssignTechnicianDtoSchema = z.object({ technicianId: z.string().uuid() });
 export type AssignTechnicianDtoType = z.infer<typeof AssignTechnicianDtoSchema>;
 
+export const UnassignTechnicianDtoSchema = z.object({ notes: optionalNotes });
+export type UnassignTechnicianDtoType = z.infer<typeof UnassignTechnicianDtoSchema>;
+
 export const StartDiagnosisDtoSchema = z.object({ notes: optionalNotes });
 export type StartDiagnosisDtoType = z.infer<typeof StartDiagnosisDtoSchema>;
 

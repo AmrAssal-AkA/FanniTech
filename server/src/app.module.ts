@@ -11,6 +11,9 @@ import { DevicesModule } from './devices/devices.module.js';
 import { RepairRequestsModule } from './repair-requests/repair-requests.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { RepairRequestManagmentModule } from './repair-request-managment/repair-request-managment.module.js';
+import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module.js';
+
+
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -24,6 +27,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     RepairRequestsModule,
     NotificationsModule,
     RepairRequestManagmentModule,
+    AdminDashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
