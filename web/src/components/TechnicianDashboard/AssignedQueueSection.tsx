@@ -1,73 +1,127 @@
 "use client";
 
 import { useState } from "react";
+import axios from "axios";
 import {
   ClipboardList,
-  ChevronRight,
-  CheckCircle2,
-  Share2,
   FileText,
   Play,
   CheckCheck,
   AlertCircle,
+  Loader2,
+  History,
+  Wrench,
+  CheckCircle2,
+  SlidersHorizontal,
+  Cpu,
+  AlertOctagon,
 } from "lucide-react";
 
 import { useTechnicianDashboardUIStore } from "@/Portal/technicianDashboardUIStore";
-{/** A component to display the assigned queue of repair tickets for a technician */}
 import type { RepairTicket } from "@/types/tickets";
+import type { UpdateTechnicianNotesPayload } from "@/types/technicianDashboard";
+import type { TechnicianModalMode } from "./TechnicianTicketManageModal";
 import { getStatusBadge } from "./_components/getStatusBadge";
 import { getPriorityBadge } from "./_components/getPriorityBadge";
 import getTurnaroundTarget from "./_components/getTurnaroundTarget";
+import { formatDateTime } from "./_components/formatters";
 
 interface AssignedQueueSectionProps {
   tickets: RepairTicket[];
+  activeBenchTicketId?: string | null;
   onSelectTicket?: (ticket: RepairTicket) => void;
-  onOpenNotes?: (ticket: RepairTicket) => void;
+  onManageTicket?: (ticket: RepairTicket, mode?: TechnicianModalMode) => void;
+  onSaveNotes?: (
+    ticketId: string,
+    payload: UpdateTechnicianNotesPayload
+  ) => Promise<RepairTicket>;
 }
 
 export function AssignedQueueSection({
   tickets,
+  activeBenchTicketId,
   onSelectTicket,
-  onOpenNotes,
+  onManageTicket,
+  onSaveNotes,
 }: AssignedQueueSectionProps) {
   const statusFilter = useTechnicianDashboardUIStore(
-    (state) => state.statusFilter,
+    (state) => state.statusFilter
   );
   const setStatusFilter = useTechnicianDashboardUIStore(
-    (state) => state.setStatusFilter,
+    (state) => state.setStatusFilter
   );
   const searchQuery = useTechnicianDashboardUIStore(
-    (state) => state.searchQuery,
+    (state) => state.searchQuery
   );
 
   const [activeNotesTicket, setActiveNotesTicket] = useState<string | null>(
-    null,
+    null
   );
+  const [diagnosisDraft, setDiagnosisDraft] = useState("");
+  const [repairNotesDraft, setRepairNotesDraft] = useState("");
+  const [logNoteDraft, setLogNoteDraft] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [notesError, setNotesError] = useState<string | null>(null);
+
+  const openNotesEditor = (ticket: RepairTicket) => {
+    if (activeNotesTicket === ticket.id) {
+      setActiveNotesTicket(null);
+      setNotesError(null);
+      return;
+    }
+    setActiveNotesTicket(ticket.id);
+    setDiagnosisDraft(ticket.diagnosis || "");
+    setRepairNotesDraft(ticket.repairNotes || "");
+    setLogNoteDraft("");
+    setNotesError(null);
+  };
+
+  const handleSaveNotes = async (ticketId: string) => {
+    if (!onSaveNotes) {
+      setActiveNotesTicket(null);
+      return;
+    }
+    setIsSavingNotes(true);
+    setNotesError(null);
+    try {
+      await onSaveNotes(ticketId, {
+        diagnosis: diagnosisDraft,
+        repairNotes: repairNotesDraft,
+        notes: logNoteDraft.trim() || undefined,
+      });
+      setActiveNotesTicket(null);
+      setLogNoteDraft("");
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) && err.response?.data?.message) ||
+        "Failed to save notes.";
+      setNotesError(typeof msg === "string" ? msg : "Failed to save notes.");
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
 
   // Filter tabs counts
   const allCount = tickets.length;
   const diagnosingCount = tickets.filter(
-    (t) => t.status === "DIAGNOSING" || t.status === "ACCEPTED",
+    (t) => t.status === "DIAGNOSING" || t.status === "ACCEPTED"
   ).length;
   const inRepairCount = tickets.filter((t) => t.status === "IN_REPAIR").length;
-  const readyQACount = tickets.filter(
-    (t) => t.status === "READY_FOR_PICKUP" || t.status === "COMPLETED",
+  const readyPickupCount = tickets.filter(
+    (t) => t.status === "READY_FOR_PICKUP"
   ).length;
 
   // Filter items
   const filteredTickets = tickets.filter((ticket) => {
-    // Tab filter
     if (statusFilter === "DIAGNOSING") {
       if (ticket.status !== "DIAGNOSING" && ticket.status !== "ACCEPTED")
         return false;
     } else if (statusFilter === "IN_REPAIR") {
       if (ticket.status !== "IN_REPAIR") return false;
     } else if (statusFilter === "READY_FOR_PICKUP") {
-      if (ticket.status !== "READY_FOR_PICKUP" && ticket.status !== "COMPLETED")
-        return false;
+      if (ticket.status !== "READY_FOR_PICKUP") return false;
     }
 
-    // Search query filter
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     const tNum = ticket.ticketNumber?.toLowerCase() || "";
@@ -89,7 +143,6 @@ export function AssignedQueueSection({
       serial.includes(q)
     );
   });
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -149,7 +202,7 @@ export function AssignedQueueSection({
                 : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
             }`}
           >
-            Ready for QC ({readyQACount})
+            Ready for Pickup ({readyPickupCount})
           </button>
         </div>
       </div>
@@ -163,7 +216,9 @@ export function AssignedQueueSection({
               No tickets found in this view
             </span>
             <p className="text-xs text-zinc-400 mt-1">
-              Try switching tabs or clearing your universal search bar.
+              {tickets.length === 0
+                ? "You currently have no repair tickets assigned to your bench."
+                : "Try switching tabs or clearing your search filter."}
             </p>
           </div>
         ) : (
@@ -173,17 +228,27 @@ export function AssignedQueueSection({
                 ? "border-l-sky-600"
                 : ticket.status === "IN_REPAIR"
                   ? "border-l-blue-600"
-                  : "border-l-zinc-400";
+                  : ticket.status === "READY_FOR_PICKUP"
+                    ? "border-l-emerald-600"
+                    : "border-l-zinc-400";
 
-            const deviceTitle = `${ticket.request?.device?.brand || ""} ${
-              ticket.request?.device?.model || ""
-            }`.trim();
-            const customer = ticket.request?.device?.customer?.user;
-            const customerNotes = ticket.request?.device?.customer?.notes;
+            const device = ticket.request?.device;
+            const deviceTitle =
+              `${device?.brand || ""} ${device?.model || ""}`.trim() ||
+              "Unknown Device";
+            const customer = device?.customer?.user;
+            const customerNotes = device?.customer?.notes;
             const faultText =
               ticket.diagnosis ||
               ticket.request?.description ||
-              ticket.request?.problem;
+              ticket.request?.problem ||
+              "No problem description provided";
+
+            const history = ticket.statusHistory || [];
+            const latestNoteEntry = [...history]
+              .reverse()
+              .find((h) => h.notes && h.notes.trim().length > 0);
+            const photosCount = ticket.request?.images?.length || 0;
 
             return (
               <div
@@ -191,7 +256,7 @@ export function AssignedQueueSection({
                 className={`p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 border-l-4 ${isLeftColor} shadow-xs hover:shadow-sm transition-all relative overflow-hidden`}
               >
                 <div className="flex flex-col gap-4">
-                  {/* Row 1: Badges, SLA, Ticket ID */}
+                  {/* Row 1: Badges, Last Update, Ticket ID */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono text-xs font-bold text-sky-800 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/70 px-2.5 py-0.5 rounded-md">
@@ -202,7 +267,7 @@ export function AssignedQueueSection({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                        Turnaround Target:
+                        Last update:
                       </span>
                       {getTurnaroundTarget(ticket)}
                     </div>
@@ -220,11 +285,19 @@ export function AssignedQueueSection({
                         </strong>{" "}
                         {faultText}
                       </p>
+                      {ticket.repairNotes && (
+                        <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                          <strong className="text-zinc-800 dark:text-zinc-200">
+                            Repair Notes:
+                          </strong>{" "}
+                          {ticket.repairNotes}
+                        </p>
+                      )}
                       <div className="flex items-center gap-4 mt-1 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
                         <span>
                           Client:{" "}
                           <strong className="text-zinc-800 dark:text-zinc-200">
-                            {customer?.name || "Client"}
+                            {customer?.name || "Customer"}
                           </strong>
                         </span>
                         {customer?.phone && (
@@ -234,157 +307,148 @@ export function AssignedQueueSection({
                       </div>
                     </div>
 
-                    {/* Right column: Specs box */}
+                    {/* Right column: Real Device Metadata box */}
                     <div className="md:col-span-4 flex flex-col justify-center gap-1.5 bg-zinc-50 dark:bg-zinc-800/60 p-3 rounded-xl border border-zinc-200/60 dark:border-zinc-750 text-xs">
-                      {ticket.ticketNumber === "TCK-2042" ? (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Motherboard:
-                            </span>
-                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                              NM-D351 Rev 1.0
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Est. Work:
-                            </span>
-                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                              1.5 hrs labor
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Part Status:
-                            </span>
-                            <span className="font-semibold text-sky-700 dark:text-sky-400">
-                              In Bay Storage (x4)
-                            </span>
-                          </div>
-                        </>
-                      ) : ticket.ticketNumber === "TCK-2038" ? (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Compound:
-                            </span>
-                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                              Honeywell PTM7950
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Parts Issued:
-                            </span>
-                            <span className="font-semibold text-sky-700 dark:text-sky-400">
-                              Delta Dual Fan Assm.
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Assembly:
-                            </span>
-                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                              Vapor Chamber Torqued
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Board Model:
-                            </span>
-                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                              820-02098-A
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Corrosion Risk:
-                            </span>
-                            <span className="font-semibold text-red-600 dark:text-red-400">
-                              Moderate (24h exposure)
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 dark:text-zinc-400">
-                              Ultrasonic Bath:
-                            </span>
-                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                              Scheduled Tank #02
-                            </span>
-                          </div>
-                        </>
-                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-500 dark:text-zinc-400">
+                          Device Type:
+                        </span>
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          {device?.deviceType || "—"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-500 dark:text-zinc-400">
+                          Serial No.:
+                        </span>
+                        <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
+                          {device?.serialNumber || "—"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-500 dark:text-zinc-400">
+                          Intake Photos:
+                        </span>
+                        <span className="font-semibold text-sky-700 dark:text-sky-400">
+                          {photosCount} {photosCount === 1 ? "photo" : "photos"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Row 3: Action Buttons */}
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-                    <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                      {ticket.status === "DIAGNOSING" ? (
-                        <>
-                          <Share2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                          <span>
-                            Thermal camera calibrated · Schematics cached
-                          </span>
-                        </>
-                      ) : ticket.status === "IN_REPAIR" ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                          <span>
-                            Phase 1 Done: New thermal paste &amp; pads installed
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                          <span>
-                            Requires battery isolation prior to board teardown
-                          </span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onManageTicket?.(ticket, "history")}
+                      className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 hover:text-sky-700 dark:hover:text-sky-400 transition-colors text-left"
+                      title="View full status history"
+                    >
+                      <History className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                      <span className="underline-offset-2 hover:underline">
+                        {latestNoteEntry?.notes
+                          ? latestNoteEntry.notes
+                          : `Opened ${formatDateTime(ticket.createdAt)}`}
+                      </span>
+                    </button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {onSelectTicket && activeBenchTicketId !== ticket.id && (
+                        <button
+                          type="button"
+                          onClick={() => onSelectTicket(ticket)}
+                          className="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-300 font-semibold transition-colors flex items-center gap-1.5 border border-zinc-200/80 dark:border-zinc-700"
+                          title="Pin this ticket to Active Bench Focus"
+                        >
+                          <Cpu className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                          <span>Focus Bench</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
-                        onClick={() => {
-                          setActiveNotesTicket(
-                            activeNotesTicket === ticket.id ? null : ticket.id,
-                          );
-                          onOpenNotes?.(ticket);
-                        }}
+                        onClick={() => openNotesEditor(ticket)}
                         className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-semibold transition-colors flex items-center gap-1.5 border border-zinc-200/80 dark:border-zinc-700"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         <span>Quick Notes</span>
                       </button>
 
+                      {onManageTicket && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectTicket?.(ticket);
+                            onManageTicket(ticket, "notes");
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-semibold transition-colors flex items-center gap-1.5 border border-zinc-200/80 dark:border-zinc-700"
+                          title="Open Ticket Management Modal"
+                        >
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                          <span>Manage</span>
+                        </button>
+                      )}
+
+                      {onManageTicket &&
+                        (ticket.status === "ACCEPTED" ||
+                          ticket.status === "DIAGNOSING" ||
+                          ticket.status === "IN_REPAIR") && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onSelectTicket?.(ticket);
+                              onManageTicket(ticket, "unrepairable");
+                            }}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-900/50"
+                            title="Mark as Unrepairable"
+                          >
+                            <AlertOctagon className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
                       {ticket.status === "DIAGNOSING" ? (
                         <button
                           type="button"
-                          onClick={() => onSelectTicket?.(ticket)}
-                          className="px-3.5 py-1.5 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-semibold transition-all shadow-xs flex items-center gap-1.5"
+                          onClick={() => {
+                            onSelectTicket?.(ticket);
+                            onManageTicket?.(ticket, "transition");
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-xs flex items-center gap-1.5"
                         >
-                          <span>Resume Diagnosis</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
+                          <Wrench className="w-3.5 h-3.5" />
+                          <span>Start Hardware Repair</span>
                         </button>
                       ) : ticket.status === "IN_REPAIR" ? (
                         <button
                           type="button"
-                          onClick={() => onSelectTicket?.(ticket)}
-                          className="px-3.5 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 dark:bg-sky-950 dark:hover:bg-sky-900 text-sky-900 dark:text-sky-200 font-semibold transition-colors flex items-center gap-1.5 border border-sky-300 dark:border-sky-800"
+                          onClick={() => {
+                            onSelectTicket?.(ticket);
+                            onManageTicket?.(ticket, "transition");
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-all shadow-xs flex items-center gap-1.5"
                         >
                           <CheckCheck className="w-3.5 h-3.5" />
-                          <span>Log Completion to QA</span>
+                          <span>Mark Ready for Pickup</span>
+                        </button>
+                      ) : ticket.status === "READY_FOR_PICKUP" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSelectTicket?.(ticket);
+                            onManageTicket?.(ticket, "transition");
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all shadow-xs flex items-center gap-1.5"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Complete Handover</span>
                         </button>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => onSelectTicket?.(ticket)}
+                          onClick={() => {
+                            onSelectTicket?.(ticket);
+                            onManageTicket?.(ticket, "transition");
+                          }}
                           className="px-3.5 py-1.5 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-semibold transition-all shadow-xs flex items-center gap-1.5"
                         >
                           <Play className="w-3.5 h-3.5" />
@@ -396,23 +460,80 @@ export function AssignedQueueSection({
 
                   {/* Inline quick notes editor if opened */}
                   {activeNotesTicket === ticket.id && (
-                    <div className="mt-2 p-3 bg-zinc-50 dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700 flex flex-col gap-2">
+                    <div className="mt-2 p-3.5 bg-zinc-50 dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
                       <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        Technician Work Notes for {ticket.ticketNumber}:
+                        Update Technician Notes for {ticket.ticketNumber}
                       </span>
-                      <textarea
-                        defaultValue={ticket.repairNotes || ""}
-                        rows={2}
-                        className="w-full p-2 text-xs rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-sky-600"
-                        placeholder="Log component measurements, findings, or bay shelf details..."
-                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+                            Diagnosis Findings
+                          </label>
+                          <textarea
+                            value={diagnosisDraft}
+                            onChange={(e) => setDiagnosisDraft(e.target.value)}
+                            rows={2}
+                            className="w-full p-2 text-xs rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                            placeholder="Enter diagnosis findings..."
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+                            Repair Notes
+                          </label>
+                          <textarea
+                            value={repairNotesDraft}
+                            onChange={(e) => setRepairNotesDraft(e.target.value)}
+                            rows={2}
+                            className="w-full p-2 text-xs rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                            placeholder="Enter repair actions or parts used..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+                          Activity Log Note (optional, appends to status history)
+                        </label>
+                        <input
+                          type="text"
+                          value={logNoteDraft}
+                          onChange={(e) => setLogNoteDraft(e.target.value)}
+                          className="w-full p-2 text-xs rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                          placeholder="Optional note for the bench activity stream..."
+                        />
+                      </div>
+
+                      {notesError && (
+                        <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                          {notesError}
+                        </p>
+                      )}
+
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() => setActiveNotesTicket(null)}
-                          className="px-3 py-1 rounded-md text-xs font-semibold bg-sky-700 text-white hover:bg-sky-800"
+                          disabled={isSavingNotes}
+                          onClick={() => {
+                            setActiveNotesTicket(null);
+                            setNotesError(null);
+                          }}
+                          className="px-3 py-1 rounded-md text-xs font-semibold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-600"
                         >
-                          Save Notes
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isSavingNotes}
+                          onClick={() => handleSaveNotes(ticket.id)}
+                          className="px-3 py-1 rounded-md text-xs font-semibold bg-sky-700 text-white hover:bg-sky-800 disabled:opacity-50 inline-flex items-center gap-1.5"
+                        >
+                          {isSavingNotes && (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          )}
+                          <span>Save Notes</span>
                         </button>
                       </div>
                     </div>

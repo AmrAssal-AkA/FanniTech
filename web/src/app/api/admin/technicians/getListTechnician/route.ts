@@ -69,7 +69,6 @@ export async function GET(request: Request) {
     let result;
     try {
       result = await fetchFromBackend(accessToken!, refreshToken);
-      console.log("Successfully fetched technicians from backend:", result.data);
     } catch (err: unknown) {
       if (
         axios.isAxiosError(err) &&

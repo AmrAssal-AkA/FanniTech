@@ -1,5 +1,9 @@
+"use client";
 import Image from "next/image";
 import { ShieldCheck, Store } from "lucide-react";
+
+import { NotificationBell } from "@/components/Notifications/NotificationBell";
+
 
 export function Header() {
   return (
@@ -31,14 +35,10 @@ export function Header() {
             </span>
           </div>
         </div>
-
         {/* Lab branch status and portal badges */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-sky-50/70 dark:bg-zinc-900/80 border border-sky-100 dark:border-zinc-800 px-3 py-1.5 rounded-lg">
-            <Store className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-800 dark:text-zinc-200">
-              Branch #01 - Main Lab
-            </span>
+          <NotificationBell />
           </div>
           <div className="flex items-center gap-1.5 bg-sky-100/70 dark:bg-sky-950/50 text-sky-900 dark:text-sky-200 border border-sky-200/60 dark:border-sky-800 px-3 py-1.5 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-600 dark:bg-sky-400 animate-pulse" />

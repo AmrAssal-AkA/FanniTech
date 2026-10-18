@@ -4,8 +4,6 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 import { AuthProvider } from "@/context/authContext";
-import { Header } from "@/components/Header&Footer/Header";
-import { Footer } from "@/components/Header&Footer/Footer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,9 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <Header />
           {children}
-          <Footer />
         </AuthProvider>
       </body>
     </html>

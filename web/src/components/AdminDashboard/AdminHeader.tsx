@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { useAdminDashboardUIStore } from "@/Portal/adminDashboardUIStore";
 import { useAuth } from "@/Hooks/useAuth";
+import { NotificationBell } from "@/components/Notifications/NotificationBell";
 
 interface AdminHeaderProps {
   benchCapacity?: string;
@@ -13,7 +14,6 @@ interface AdminHeaderProps {
 export function AdminHeader({
   benchCapacity = "8/10",
   slaRate = "98.4%",
-  unreadNotifications = 3,
 }: AdminHeaderProps) {
   const searchQuery = useAdminDashboardUIStore((state) => state.searchQuery);
   const setSearchQuery = useAdminDashboardUIStore(
@@ -61,21 +61,8 @@ export function AdminHeader({
           </span>
         </div>
 
-        {/* Notifications button */}
-        <div className="relative">
-          <button
-            type="button"
-            aria-label="View notifications"
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
-          >
-            <Bell className="w-4 h-4" />
-            {unreadNotifications > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold leading-none ring-2 ring-white dark:ring-zinc-950">
-                {unreadNotifications}
-              </span>
-            )}
-          </button>
-        </div>
+        {/* Real-time Notifications */}
+        <NotificationBell />
 
         {/* User profile dropdown snippet */}
         <div className="flex items-center gap-3 pl-2 border-l border-zinc-200/80 dark:border-zinc-800">

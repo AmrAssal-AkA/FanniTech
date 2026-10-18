@@ -33,7 +33,11 @@ export async function GET() {
       refreshed = result.data;
       ({ data } = await serverClient.get<User>("/api/v1/auth/me", { headers: getAuthHeaders(refreshed.accessToken, refreshed.refreshToken) }));
     }
-    const response = NextResponse.json({ success: true, data });
+    const activeToken = refreshed?.accessToken ?? token ?? null;
+    const response = NextResponse.json({
+      success: true,
+      data: { ...data, token: activeToken },
+    });
     if (refreshed) {
       response.cookies.set("x-access-token", refreshed.accessToken, { ...cookieOptions, maxAge: 15 * 60 });
       response.cookies.set("x-refresh-token", refreshed.refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 });

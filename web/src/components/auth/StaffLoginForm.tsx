@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ShieldAlert,
 } from "lucide-react";
+
 import { useAuth } from "@/Hooks/useAuth";
 import type { User } from "@/types/auth";
 
@@ -20,8 +21,8 @@ export function StaffLoginForm() {
   const router = useRouter();
   const { login, isAuthenticated, loading, isAdmin, isTechnician } = useAuth();
 
-  const [identifier, setIdentifier] = useState("admin@fannitech.com");
-  const [passphrase, setPassphrase] = useState("admin123");
+  const [identifier, setIdentifier] = useState("");
+  const [passphrase, setPassphrase] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberWorkstation, setRememberWorkstation] = useState(true);
 
@@ -153,7 +154,7 @@ export function StaffLoginForm() {
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin@fannitech.com"
+                  placeholder="example@fannitech.com"
                   className="w-full h-11 pl-10 pr-3.5 bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20 transition-all"
                 />
               </div>

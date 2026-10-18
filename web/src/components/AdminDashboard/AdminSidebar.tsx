@@ -9,13 +9,12 @@ import {
   Inbox,
   Ticket,
   Wrench,
-  Bell,
-  Settings,
   DoorOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { useAuth } from "@/Hooks/useAuth";
+
 
 interface AdminSidebarProps {
   pendingCount?: number;
@@ -23,8 +22,8 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
-  pendingCount = 4,
-  ticketsCount = 12,
+  pendingCount = 0,
+  ticketsCount = 0,
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
@@ -67,27 +66,11 @@ export function AdminSidebar({
       badge: null,
       badgeColor: "",
     },
-    {
-      title: "Notifications",
-      href: "/notifications",
-      icon: Bell,
-      badge: 3,
-      badgeColor:
-        "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
-    },
-    {
-      title: "Settings",
-      href: "/settings",
-      icon: Settings,
-      badge: null,
-      badgeColor: "",
-    },
   ];
 
   const handleLogout = async () => {
     try {
       await logout();
-      // Optionally, you can redirect the user to the login page or home page after logout
       window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);

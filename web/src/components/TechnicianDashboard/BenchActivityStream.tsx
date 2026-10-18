@@ -1,53 +1,25 @@
 import { History } from "lucide-react";
-import type { BenchActivityItem } from "@/types/technicianDashboard";
+import type { WorkbenchActivity } from "@/types/technicianDashboard";
+import type { RepairTicketStatus } from "@/types/tickets";
+import { formatClock, statusLabel } from "./_components/formatters";
 
 interface BenchActivityStreamProps {
-  activities?: BenchActivityItem[];
+  activities: WorkbenchActivity[];
 }
 
-export function BenchActivityStream({
-  activities = [
-    {
-      id: "act-1",
-      time: "11:50",
-      type: "primary",
-      headline: "Component replacement logged for",
-      ticketNumber: "TCK-2042",
-      detail: "Reserved PQ301 (AON6414A) from Bin #B-14",
-    },
-    {
-      id: "act-2",
-      time: "10:45",
-      type: "tertiary",
-      headline: "Thermal re-paste finished on",
-      ticketNumber: "TCK-2038",
-      detail: "Applied PTM7950 phase-change material",
-    },
-    {
-      id: "act-3",
-      time: "09:15",
-      type: "neutral",
-      headline: "Ticket TCK-2042 assigned by Dispatch",
-      ticketNumber: "TCK-2042",
-      detail: "Tariq Al-Mansoor assigned priority ticket to Bay #04",
-    },
-    {
-      id: "act-4",
-      time: "08:10",
-      type: "success",
-      headline: "Morning Bench Calibration Verified",
-      detail: "Grounding ESD mat: < 1.0 MΩ (Passed)",
-    },
-  ],
-}: BenchActivityStreamProps) {
-  const getDotColor = (type: string) => {
-    switch (type) {
-      case "primary":
+export function BenchActivityStream({ activities }: BenchActivityStreamProps) {
+  const getDotColor = (status: RepairTicketStatus) => {
+    switch (status) {
+      case "DIAGNOSING":
         return "bg-sky-600";
-      case "tertiary":
+      case "IN_REPAIR":
         return "bg-blue-600";
-      case "success":
+      case "READY_FOR_PICKUP":
+      case "COMPLETED":
         return "bg-emerald-600";
+      case "UNREPAIRABLE":
+      case "CANCELLED":
+        return "bg-red-600";
       default:
         return "bg-zinc-400 dark:bg-zinc-600";
     }
@@ -63,38 +35,45 @@ export function BenchActivityStream({
           </h3>
         </div>
         <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-          Today
+          Recent
         </span>
       </div>
 
-      <div className="flex flex-col gap-3.5 mt-3">
-        {activities.map((item) => (
-          <div key={item.id} className="flex items-start gap-2.5">
-            <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400 pt-0.5 shrink-0 w-9">
-              {item.time}
-            </span>
-            <div
-              className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${getDotColor(
-                item.type
-              )}`}
-            />
-            <div className="flex flex-col leading-snug">
-              <span className="text-xs text-zinc-800 dark:text-zinc-200">
-                {item.headline}{" "}
-                {item.ticketNumber && (
-                  <strong className="text-sky-700 dark:text-sky-400 font-semibold font-mono">
-                    {item.ticketNumber}
-                  </strong>
+      {activities.length === 0 ? (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 py-6 text-center">
+          No status history recorded yet.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3.5 mt-3">
+          {activities.map((item) => (
+            <div key={item.id} className="flex items-start gap-2.5">
+              <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400 pt-0.5 shrink-0 w-10">
+                {formatClock(item.changedAt)}
+              </span>
+              <div
+                className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${getDotColor(
+                  item.status
+                )}`}
+              />
+              <div className="flex flex-col leading-snug min-w-0">
+                <span className="text-xs text-zinc-800 dark:text-zinc-200">
+                  Status → <strong>{statusLabel(item.status)}</strong>{" "}
+                  {item.ticket?.ticketNumber && (
+                    <strong className="text-sky-700 dark:text-sky-400 font-semibold font-mono">
+                      {item.ticket.ticketNumber}
+                    </strong>
+                  )}
+                </span>
+                {item.notes && (
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 break-words">
+                    {item.notes}
+                  </span>
                 )}
-              </span>
-              <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                {item.detail}
-              </span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
