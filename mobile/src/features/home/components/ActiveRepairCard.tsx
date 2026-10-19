@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Laptop, Clock, Wrench, ArrowRight, Check } from 'lucide-react-native';
 import { ActiveRepairTicket, RepairStage } from '../types';
 
@@ -21,6 +21,27 @@ export const ActiveRepairCard: React.FC<ActiveRepairCardProps> = ({
   onPressDetails,
 }) => {
   const currentStage = ticket.currentStage;
+  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'test') return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [pulseAnim]);
 
   return (
     <View className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-slate-100 relative overflow-hidden">
@@ -41,7 +62,10 @@ export const ActiveRepairCard: React.FC<ActiveRepairCardProps> = ({
         </View>
 
         <View className="flex-row items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container shadow-xs">
-          <View className="w-2 h-2 rounded-full bg-tertiary-fixed" />
+          <Animated.View
+            style={{ opacity: pulseAnim }}
+            className="w-2 h-2 rounded-full bg-tertiary-fixed"
+          />
           <Text className="text-xs font-bold tracking-wider text-on-secondary-container">
             {ticket.statusLabel}
           </Text>
@@ -84,8 +108,8 @@ export const ActiveRepairCard: React.FC<ActiveRepairCardProps> = ({
 
           {/* Steps */}
           {STAGES.map((s) => {
-            const isCompleted = s.stage < currentStage;
-            const isCurrent = s.stage === currentStage;
+            const isCompleted = s.stage < currentStage || (currentStage === 5 && s.stage === 5);
+            const isCurrent = s.stage === currentStage && currentStage !== 5;
 
             return (
               <View key={s.stage} className="items-center z-10">
@@ -95,7 +119,10 @@ export const ActiveRepairCard: React.FC<ActiveRepairCardProps> = ({
                   </View>
                 ) : isCurrent ? (
                   <View className="w-6 h-6 rounded-full bg-primary-container items-center justify-center shadow-xs">
-                    <View className="w-2.5 h-2.5 rounded-full bg-tertiary-fixed" />
+                    <Animated.View
+                      style={{ opacity: pulseAnim }}
+                      className="w-2.5 h-2.5 rounded-full bg-tertiary-fixed"
+                    />
                   </View>
                 ) : (
                   <View className="w-5 h-5 rounded-full bg-surface-container-highest items-center justify-center">

@@ -40,7 +40,8 @@ describe('useAlerts', () => {
     useNotificationStore.setState({ notifications: [], unreadCount: 0 });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    queryClient?.cancelQueries();
     queryClient?.clear();
   });
 
@@ -157,6 +158,9 @@ describe('useAlerts', () => {
     });
 
     expect(NotificationsService.markAsRead).toHaveBeenCalledWith('server-1');
+    await waitFor(() => {
+      expect(queryClient.isMutating()).toBe(0);
+    });
   });
 
   it('triggers markAllAsRead and calls service', async () => {
@@ -175,5 +179,8 @@ describe('useAlerts', () => {
     });
 
     expect(NotificationsService.markAllAsRead).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(queryClient.isMutating()).toBe(0);
+    });
   });
 });

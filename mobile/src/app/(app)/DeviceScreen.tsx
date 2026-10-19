@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -41,7 +41,7 @@ export default function DeviceScreen() {
     openDeviceMenu,
     closeDeviceMenu,
   } = useDevices();
-  const [isRegisterSheetVisible, setRegisterSheetVisible] = React.useState(false);
+  const [isRegisterSheetVisible, setRegisterSheetVisible] = useState(false);
 
   const handleNotificationsPress = () => {
     router.push('/(app)/AlertScreen');

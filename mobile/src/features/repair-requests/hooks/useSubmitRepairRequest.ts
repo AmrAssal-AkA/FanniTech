@@ -63,6 +63,7 @@ export function useSubmitRepairRequest(defaultDeviceId?: string) {
     }),
     isSubmitting: mutation.isPending,
     isSuccess: mutation.isSuccess,
+    submittedRequest: mutation.data,
     error: mutation.error,
     reset: () => {
       form.reset();

@@ -5,10 +5,13 @@ import RepairRequestScreen from '../../../app/(app)/RepairRequestScreen';
 import { useGetDevices } from '../../devices';
 import { useSubmitRepairRequest } from '../hooks/useSubmitRepairRequest';
 
+const mockPush = jest.fn();
+const mockBack = jest.fn();
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    back: jest.fn(),
+    push: mockPush,
+    back: mockBack,
   }),
   useLocalSearchParams: () => ({
     deviceId: 'dev-1',
@@ -170,14 +173,64 @@ describe('RepairRequestScreen', () => {
       submitWithDevice: mockSubmitWithDevice,
       isSubmitting: false,
       isSuccess: true,
+      submittedRequest: {
+        id: 'req-real-123',
+        deviceId: 'dev-1',
+        problem: 'Overheating / Loud fan',
+        description: 'Fan spinning fast and system throttles.',
+        status: 'PENDING',
+        createdAt: '2026-10-18T10:00:00.000Z',
+        updatedAt: '2026-10-18T10:00:00.000Z',
+      },
       error: null,
       reset: jest.fn(),
     });
 
-    await renderWithProviders(<RepairRequestScreen />);
+    const rendered = await renderWithProviders(<RepairRequestScreen />);
 
-    expect(screen.getByText('Request Submitted')).toBeTruthy();
-    expect(screen.getByText('View My Repairs')).toBeTruthy();
-    expect(screen.getByText('Back to Devices')).toBeTruthy();
+    expect(rendered.getByText('Request Submitted')).toBeTruthy();
+    expect(rendered.getByText('View All Repairs')).toBeTruthy();
+    expect(rendered.getByText('Back to Devices')).toBeTruthy();
+    expect(rendered.getAllByText('Track Repair').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('navigates to RepairTicketScreen when user clicks Track Repair button', async () => {
+    const mockReset = jest.fn();
+    (useSubmitRepairRequest as jest.Mock).mockReturnValue({
+      form: {
+        control: {},
+        formState: { isValid: true, isSubmitted: false },
+        setValue: jest.fn(),
+        watch: jest.fn(() => ''),
+      },
+      pickedImages: [],
+      pickImages: jest.fn(),
+      removeImage: jest.fn(),
+      submitWithDevice: mockSubmitWithDevice,
+      isSubmitting: false,
+      isSuccess: true,
+      submittedRequest: {
+        id: 'req-abc-999',
+        deviceId: 'dev-1',
+        problem: 'Random shut downs',
+        description: 'Shuts down after 15 min.',
+        status: 'PENDING',
+        createdAt: '2026-10-18T10:00:00.000Z',
+        updatedAt: '2026-10-18T10:00:00.000Z',
+      },
+      error: null,
+      reset: mockReset,
+    });
+
+    const rendered = await renderWithProviders(<RepairRequestScreen />);
+
+    const trackButtons = rendered.getAllByText('Track Repair');
+    fireEvent.press(trackButtons[0]);
+
+    expect(mockReset).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/(app)/RepairTicketScreen',
+      params: { requestId: 'req-abc-999' },
+    });
   });
 });

@@ -2,6 +2,21 @@ import { serverClient } from '../../../utils/serverClient';
 import { PaginatedResponse } from '../../../types/api';
 import { ApiRepairRequest, RepairRequestsQuery, SubmitRepairRequestInput } from '../types';
 
+function unwrapRequest(
+  payload: { data?: ApiRepairRequest } | ApiRepairRequest
+): ApiRepairRequest {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'data' in payload &&
+    payload.data &&
+    typeof payload.data === 'object'
+  ) {
+    return payload.data;
+  }
+  return payload as ApiRepairRequest;
+}
+
 export const RepairRequestsService = {
   submitRequest: async (input: SubmitRepairRequestInput): Promise<ApiRepairRequest> => {
     const form = new FormData();
@@ -12,10 +27,14 @@ export const RepairRequestsService = {
       form.append('images', { uri: image.uri, name: image.name, type: image.type } as unknown as Blob);
     });
 
-    const response = await serverClient.post<ApiRepairRequest>('/api/v1/repair-requests', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data;
+    const response = await serverClient.post<{ data?: ApiRepairRequest } | ApiRepairRequest>(
+      '/api/v1/repair-requests',
+      form,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+    return unwrapRequest(response.data);
   },
 
   listRequests: (query: RepairRequestsQuery = {}) =>
@@ -23,11 +42,13 @@ export const RepairRequestsService = {
       .get<PaginatedResponse<ApiRepairRequest>>('/api/v1/repair-requests', { params: query })
       .then((response) => response.data),
 
-  getRequestById: (requestId: string) =>
-    serverClient.get<ApiRepairRequest>(`/api/v1/repair-requests/${requestId}`).then((response) => response.data),
-
-  cancelRequest: (requestId: string) =>
+  getRequestById: (requestId: string): Promise<ApiRepairRequest> =>
     serverClient
-      .patch<ApiRepairRequest>(`/api/v1/repair-requests/${requestId}/cancel`)
-      .then((response) => response.data),
+      .get<{ data?: ApiRepairRequest } | ApiRepairRequest>(`/api/v1/repair-requests/${requestId}`)
+      .then((response) => unwrapRequest(response.data)),
+
+  cancelRequest: (requestId: string): Promise<ApiRepairRequest> =>
+    serverClient
+      .patch<{ data?: ApiRepairRequest } | ApiRepairRequest>(`/api/v1/repair-requests/${requestId}/cancel`)
+      .then((response) => unwrapRequest(response.data)),
 };

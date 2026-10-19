@@ -62,10 +62,28 @@ describe('RepairRequestsService', () => {
   });
 
   it('cancels a repair request', async () => {
-    mockedClient.patch.mockResolvedValue({ data: { id: 'request-1', status: 'CANCELLED' } });
+    mockedClient.patch.mockResolvedValue({ data: { data: { id: 'request-1', status: 'CANCELLED' } } });
 
-    await RepairRequestsService.cancelRequest('request-1');
+    const res = await RepairRequestsService.cancelRequest('request-1');
 
     expect(mockedClient.patch).toHaveBeenCalledWith('/api/v1/repair-requests/request-1/cancel');
+    expect(res).toEqual({ id: 'request-1', status: 'CANCELLED' });
+  });
+
+  it('unwraps { data: request } envelope in getRequestById', async () => {
+    const mockRequest = {
+      id: 'request-99',
+      deviceId: 'device-1',
+      problem: 'No power',
+      description: 'Does not turn on',
+      status: 'ACCEPTED',
+      repairTicket: { id: 'ticket-1', ticketNumber: 'SR-1001', status: 'DIAGNOSING' },
+    };
+    mockedClient.get.mockResolvedValue({ data: { data: mockRequest } });
+
+    const res = await RepairRequestsService.getRequestById('request-99');
+
+    expect(mockedClient.get).toHaveBeenCalledWith('/api/v1/repair-requests/request-99');
+    expect(res).toEqual(mockRequest);
   });
 });

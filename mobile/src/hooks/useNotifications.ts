@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
+import { useQueryClient } from '@tanstack/react-query';
 import { socketService, NotificationPayload } from '../services/socketService';
 import { useNotificationStore } from '../stores/notificationStore';
 import { NotificationsService } from '../features/alerts/services/NotificationsService';
 
 export function useNotifications() {
+  const queryClient = useQueryClient();
   const {
     addNotification,
     notifications,
@@ -23,29 +25,52 @@ export function useNotifications() {
         // Ignored when unauthenticated or offline
       });
 
+    const isRepairLifecycleEvent = (type: string, data?: Record<string, unknown>) => {
+      if (!type) return false;
+      const upper = type.toUpperCase();
+      return (
+        upper.startsWith('REPAIR_') ||
+        upper.includes('TECHNICIAN') ||
+        upper.includes('DIAGNOSTIC') ||
+        Boolean(data?.ticketId || data?.repairRequestId)
+      );
+    };
+
+    const invalidateRepairCaches = (type: string, data?: Record<string, unknown>) => {
+      if (isRepairLifecycleEvent(type, data)) {
+        void queryClient.invalidateQueries({ queryKey: ['repairTicket'] });
+        void queryClient.invalidateQueries({ queryKey: ['repair-requests'] });
+        void queryClient.invalidateQueries({ queryKey: ['devices'] });
+      }
+    };
+
     const handleNew = (payload: NotificationPayload) => {
       addNotification(payload);
+      invalidateRepairCaches(payload.type, payload.data);
     };
 
     socketService.on('notification:new', handleNew);
 
     const foregroundSub = Notifications.addNotificationReceivedListener((notification) => {
       const content = notification.request.content;
+      const data = (content.data ?? {}) as Record<string, unknown>;
+      const type = typeof data?.type === 'string' ? data.type : 'INFO';
       addNotification({
         id: notification.request.identifier,
-        type: typeof content.data?.type === 'string' ? content.data.type : 'INFO',
+        type,
         title: content.title ?? '',
         body: content.body ?? '',
-        data: (content.data ?? {}) as Record<string, unknown>,
+        data,
         createdAt: new Date().toISOString(),
       });
+      invalidateRepairCaches(type, data);
     });
 
     return () => {
       socketService.off('notification:new', handleNew);
       foregroundSub.remove();
     };
-  }, [addNotification, setUnreadCount]);
+  }, [addNotification, queryClient, setUnreadCount]);
 
   return { notifications, unreadCount, markAsRead, markAllAsRead };
 }

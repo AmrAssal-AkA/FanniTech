@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -37,6 +38,7 @@ import {
 
 import {
   ImagePickerGrid,
+  RepairRequestCard,
   useSubmitRepairRequest,
 } from "../../features/repair-requests";
 import {
@@ -73,9 +75,33 @@ function getDeviceIcon(deviceType?: string) {
   return Cpu;
 }
 
+const TAB_BAR_HEIGHT = 64;
+const TAB_BAR_BOTTOM = 24;
+const NAV_BAR_TOTAL_HEIGHT = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM;
+
 export default function RepairRequestScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const navBarClearance =
+    Math.max(insets.bottom + TAB_BAR_HEIGHT, NAV_BAR_TOTAL_HEIGHT) + 12;
+
   const params = useLocalSearchParams<{
     deviceId?: string;
     deviceName?: string;
@@ -139,6 +165,7 @@ export default function RepairRequestScreen() {
     submitWithDevice,
     isSubmitting,
     isSuccess,
+    submittedRequest,
     error,
     reset,
   } = useSubmitRepairRequest(selectedDeviceId);
@@ -169,121 +196,186 @@ export default function RepairRequestScreen() {
 
   // SUCCESS STATE
   if (isSuccess) {
+    const handleTrackRepair = () => {
+      const reqId = submittedRequest?.id;
+      const ticketNum = submittedRequest?.repairTicket?.ticketNumber;
+      reset();
+      if (reqId) {
+        router.push({
+          pathname: "/(app)/RepairTicketScreen",
+          params: {
+            requestId: reqId,
+            ...(ticketNum ? { ticketNumber: ticketNum } : {}),
+          },
+        });
+      } else {
+        router.push("/(app)/RepairRequestsListScreen" as never);
+      }
+    };
+
     return (
       <SafeAreaView
-        className="flex-1 bg-surface"
-        edges={["top", "bottom", "left", "right"]}
+        className="flex-1 w-full h-full bg-surface"
+        edges={["top", "left", "right"]}
       >
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-secondary-fixed">
-            <CheckCircle2 size={44} color="#0051d5" />
-          </View>
-
-          <Text className="text-center text-2xl font-bold tracking-tight text-on-surface">
-            Request Submitted
-          </Text>
-
-          <Text className="mt-2.5 text-center text-sm leading-6 text-on-surface-variant">
-            Your repair request has been successfully registered. Our bench
-            technicians will review the issue and prepare your diagnostic ticket.
-          </Text>
-
-          {/* Request summary card */}
-          <View className="mt-6 w-full rounded-2xl bg-surface-container-lowest p-4 shadow-sm border border-outline-variant/30">
-            <View className="flex-row items-center justify-between pb-3 border-b border-surface-container">
-              <Text className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-                Target Device
-              </Text>
-              <Text className="text-xs font-bold text-secondary">
-                {selectedDevice
-                  ? `${selectedDevice.brand} ${selectedDevice.model}`
-                  : "Registered Device"}
-              </Text>
+        <ScrollView
+          className="flex-1 w-full"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 24,
+            paddingTop: 24,
+            paddingBottom: navBarClearance + 16,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="w-full max-w-md mx-auto items-center">
+            <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-secondary-fixed">
+              <CheckCircle2 size={44} color="#0051d5" />
             </View>
-            <View className="flex-row items-center justify-between pt-3">
-              <Text className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-                Initial Status
-              </Text>
-              <View className="rounded-full bg-secondary/10 px-2.5 py-0.5">
-                <Text className="text-xs font-bold text-secondary">
-                  PENDING REVIEW
-                </Text>
+
+            <Text className="text-center text-2xl font-bold tracking-tight text-on-surface">
+              Request Submitted
+            </Text>
+
+            <Text className="mt-2.5 text-center text-sm leading-6 text-on-surface-variant">
+              Your repair request has been successfully registered. Our bench
+              technicians will review the issue and prepare your diagnostic ticket.
+            </Text>
+
+            {/* Request card with track repair button */}
+            {submittedRequest ? (
+              <View className="mt-6 w-full">
+                <RepairRequestCard
+                  request={submittedRequest}
+                  onTrackRepair={handleTrackRepair}
+                />
               </View>
+            ) : (
+              <View className="mt-6 w-full rounded-2xl bg-surface-container-lowest p-4 shadow-sm border border-outline-variant/30">
+                <View className="flex-row items-center justify-between pb-3 border-b border-surface-container">
+                  <Text className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Target Device
+                  </Text>
+                  <Text className="text-xs font-bold text-secondary">
+                    {selectedDevice
+                      ? `${selectedDevice.brand} ${selectedDevice.model}`
+                      : "Registered Device"}
+                  </Text>
+                </View>
+                <View className="flex-row items-center justify-between pt-3">
+                  <Text className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Initial Status
+                  </Text>
+                  <View className="rounded-full bg-secondary/10 px-2.5 py-0.5">
+                    <Text className="text-xs font-bold text-secondary">
+                      PENDING REVIEW
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Action buttons */}
+            <View className="mt-6 w-full gap-3">
+              <Pressable
+                testID="track-repair-button"
+                className="min-h-[50px] w-full flex-row items-center justify-center rounded-xl bg-primary active:opacity-90 shadow-sm"
+                onPress={handleTrackRepair}
+                accessibilityLabel="Track Repair"
+                accessibilityRole="button"
+              >
+                <Text className="font-semibold text-on-primary">
+                  Track Repair
+                </Text>
+                <ArrowRight size={18} color="#ffffff" style={{ marginLeft: 8 }} />
+              </Pressable>
+
+              <Pressable
+                className="min-h-[48px] w-full items-center justify-center rounded-xl bg-surface-container active:bg-surface-container-high"
+                onPress={() => {
+                  reset();
+                  router.push("/(app)/RepairRequestsListScreen" as never);
+                }}
+                accessibilityLabel="View All Repairs"
+                accessibilityRole="button"
+              >
+                <Text className="font-semibold text-on-surface">
+                  View All Repairs
+                </Text>
+              </Pressable>
+
+              <Pressable
+                className="min-h-[44px] w-full items-center justify-center rounded-xl active:bg-surface-container-low"
+                onPress={() => {
+                  reset();
+                  router.back();
+                }}
+                accessibilityLabel="Back to Devices"
+                accessibilityRole="button"
+              >
+                <Text className="text-sm font-medium text-on-surface-variant">
+                  Back to Devices
+                </Text>
+              </Pressable>
             </View>
           </View>
-
-          {/* Action buttons */}
-          <View className="mt-8 w-full gap-3">
-            <Pressable
-              className="min-h-[50px] w-full flex-row items-center justify-center rounded-xl bg-primary active:opacity-90 shadow-sm"
-              onPress={() => {
-                reset();
-                router.push("/(app)/RepairRequestsListScreen" as never);
-              }}
-              accessibilityLabel="View All Repairs"
-            >
-              <Text className="font-semibold text-on-primary">
-                View My Repairs
-              </Text>
-              <ArrowRight size={18} color="#ffffff" style={{ marginLeft: 8 }} />
-            </Pressable>
-
-            <Pressable
-              className="min-h-[48px] w-full items-center justify-center rounded-xl bg-surface-container active:bg-surface-container-high"
-              onPress={() => {
-                reset();
-                router.back();
-              }}
-              accessibilityLabel="Back to Devices"
-            >
-              <Text className="font-semibold text-on-surface">
-                Back to Devices
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface" edges={["top", "left", "right"]}>
+    <SafeAreaView
+      className="flex-1 w-full h-full bg-surface"
+      edges={["top", "left", "right"]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        className="flex-1"
+        className="flex-1 w-full"
       >
         {/* TOP APP HEADER */}
-        <View className="h-14 flex-row items-center justify-between border-b border-surface-container-high/60 bg-surface/90 px-4">
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              accessibilityLabel="Go back"
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              className="-ml-1 h-10 w-10 items-center justify-center rounded-full active:bg-surface-container"
-            >
-              <ArrowLeft size={22} color="#131b2e" />
-            </TouchableOpacity>
-            <Text className="text-lg font-bold tracking-tight text-on-surface">
-              Book Service
-            </Text>
-          </View>
+        <View className="w-full border-b border-surface-container-high/60 bg-surface/90 px-4">
+          <View className="h-14 w-full max-w-md mx-auto flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity
+                onPress={() => router.back()}
+                accessibilityLabel="Go back"
+                accessibilityRole="button"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                className="-ml-1 h-10 w-10 items-center justify-center rounded-full active:bg-surface-container"
+              >
+                <ArrowLeft size={22} color="#131b2e" />
+              </TouchableOpacity>
+              <Text className="text-lg font-bold tracking-tight text-on-surface">
+                Book Service
+              </Text>
+            </View>
 
-          <TouchableOpacity
-            className="h-8 w-8 items-center justify-center rounded-full bg-primary"
-            onPress={() => router.push("/(app)/ProfileScreen" as never)}
-            accessibilityLabel="User Profile"
-          >
-            <User size={16} color="#ffffff" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="h-8 w-8 items-center justify-center rounded-full bg-primary"
+              onPress={() => router.push("/(app)/ProfileScreen" as never)}
+              accessibilityLabel="User Profile"
+              accessibilityRole="button"
+            >
+              <User size={16} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* SCROLLABLE FORM CONTENT */}
         <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 110 }}
+          className="flex-1 w-full"
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 14,
+            paddingBottom: 24,
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <View className="w-full max-w-md mx-auto">
           {/* STEPPER & PROGRESS HEADER */}
           <View className="mb-5">
             <View className="flex-row items-center justify-between">
@@ -661,13 +753,18 @@ export default function RepairRequestScreen() {
                 </Text>
               </View>
             ) : null}
+            </View>
           </View>
         </ScrollView>
 
         {/* FIXED BOTTOM ACTION BAR */}
         <View
-          style={{ paddingBottom: Math.max(insets.bottom, 12) }}
-          className="absolute bottom-0 left-0 right-0 border-t border-surface-container bg-surface/95 px-4 pt-3 backdrop-blur-md shadow-lg"
+          style={{
+            paddingBottom: isKeyboardVisible
+              ? Math.max(insets.bottom, 12)
+              : navBarClearance,
+          }}
+          className="w-full border-t border-surface-container bg-surface/95 px-4 pt-3 backdrop-blur-md shadow-lg"
         >
           <View className="w-full max-w-md mx-auto items-center gap-1.5">
             <Pressable

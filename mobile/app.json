@@ -51,7 +51,17 @@
             "cropBackgroundColor": "#E6F4FE"
           }
         }
-      ]
+      ],
+      "expo-splash-screen",
+      {
+        "backgroundColor": "#ffffff",
+        "image": "./assets/icon.png",
+        "darkMode": {
+          "backgroundColor": "#000000",
+          "image": "./assets/icon.png"
+        },
+        "imageWidth": 200
+      }
     ],
     "experiments": {
       "typedRoutes": true

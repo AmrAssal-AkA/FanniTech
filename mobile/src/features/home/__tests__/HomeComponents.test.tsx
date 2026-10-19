@@ -51,6 +51,27 @@ describe('Home Screen Components', () => {
     expect(screen.getByText('View Ticket Details')).toBeTruthy();
   });
 
+  it('renders ActiveRepairCard when repair is completed (stage 5)', async () => {
+    const mockCompletedTicket: ActiveRepairTicket = {
+      id: 'ticket-2',
+      ticketNumber: 'SR-1002',
+      deviceModel: 'MacBook Pro 16',
+      reportedIssue: 'Battery replacement completed',
+      status: 'COMPLETED',
+      statusLabel: 'COMPLETED',
+      priorityLabel: 'Normal Priority',
+      currentStage: 5,
+      estimatedDiagnosisTime: 'Completed',
+      assignedTechnician: 'Tech Salim',
+    };
+
+    await render(<ActiveRepairCard ticket={mockCompletedTicket} />);
+    expect(screen.getByText('#SR-1002')).toBeTruthy();
+    expect(screen.getByText('COMPLETED')).toBeTruthy();
+    expect(screen.getByText('MacBook Pro 16')).toBeTruthy();
+    expect(screen.getByText('Done')).toBeTruthy();
+  });
+
   it('renders QuickActionButtons', async () => {
     await render(<QuickActionButtons />);
     expect(screen.getByText('Submit Repair')).toBeTruthy();
@@ -76,6 +97,12 @@ describe('Home Screen Components', () => {
     expect(screen.getByText('Ticket SR-1001')).toBeTruthy();
   });
 
+  it('renders RegisteredDevicesSection empty state when no devices are registered', async () => {
+    await render(<RegisteredDevicesSection devices={[]} onAddNewDevice={jest.fn()} />);
+    expect(screen.getByText('No Registered Devices')).toBeTruthy();
+    expect(screen.getByText('+ Register Device')).toBeTruthy();
+  });
+
   it('renders RecentActivitySection with activity items', async () => {
     const activities: RecentActivityItem[] = [
       {
@@ -93,6 +120,11 @@ describe('Home Screen Components', () => {
     expect(screen.getByText('Recent Requests & Activity')).toBeTruthy();
     expect(screen.getByText('#REQ-8821')).toBeTruthy();
     expect(screen.getByText('Dell XPS 15')).toBeTruthy();
+  });
+
+  it('renders RecentActivitySection empty state when no activities exist', async () => {
+    await render(<RecentActivitySection activities={[]} />);
+    expect(screen.getByText('No Recent Activity')).toBeTruthy();
   });
 
   it('renders LaboratoryStandardsCard', async () => {

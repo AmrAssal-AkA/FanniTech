@@ -16,6 +16,35 @@ export interface ApiRepairRequest {
   description: string;
   status: RepairRequestStatus;
   images: RepairRequestImage[];
+  device?: {
+    id: string;
+    brand: string;
+    model: string;
+    deviceType: string;
+    serialNumber?: string | null;
+  };
+  repairTicket?: {
+    id: string;
+    ticketNumber: string;
+    priority: string;
+    status: string;
+    diagnosis?: string | null;
+    repairNotes?: string | null;
+    statusHistory?: Array<{
+      id: string;
+      status: string;
+      notes?: string | null;
+      changedAt: string;
+    }>;
+    technician?: {
+      id: string;
+      user?: {
+        name: string;
+        phone?: string;
+        email?: string;
+      };
+    } | null;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

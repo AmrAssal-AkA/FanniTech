@@ -13,6 +13,7 @@ import {
   LaboratoryStandardsCard,
   useHomeData,
 } from '../../features/home';
+
 import { useNotificationStore } from '../../stores/notificationStore';
 
 export default function HomeScreen() {
@@ -37,34 +38,54 @@ export default function HomeScreen() {
     router.push('/(app)/ProfileScreen');
   };
 
-  const handleTicketDetails = (_ticketId: string) => {
-    // Navigate to ticket detail view (#SR-1001)
+  const handleTicketDetails = (ticketId: string) => {
+    router.push({
+      pathname: '/(app)/RepairTicketScreen',
+      params: {
+        ticketId,
+        ...(activeTicket?.ticketNumber ? { ticketNumber: activeTicket.ticketNumber } : {}),
+      },
+    });
   };
 
   const handleSubmitRepair = () => {
-    // Navigate to create repair request flow
+    router.push('/(app)/RepairRequestScreen');
   };
 
   const handleAddNewDevice = () => {
-    // Navigate to add new device flow
+    router.push('/(app)/DeviceScreen');
   };
 
   const handleViewAllDevices = () => {
     router.push('/(app)/DeviceScreen');
   };
 
-  const handleSelectDevice = (_deviceId: string) => {
-    // Navigate to specific device detail
+  const handleSelectDevice = (deviceId: string) => {
+    const selected = devices.find((d) => d.id === deviceId);
+    if (selected?.activeTicketNumber) {
+      router.push({
+        pathname: '/(app)/RepairTicketScreen',
+        params: { ticketNumber: selected.activeTicketNumber },
+      });
+    } else {
+      router.push({
+        pathname: '/(app)/RepairRequestScreen',
+        params: { deviceId: selected?.id ?? deviceId, deviceName: selected?.name },
+      });
+    }
   };
 
-  const handleSelectActivity = (_activityId: string) => {
-    // Navigate to repair request detail
+  const handleSelectActivity = (activityId: string) => {
+    router.push({
+      pathname: '/(app)/RepairTicketScreen',
+      params: { requestId: activityId },
+    });
   };
 
   return (
     <SafeAreaView
       className="flex-1 bg-surface"
-      edges={['top', 'left', 'right']}
+      edges={['top', 'left', 'right', 'bottom']}
     >
       <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
 
@@ -116,6 +137,7 @@ export default function HomeScreen() {
             devices={devices}
             onViewAll={handleViewAllDevices}
             onSelectDevice={handleSelectDevice}
+            onAddNewDevice={handleAddNewDevice}
           />
 
           {/* Recent Requests & Activity */}

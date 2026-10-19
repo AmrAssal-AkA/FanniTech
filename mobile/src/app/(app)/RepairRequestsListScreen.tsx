@@ -26,7 +26,7 @@ export default function RepairRequestsListScreen() {
       edges={["top", "left", "right"]}
     >
       <Pressable className="py-4" onPress={() => router.back()}>
-        <Text className="font-semibold text-primary">‹ Back</Text>
+        <Text className="font-semibold text-primary">Back</Text>
       </Pressable>
       <Text className="mb-4 text-2xl font-bold text-on-surface">
         Repair requests
@@ -52,6 +52,17 @@ export default function RepairRequestsListScreen() {
           renderItem={({ item }) => (
             <RepairRequestCard
               request={item}
+              onTrackRepair={(id) => {
+                router.push({
+                  pathname: "/(app)/RepairTicketScreen",
+                  params: {
+                    requestId: id,
+                    ...(item.repairTicket?.ticketNumber
+                      ? { ticketNumber: item.repairTicket.ticketNumber }
+                      : {}),
+                  },
+                });
+              }}
               onCancel={() => cancelMutation.mutate(item.id)}
               isCancelling={
                 cancelMutation.isPending && cancelMutation.variables === item.id

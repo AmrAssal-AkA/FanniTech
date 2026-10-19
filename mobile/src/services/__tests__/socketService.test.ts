@@ -91,4 +91,29 @@ describe('SocketService', () => {
     socketService.emit('test:event', { data: 123 });
     expect(mockSocket.emit).toHaveBeenCalledWith('test:event', { data: 123 });
   });
+
+  it('preserves listeners registered before connect and attaches them upon connection', async () => {
+    const preConnectListener = jest.fn();
+    socketService.on('notification:new', preConnectListener);
+
+    (tokenStorage.getAccess as jest.Mock).mockResolvedValue('token-pre');
+    await socketService.connect();
+
+    expect(mockSocket.on).toHaveBeenCalledWith('notification:new', preConnectListener);
+  });
+
+  it('notifies connection state subscribers via onConnectionChange', async () => {
+    const connectionListener = jest.fn();
+    const unsubscribe = socketService.onConnectionChange(connectionListener);
+
+    expect(connectionListener).toHaveBeenCalledWith(false);
+
+    (tokenStorage.getAccess as jest.Mock).mockResolvedValue('token-1');
+    mockSocket.connected = true;
+    await socketService.connect();
+
+    expect(socketService.isConnected()).toBe(true);
+
+    unsubscribe();
+  });
 });

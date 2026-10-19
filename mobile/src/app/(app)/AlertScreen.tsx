@@ -54,13 +54,12 @@ export default function AlertScreen() {
     }
 
     if (alert.action?.type === "ticket") {
-      // In FanniTech workflow, navigate to ticket or repairs screen
-      // If repairs route or ticket route exists
-      // router.push('/(tabs)/repairs');
-      Alert.alert(
-        "Repair Ticket",
-        `Navigating to Ticket #${alert.action.target || alert.referenceId}`,
-      );
+      router.push({
+        pathname: "/(app)/RepairTicketScreen",
+        params: {
+          ticketNumber: alert.action.target || alert.referenceId || "SR-1001",
+        },
+      });
     } else if (alert.action?.type === "info") {
       Alert.alert("Drop-off Information", alert.action.infoDetails || "");
     }

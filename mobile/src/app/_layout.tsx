@@ -1,5 +1,6 @@
 import React from 'react';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 
 import '../../global.css';
 import { AuthSessionProvider, useAuthSession } from '../features/auth/session/AuthSession';
@@ -28,6 +29,12 @@ function SessionGate() {
     </Stack>
   );
 }
+
+// Hide the splash screen after a delay to ensure smooth transition
+SplashScreen.setOptions({
+    duration: 1000,
+    fade: true,
+});
 
 export default function RootLayout() {
   return (

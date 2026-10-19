@@ -7,12 +7,14 @@ interface RegisteredDevicesSectionProps {
   devices: RegisteredDevice[];
   onViewAll?: () => void;
   onSelectDevice?: (deviceId: string) => void;
+  onAddNewDevice?: () => void;
 }
 
 export const RegisteredDevicesSection: React.FC<RegisteredDevicesSectionProps> = ({
   devices,
   onViewAll,
   onSelectDevice,
+  onAddNewDevice,
 }) => {
   return (
     <View className="space-y-2.5">
@@ -35,9 +37,35 @@ export const RegisteredDevicesSection: React.FC<RegisteredDevicesSectionProps> =
         </TouchableOpacity>
       </View>
 
-      {/* Grid of registered devices */}
-      <View className="flex-row gap-3">
-        {devices.map((device) => {
+      {/* Grid of registered devices or empty state */}
+      {devices.length === 0 ? (
+        <View className="bg-surface-container-lowest rounded-2xl p-5 border border-slate-100 items-center justify-center">
+          <View className="w-10 h-10 rounded-full bg-surface-container items-center justify-center mb-2">
+            <Laptop size={20} color="#757682" />
+          </View>
+          <Text className="text-sm font-semibold text-on-surface text-center">
+            No Registered Devices
+          </Text>
+          <Text className="text-xs text-outline text-center mt-1">
+            Register your device to schedule repairs and track hardware status.
+          </Text>
+          {onAddNewDevice && (
+            <TouchableOpacity
+              onPress={onAddNewDevice}
+              activeOpacity={0.75}
+              className="mt-3 px-4 py-2 bg-secondary rounded-xl"
+              accessibilityRole="button"
+              accessibilityLabel="Register a device"
+            >
+              <Text className="text-xs font-bold text-on-secondary">
+                + Register Device
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <View className="flex-row gap-3">
+          {devices.slice(0, 2).map((device) => {
           const isInService = device.status === 'IN_SERVICE';
 
           return (
@@ -100,6 +128,7 @@ export const RegisteredDevicesSection: React.FC<RegisteredDevicesSectionProps> =
           );
         })}
       </View>
+    )}
     </View>
   );
 };

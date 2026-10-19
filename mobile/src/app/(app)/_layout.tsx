@@ -1,40 +1,52 @@
 import React from "react";
-import { Platform, StyleSheet } from "react-native";
+import { Platform } from "react-native";
 import { Tabs } from "expo-router";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function AppLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Tabs screenOptions={{
+    <Tabs
+      screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#6C5CE7',
-        tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 24,
-          left: 20,
-          right: 20,
-          height: 64,
-          borderRadius: 32,
-          borderTopWidth: 0,
-          backgroundColor: Platform.OS === 'ios' ? 'transparent' : '#fff',
-          elevation: 10, 
-          shadowColor: '#000',         
-          shadowOpacity: 0.12,
-          shadowRadius: 16,
-          shadowOffset: { width: 0, height: 8 },
+        tabBarActiveTintColor: "#00236F",
+        tabBarInactiveTintColor: "#64748B",
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: -2,
         },
-        tabBarItemStyle: { paddingVertical: 8 }
-    
-      }}>
+        tabBarItemStyle: {
+          paddingVertical: 6,
+          justifyContent: "center",
+          alignItems: "center",
+        },
+        tabBarStyle: {
+          borderRadius: 32,
+          borderWidth: 1,
+          borderColor: "#E2E8F0",
+          backgroundColor: "#FFFFFF",
+          elevation: 6,
+          shadowColor: "#0F172A",
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 4 },
+        },
+      }}
+    >
       <Tabs.Screen
         name="HomeScreen"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={size || 22}
+              color={color}
+            />
           ),
         }}
       />
@@ -42,8 +54,12 @@ export default function AppLayout() {
         name="DeviceScreen"
         options={{
           title: "Devices",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="desktop" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "desktop" : "desktop-outline"}
+              size={size || 22}
+              color={color}
+            />
           ),
         }}
       />
@@ -51,8 +67,12 @@ export default function AppLayout() {
         name="AlertScreen"
         options={{
           title: "Alerts",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "notifications" : "notifications-outline"}
+              size={size || 22}
+              color={color}
+            />
           ),
         }}
       />
@@ -60,14 +80,27 @@ export default function AppLayout() {
         name="ProfileScreen"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={size || 22}
+              color={color}
+            />
           ),
         }}
       />
-      <Tabs.Screen name="RepairRequestScreen" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="RepairRequestsListScreen" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen
+        name="RepairRequestScreen"
+        options={{ href: null, headerShown: false }}
+      />
+      <Tabs.Screen
+        name="RepairRequestsListScreen"
+        options={{ href: null, headerShown: false }}
+      />
+      <Tabs.Screen
+        name="RepairTicketScreen"
+        options={{ href: null, headerShown: false }}
+      />
     </Tabs>
   );
 }
-

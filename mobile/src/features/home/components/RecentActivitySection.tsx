@@ -24,9 +24,22 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
         </Text>
       </View>
 
-      {/* Activity items list */}
-      <View className="space-y-2">
-        {activities.map((activity) => {
+      {/* Activity items list or empty state */}
+      {activities.length === 0 ? (
+        <View className="bg-surface-container-lowest rounded-2xl p-5 border border-slate-100 items-center justify-center">
+          <View className="w-10 h-10 rounded-full bg-surface-container items-center justify-center mb-2">
+            <Clock size={20} color="#757682" />
+          </View>
+          <Text className="text-sm font-semibold text-on-surface text-center">
+            No Recent Activity
+          </Text>
+          <Text className="text-xs text-outline text-center mt-1">
+            Your service requests and diagnostic tickets will appear here.
+          </Text>
+        </View>
+      ) : (
+        <View className="space-y-2">
+          {activities.map((activity) => {
           const isAccepted = activity.status === 'ACCEPTED';
 
           return (
@@ -102,6 +115,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
           );
         })}
       </View>
-    </View>
+      )}
+      </View>
   );
 };

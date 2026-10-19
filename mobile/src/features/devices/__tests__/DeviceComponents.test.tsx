@@ -45,7 +45,7 @@ describe('Device Screen Components', () => {
     const handlePress = jest.fn();
     await render(<RegisterDeviceButton onPress={handlePress} />);
 
-    fireEvent.press(screen.getByText('Register New Device'));
+    await fireEvent.press(screen.getByText('Register New Device'));
     expect(handlePress).toHaveBeenCalledTimes(1);
   });
 
@@ -70,10 +70,10 @@ describe('Device Screen Components', () => {
     expect(screen.getByText('Active repair')).toBeTruthy();
     expect(screen.getByText('Track Repair')).toBeTruthy();
 
-    fireEvent.press(screen.getByText('View Details'));
+    await fireEvent.press(screen.getByText('View Details'));
     expect(handleDetails).toHaveBeenCalledWith(activeDevice);
 
-    fireEvent.press(screen.getByText('Track Repair'));
+    await fireEvent.press(screen.getByText('Track Repair'));
     expect(handlePrimary).toHaveBeenCalledWith(activeDevice);
   });
 
@@ -114,7 +114,7 @@ describe('Device Screen Components', () => {
     expect(rendered.getByText('Active repair')).toBeTruthy();
     expect(rendered.getByText('No devices registered')).toBeTruthy();
 
-    fireEvent.press(rendered.getByText('Edit Details'));
+    await fireEvent.press(rendered.getByText('Edit Details'));
     expect(handleEdit).toHaveBeenCalledWith(activeDevice);
   });
 });

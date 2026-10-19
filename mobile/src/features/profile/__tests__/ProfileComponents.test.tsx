@@ -57,7 +57,7 @@ describe('Profile Screen Components', () => {
       <ProfileHeaderCard profile={mockProfile} onEditPress={onEdit} />
     );
 
-    fireEvent.press(screen.getByLabelText('Edit profile'));
+    await fireEvent.press(screen.getByLabelText('Edit profile'));
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
@@ -76,10 +76,10 @@ describe('Profile Screen Components', () => {
     expect(screen.getByText('1')).toBeTruthy();
     expect(screen.getByText('4')).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText('3 registered devices'));
+    await fireEvent.press(screen.getByLabelText('3 registered devices'));
     expect(onDevices).toHaveBeenCalledTimes(1);
 
-    fireEvent.press(screen.getByLabelText('1 active repairs'));
+    await fireEvent.press(screen.getByLabelText('1 active repairs'));
     expect(onRepairs).toHaveBeenCalledTimes(1);
   });
 
@@ -123,7 +123,7 @@ describe('Profile Screen Components', () => {
       />
     );
 
-    fireEvent.press(screen.getByText('Log Out'));
+    await fireEvent.press(screen.getByText('Log Out'));
     expect(onLogoutPress).toHaveBeenCalledTimes(1);
   });
 
@@ -142,11 +142,10 @@ describe('Profile Screen Components', () => {
 
     expect(screen.getByText('Log out of FanniTech?')).toBeTruthy();
 
-    fireEvent.press(screen.getByText('Yes, Log Out'));
+    await fireEvent.press(screen.getByText('Yes, Log Out'));
     expect(onConfirm).toHaveBeenCalledTimes(1);
 
-    fireEvent.press(screen.getByText('Cancel'));
+    await fireEvent.press(screen.getByText('Cancel'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });
-
