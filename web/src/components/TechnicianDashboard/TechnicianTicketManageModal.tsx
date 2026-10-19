@@ -798,7 +798,7 @@ export function TechnicianTicketManageModal({
                       key={item.id || index}
                       className="relative flex flex-col gap-1"
                     >
-                      <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-white dark:bg-zinc-900 border-2 border-sky-600" />
+                      <div className="absolute -left-5.25 top-1 w-3 h-3 rounded-full bg-white dark:bg-zinc-900 border-2 border-sky-600" />
                       <div className="flex items-center justify-between gap-2">
                         <span
                           className={`inline-flex px-2 py-0.5 rounded font-mono text-[10px] font-bold ${getHistoryBadgeClass(

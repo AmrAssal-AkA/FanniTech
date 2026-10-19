@@ -65,7 +65,7 @@ export function BenchActivityStream({ activities }: BenchActivityStreamProps) {
                   )}
                 </span>
                 {item.notes && (
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 break-words">
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 wrap-break-word">
                     {item.notes}
                   </span>
                 )}
