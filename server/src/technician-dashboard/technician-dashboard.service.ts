@@ -3,19 +3,25 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
+  NotificationType,
   RepairTicketPriority,
   RepairTicketStatus,
 } from '../prisma/generated/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import type { UpdateTechnicianNotesDtoType } from './dto/technician-dashboard.dto.js';
 
 @Injectable()
 export class TechnicianDashboardService {
   private readonly logger = new Logger(TechnicianDashboardService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly notificationsService?: NotificationsService,
+  ) {}
 
   private readonly ticketInclude = {
     request: {
@@ -171,10 +177,10 @@ export class TechnicianDashboardService {
       dataToUpdate.repairNotes = dto.repairNotes;
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       const db = tx as unknown as PrismaService;
 
-      const updated = await db.repairTicket.update({
+      const updatedTicket = await db.repairTicket.update({
         where: { id: ticketId },
         data: dataToUpdate,
         include: this.ticketInclude,
@@ -190,7 +196,35 @@ export class TechnicianDashboardService {
         });
       }
 
-      return updated;
+      return updatedTicket;
     });
+
+    if (this.notificationsService && updated.request?.device?.customerId) {
+      const customerId = updated.request.device.customerId;
+      const isDiagnosisUpdate = dto.diagnosis !== undefined;
+      const title = isDiagnosisUpdate
+        ? 'Diagnostic Notes Updated'
+        : 'Repair Notes Updated';
+      const body = `Technician updated notes on ticket ${updated.ticketNumber}.`;
+
+      void this.notificationsService
+        .createAndSend({
+          userId: customerId,
+          type: NotificationType.REPAIR_STATUS_UPDATED,
+          title,
+          body,
+          data: {
+            ticketId: updated.id,
+            ticketNumber: updated.ticketNumber,
+            repairRequestId: updated.requestId,
+            status: updated.status,
+          },
+        })
+        .catch((err) => {
+          this.logger.warn(`Failed to send real-time notification: ${err}`);
+        });
+    }
+
+    return updated;
   }
 }

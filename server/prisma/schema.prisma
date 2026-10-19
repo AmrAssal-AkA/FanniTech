@@ -200,6 +200,7 @@ model RepairTicket {
 
   @@index([technicianId])
   @@index([status])
+  @@index([ticketNumber])
   @@index([requestId])
 }
 

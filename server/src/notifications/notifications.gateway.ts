@@ -75,6 +75,10 @@ export class NotificationsGateway
     this.server.to('admins').emit('notification:new', notification);
   }
 
+  sentToTechnician(technicianId: string, notification: object): void {
+     this.server.to(`user-${technicianId}`).emit('notification:new', notification);
+  }
+
   isUserConnected(userId: string): boolean {
     const room = this.server?.sockets?.adapter?.rooms?.get(`user-${userId}`);
     return (room?.size ?? 0) > 0;

@@ -100,6 +100,23 @@ export class RepairRequestsController {
     return { data: result.items, pagination: result.pagination };
   }
 
+  @Get('tickets/:ticketIdOrNumber')
+  @ApiOperation({ summary: 'Get details of a repair ticket by ticket ID or number for customer' })
+  @ApiOkResponse({
+    description: 'Repair ticket details with timeline, diagnostic notes and device info',
+  })
+  @ApiNotFoundResponse({ description: 'Repair ticket not found' })
+  async getCustomerTicket(
+    @CurrentUser('sub') customerId: string,
+    @Param('ticketIdOrNumber') ticketIdOrNumber: string,
+  ) {
+    const ticket = await this.repairRequestsService.getCustomerTicketDetails(
+      customerId,
+      ticketIdOrNumber,
+    );
+    return { data: ticket };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get details of a repair request' })
   @ApiOkResponse({

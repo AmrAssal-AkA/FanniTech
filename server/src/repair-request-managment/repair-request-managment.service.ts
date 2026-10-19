@@ -35,6 +35,166 @@ export class RepairRequestManagmentService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  private readonly requestInclude = {
+    images: true,
+    device: {
+      include: {
+        customer: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, phone: true },
+            },
+          },
+        },
+      },
+    },
+    repairTicket: true,
+  } as const;
+  private readonly ticketInclude = {
+    request: {
+      include: {
+        images: true,
+        device: {
+          include: {
+            customer: {
+              include: {
+                user: {
+                  select: { id: true, name: true, email: true, phone: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    technician: {
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } },
+      },
+    },
+    statusHistory: { orderBy: { changedAt: 'asc' as const } },
+  } as const;
+  private async transition(
+    ticketId: string,
+    status: RepairTicketStatus,
+    data: Record<string, unknown>,
+    notes?: string,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const db = tx as unknown as PrismaService;
+      const updated = await db.repairTicket.update({
+        where: { id: ticketId },
+        data: { status, ...data },
+        include: this.ticketInclude,
+      });
+      await db.repairStatusHistory.create({
+        data: { ticketId, status, notes },
+      });
+      return updated;
+    });
+  }
+  private async findTicket(id: string) {
+    const ticket = await this.prisma.repairTicket.findUnique({
+      where: { id },
+      include: this.ticketInclude,
+    });
+    if (!ticket) throw new NotFoundException('Repair ticket not found');
+    return ticket;
+  }
+  private async getTechnician(id: string) {
+    const technician = await this.prisma.technician.findUnique({
+      where: { id },
+    });
+    if (!technician) throw new NotFoundException('Technician not found');
+    return technician;
+  }
+  private assertTicketAccess(
+    ticket: { technicianId: string | null },
+    user?: Actor,
+    allowUnassigned = false,
+  ) {
+    if (
+      user?.role.toUpperCase() === 'TECHNICIAN' &&
+      ticket.technicianId !== user.sub &&
+      !(allowUnassigned && !ticket.technicianId)
+    )
+      throw new ForbiddenException('This ticket is not assigned to you');
+  }
+  private assertRequestStatus(
+    actual: RepairRequestStatus,
+    expected: RepairRequestStatus,
+  ) {
+    if (actual !== expected)
+      throw new ConflictException(`Request must be ${expected}`);
+  }
+  private assertTicketStatus(
+    actual: RepairTicketStatus,
+    expected: RepairTicketStatus,
+  ) {
+    if (actual !== expected)
+      throw new ConflictException(`Ticket must be ${expected}`);
+  }
+  private pagination(page: number, limit: number, total: number) {
+    return { page, limit, total, totalPages: Math.ceil(total / limit) || 1 };
+  }
+  private async notifyCustomer(
+    userId: string,
+    payload: {
+      type: NotificationType;
+      title: string;
+      body: string;
+      data: Record<string, unknown>;
+    },
+  ) {
+    await this.notificationsService.createAndSend({ userId, ...payload });
+  }
+  private async notifyTechnicianAssigned(ticket: {
+    technicianId: string | null;
+    id: string;
+    ticketNumber: string;
+    requestId: string;
+    status: RepairTicketStatus;
+    request: { device: { customerId: string } };
+  }) {
+    if (!ticket.technicianId) return;
+    await this.notifyCustomer(ticket.request.device.customerId, {
+      type: NotificationType.TECHNICIAN_ASSIGNED,
+      title: 'Technician Assigned',
+      body: `A technician has been assigned to ticket ${ticket.ticketNumber}.`,
+      data: {
+        ticketId: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        repairRequestId: ticket.requestId,
+        status: ticket.status,
+        technicianId: ticket.technicianId,
+      },
+    });
+  }
+  private async notifyStatus(
+    ticket: {
+      request: { device: { customerId: string } };
+      id: string;
+      ticketNumber: string;
+      requestId: string;
+      status: RepairTicketStatus;
+    },
+    title: string,
+    body: string,
+    type: NotificationType,
+  ) {
+    await this.notifyCustomer(ticket.request.device.customerId, {
+      type,
+      title,
+      body,
+      data: {
+        ticketId: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        repairRequestId: ticket.requestId,
+        status: ticket.status,
+      },
+    });
+  }
+
   async listRequests(query: ListRepairRequestsQueryDtoType) {
     const { page = 1, limit = 10, status } = query;
     const where = status ? { status } : {};
@@ -59,7 +219,6 @@ export class RepairRequestManagmentService {
     if (!request) throw new NotFoundException('Repair request not found');
     return request;
   }
-
 
   async acceptRequest(id: string, dto: AcceptRepairRequestDtoType) {
     const request = await this.getRequestById(id);
@@ -86,7 +245,12 @@ export class RepairRequestManagmentService {
       type: NotificationType.REPAIR_REQUEST_ACCEPTED,
       title: 'Repair Request Accepted',
       body: `Your repair request was accepted. Ticket ${result.ticket.ticketNumber} was created.`,
-      data: { repairRequestId: id, ticketId: result.ticket.id },
+      data: {
+        repairRequestId: id,
+        ticketId: result.ticket.id,
+        ticketNumber: result.ticket.ticketNumber,
+        status: result.ticket.status,
+      },
     });
     if (dto.technicianId) await this.notifyTechnicianAssigned(result.ticket);
     return result;
@@ -160,6 +324,7 @@ export class RepairRequestManagmentService {
       include: this.ticketInclude,
     });
     await this.notifyTechnicianAssigned(updated);
+
     return updated;
   }
 
@@ -178,7 +343,9 @@ export class RepairRequestManagmentService {
       data: {
         ticketId,
         status: ticket.status,
-        notes: notes ?? `Technician ${previousTechnician?.user?.name ?? ''} unassigned by Admin`,
+        notes:
+          notes ??
+          `Technician ${previousTechnician?.user?.name ?? ''} unassigned by Admin`,
       },
     });
     return updated;
@@ -192,9 +359,9 @@ export class RepairRequestManagmentService {
     const ticket = await this.findTicket(ticketId);
     this.assertTicketAccess(ticket, user, true);
     this.assertTicketStatus(ticket.status, RepairTicketStatus.ACCEPTED);
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       const db = tx as unknown as PrismaService;
-      const updated = await db.repairTicket.update({
+      const updatedTicket = await db.repairTicket.update({
         where: { id: ticketId },
         data: {
           status: RepairTicketStatus.DIAGNOSING,
@@ -211,8 +378,17 @@ export class RepairRequestManagmentService {
           notes: dto.notes,
         },
       });
-      return updated;
+      return updatedTicket;
     });
+
+    await this.notifyStatus(
+      updated,
+      'Diagnosis Started',
+      'Our technician has started diagnosing your device.',
+      NotificationType.REPAIR_STATUS_UPDATED,
+    );
+
+    return updated;
   }
 
   async startRepair(ticketId: string, user: Actor, dto: StartRepairDtoType) {
@@ -318,152 +494,18 @@ export class RepairRequestManagmentService {
     ];
     if (closedStatuses.includes(ticket.status))
       throw new ConflictException('Ticket is already closed');
-    return this.transition(
+    const updated = await this.transition(
       ticketId,
       RepairTicketStatus.CANCELLED,
       { completedAt: new Date() },
       dto.notes,
     );
+    await this.notifyStatus(
+      updated,
+      'Repair Ticket Cancelled',
+      dto.notes ?? 'Your repair ticket has been cancelled.',
+      NotificationType.REPAIR_STATUS_UPDATED,
+    );
+    return updated;
   }
-
-  private async transition(
-    ticketId: string,
-    status: RepairTicketStatus,
-    data: Record<string, unknown>,
-    notes?: string,
-  ) {
-    return this.prisma.$transaction(async (tx) => {
-      const db = tx as unknown as PrismaService;
-      const updated = await db.repairTicket.update({
-        where: { id: ticketId },
-        data: { status, ...data },
-        include: this.ticketInclude,
-      });
-      await db.repairStatusHistory.create({
-        data: { ticketId, status, notes },
-      });
-      return updated;
-    });
-  }
-  private async findTicket(id: string) {
-    const ticket = await this.prisma.repairTicket.findUnique({
-      where: { id },
-      include: this.ticketInclude,
-    });
-    if (!ticket) throw new NotFoundException('Repair ticket not found');
-    return ticket;
-  }
-  private async getTechnician(id: string) {
-    const technician = await this.prisma.technician.findUnique({
-      where: { id },
-    });
-    if (!technician) throw new NotFoundException('Technician not found');
-    return technician;
-  }
-  private assertTicketAccess(
-    ticket: { technicianId: string | null },
-    user?: Actor,
-    allowUnassigned = false,
-  ) {
-    if (
-      user?.role.toUpperCase() === 'TECHNICIAN' &&
-      ticket.technicianId !== user.sub &&
-      !(allowUnassigned && !ticket.technicianId)
-    )
-      throw new ForbiddenException('This ticket is not assigned to you');
-  }
-  private assertRequestStatus(
-    actual: RepairRequestStatus,
-    expected: RepairRequestStatus,
-  ) {
-    if (actual !== expected)
-      throw new ConflictException(`Request must be ${expected}`);
-  }
-  private assertTicketStatus(
-    actual: RepairTicketStatus,
-    expected: RepairTicketStatus,
-  ) {
-    if (actual !== expected)
-      throw new ConflictException(`Ticket must be ${expected}`);
-  }
-  private pagination(page: number, limit: number, total: number) {
-    return { page, limit, total, totalPages: Math.ceil(total / limit) || 1 };
-  }
-  private async notifyCustomer(
-    userId: string,
-    payload: {
-      type: NotificationType;
-      title: string;
-      body: string;
-      data: Record<string, unknown>;
-    },
-  ) {
-    await this.notificationsService.createAndSend({ userId, ...payload });
-  }
-  private async notifyTechnicianAssigned(ticket: {
-    technicianId: string | null;
-    id: string;
-    ticketNumber: string;
-    request: { device: { customerId: string } };
-  }) {
-    if (!ticket.technicianId) return;
-    await this.notifyCustomer(ticket.request.device.customerId, {
-      type: NotificationType.TECHNICIAN_ASSIGNED,
-      title: 'Technician Assigned',
-      body: `A technician has been assigned to ticket ${ticket.ticketNumber}.`,
-      data: { ticketId: ticket.id, technicianId: ticket.technicianId },
-    });
-  }
-  private async notifyStatus(
-    ticket: { request: { device: { customerId: string } }; id: string },
-    title: string,
-    body: string,
-    type: NotificationType,
-  ) {
-    await this.notifyCustomer(ticket.request.device.customerId, {
-      type,
-      title,
-      body,
-      data: { ticketId: ticket.id },
-    });
-  }
-  private readonly requestInclude = {
-    images: true,
-    device: {
-      include: {
-        customer: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true, phone: true },
-            },
-          },
-        },
-      },
-    },
-    repairTicket: true,
-  } as const;
-  private readonly ticketInclude = {
-    request: {
-      include: {
-        images: true,
-        device: {
-          include: {
-            customer: {
-              include: {
-                user: {
-                  select: { id: true, name: true, email: true, phone: true },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    technician: {
-      include: {
-        user: { select: { id: true, name: true, email: true, phone: true } },
-      },
-    },
-    statusHistory: { orderBy: { changedAt: 'asc' as const } },
-  } as const;
 }

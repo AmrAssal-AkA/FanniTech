@@ -208,7 +208,24 @@ describe('RepairRequestsService', () => {
         skip: 0,
         take: 10,
         orderBy: { createdAt: 'desc' },
-        include: { images: true, device: true },
+        include: {
+          images: true,
+          device: true,
+          repairTicket: {
+            include: {
+              technician: {
+                include: {
+                  user: {
+                    select: { id: true, name: true, phone: true, email: true },
+                  },
+                },
+              },
+              statusHistory: {
+                orderBy: { changedAt: 'asc' },
+              },
+            },
+          },
+        },
       });
       expect(result).toEqual({
         items: mockItems,

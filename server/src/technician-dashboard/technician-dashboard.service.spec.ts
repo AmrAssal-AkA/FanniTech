@@ -1,14 +1,17 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  NotificationType,
   RepairTicketPriority,
   RepairTicketStatus,
 } from '../prisma/generated/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { TechnicianDashboardService } from './technician-dashboard.service.js';
 
 describe('TechnicianDashboardService', () => {
   let service: TechnicianDashboardService;
+  let notificationsService: { createAndSend: any };
   let prisma: {
     technician: { findUnique: any };
     repairTicket: { findMany: any; count: any; findUnique: any; update: any };
@@ -34,10 +37,15 @@ describe('TechnicianDashboardService', () => {
       $transaction: vi.fn((cb) => cb(prisma)),
     };
 
+    notificationsService = {
+      createAndSend: vi.fn().mockResolvedValue({}),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TechnicianDashboardService,
         { provide: PrismaService, useValue: prisma },
+        { provide: NotificationsService, useValue: notificationsService },
       ],
     }).compile();
 
@@ -186,8 +194,16 @@ describe('TechnicianDashboardService', () => {
 
       prisma.repairTicket.update.mockResolvedValue({
         id: 'ticket-1',
+        ticketNumber: 'TK-1001',
+        requestId: 'req-1',
         technicianId: mockTechnicianId,
+        status: RepairTicketStatus.DIAGNOSING,
         diagnosis: 'New findings on capacitor',
+        request: {
+          device: {
+            customerId: 'cust-1',
+          },
+        },
       });
 
       const result = await service.updateTicketNotes('ticket-1', mockTechnicianId, {
@@ -207,6 +223,19 @@ describe('TechnicianDashboardService', () => {
           ticketId: 'ticket-1',
           status: RepairTicketStatus.DIAGNOSING,
           notes: 'Thermal camera check completed',
+        },
+      });
+
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith({
+        userId: 'cust-1',
+        type: NotificationType.REPAIR_STATUS_UPDATED,
+        title: 'Diagnostic Notes Updated',
+        body: 'Technician updated notes on ticket TK-1001.',
+        data: {
+          ticketId: 'ticket-1',
+          ticketNumber: 'TK-1001',
+          repairRequestId: 'req-1',
+          status: RepairTicketStatus.DIAGNOSING,
         },
       });
 

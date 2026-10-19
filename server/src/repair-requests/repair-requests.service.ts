@@ -114,6 +114,20 @@ export class RepairRequestsService {
         include: {
           images: true,
           device: true,
+          repairTicket: {
+            include: {
+              technician: {
+                include: {
+                  user: {
+                    select: { id: true, name: true, phone: true, email: true },
+                  },
+                },
+              },
+              statusHistory: {
+                orderBy: { changedAt: 'asc' },
+              },
+            },
+          },
         },
       }),
     ]);
@@ -135,6 +149,20 @@ export class RepairRequestsService {
       include: {
         images: true,
         device: true,
+        repairTicket: {
+          include: {
+            technician: {
+              include: {
+                user: {
+                  select: { id: true, name: true, phone: true, email: true },
+                },
+              },
+            },
+            statusHistory: {
+              orderBy: { changedAt: 'asc' },
+            },
+          },
+        },
       },
     });
 
@@ -189,5 +217,75 @@ export class RepairRequestsService {
     });
 
     return cancelledRequest;
+  }
+
+  async getCustomerTicketDetails(userId: string, ticketIdOrNumber: string) {
+    try {
+      const cleanNumber = ticketIdOrNumber.startsWith('#')
+        ? ticketIdOrNumber.slice(1)
+        : ticketIdOrNumber;
+
+      const where =
+        ticketIdOrNumber === 'latest' || ticketIdOrNumber === 'active'
+          ? {
+              request: {
+                device: {
+                  customerId: userId,
+                },
+              },
+            }
+          : {
+              OR: [
+                { id: ticketIdOrNumber },
+                { ticketNumber: ticketIdOrNumber },
+                { ticketNumber: cleanNumber },
+              ],
+              request: {
+                device: {
+                  customerId: userId,
+                },
+              },
+            };
+
+      const ticket = await this.prisma.repairTicket.findFirst({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          request: {
+            include: {
+              device: true,
+              images: true,
+            },
+          },
+          technician: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+            },
+          },
+          statusHistory: {
+            orderBy: {
+              changedAt: 'asc',
+            },
+          },
+        },
+      });
+      if (!ticket) {
+        throw new NotFoundException('Repair ticket not found');
+      }
+      return ticket;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException('Repair ticket not found');
+      }
+    }
   }
 }

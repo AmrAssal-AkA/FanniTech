@@ -58,6 +58,17 @@ export class NotificationsService {
     });
   }
 
+  broadcastToTechnician(technicianId: string, payload: AdminNotificationPayload): void {
+    this.gateway.sentToTechnician(technicianId, {
+      type: payload.type,
+      title: payload.title,
+      body: payload.body,
+      data: payload.data ?? {},
+      createdAt: new Date(),
+    });
+  }
+
+
   async listNotifications(
     userId: string,
     query: { page?: number; limit?: number; unreadOnly?: boolean },
