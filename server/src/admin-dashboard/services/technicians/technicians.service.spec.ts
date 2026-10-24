@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   InternalServerErrorException,
   NotFoundException,
@@ -10,6 +11,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TechniciansService } from './technicians.service.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import * as passwordHash from '../../../utils/password-hash.js';
+import { createTechnicianAccountSchema } from '../../dto/create-Technician-account.dto.js';
+import { ZodError } from 'zod';
 
 describe('TechniciansService', () => {
   let service: TechniciansService;
@@ -153,6 +156,46 @@ describe('TechniciansService', () => {
 
       await expect(service.createTechnicianAccount(technicianData)).rejects.toBe(httpError);
     });
+
+    it('should throw HttpException 400 when required fields are missing after parse', async () => {
+      vi.spyOn(createTechnicianAccountSchema, 'parse').mockReturnValueOnce({
+        name: '',
+        email: '',
+        password: '',
+        role: 'TECHNICIAN',
+      } as any);
+
+      await expect(service.createTechnicianAccount(technicianData)).rejects.toThrow(
+        new HttpException('Name, email, and password are required', 400),
+      );
+    });
+
+    it('should throw ForbiddenException if role is not TECHNICIAN', async () => {
+      vi.spyOn(createTechnicianAccountSchema, 'parse').mockReturnValueOnce({
+        name: 'A',
+        email: 'a@a.com',
+        password: 'pass',
+        role: 'ADMIN' as any,
+      });
+
+      await expect(service.createTechnicianAccount(technicianData)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw HttpException 400 if phone format is invalid after parse', async () => {
+      vi.spyOn(createTechnicianAccountSchema, 'parse').mockReturnValueOnce({
+        name: 'A',
+        email: 'a@a.com',
+        password: 'pass',
+        role: 'TECHNICIAN',
+        phone: '123',
+      });
+
+      await expect(service.createTechnicianAccount(technicianData)).rejects.toThrow(
+        new HttpException('Invalid phone number', 400),
+      );
+    });
   });
 
   describe('getAllTechnicians', () => {
@@ -263,6 +306,31 @@ describe('TechniciansService', () => {
         InternalServerErrorException,
       );
     });
+
+    it('should filter technicians by search query', async () => {
+      mockPrisma.technician.findMany.mockResolvedValue([]);
+      mockPrisma.technician.count.mockResolvedValue(0);
+
+      await service.listTechnicians({ search: 'Alex' });
+
+      expect(mockPrisma.technician.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            OR: expect.arrayContaining([
+              { employeeId: { contains: 'Alex', mode: 'insensitive' } },
+            ]),
+          },
+        }),
+      );
+    });
+
+    it('should rethrow HttpException in listTechnicians', async () => {
+      mockPrisma.technician.findMany.mockRejectedValue(new NotFoundException('Not found'));
+
+      await expect(service.listTechnicians({ page: 1, limit: 10 })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 
   describe('getTechnicianById', () => {
@@ -305,6 +373,14 @@ describe('TechniciansService', () => {
         NotFoundException,
       );
     });
+
+    it('should convert DB errors into InternalServerErrorException', async () => {
+      mockPrisma.technician.findUnique.mockRejectedValue(new Error('DB failure'));
+
+      await expect(service.getTechnicianById('tech-1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
   });
 
   describe('updateTechnician', () => {
@@ -345,6 +421,20 @@ describe('TechniciansService', () => {
         service.updateTechnician('tech-uuid-1', { email: 'taken@example.com' }),
       ).rejects.toThrow(ConflictException);
     });
+
+    it('should throw NotFoundException if technician to update does not exist', async () => {
+      mockPrisma.technician.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.updateTechnician('non-existent', { name: 'New Name' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException on invalid update data (ZodError)', async () => {
+      await expect(
+        service.updateTechnician('tech-uuid-1', { email: 'not-an-email' }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('resetTechnicianPassword', () => {
@@ -366,9 +456,33 @@ describe('TechniciansService', () => {
         service.resetTechnicianPassword('non-existent-id', 'NewPass123'),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should throw InternalServerErrorException on unexpected DB error', async () => {
+      mockPrisma.technician.findUnique.mockRejectedValue(new Error('DB failure'));
+
+      await expect(
+        service.resetTechnicianPassword('tech-uuid-1', 'NewPass123'),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
   });
 
   describe('deleteTechnician', () => {
+    it('should throw NotFoundException if technician does not exist', async () => {
+      mockPrisma.technician.findUnique.mockResolvedValue(null);
+
+      await expect(service.deleteTechnician('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should convert unexpected DB errors to InternalServerErrorException', async () => {
+      mockPrisma.technician.findUnique.mockRejectedValue(new Error('DB failure'));
+
+      await expect(service.deleteTechnician('tech-1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
     it('should prevent deletion if technician has active repair tickets', async () => {
       mockPrisma.technician.findUnique.mockResolvedValue({
         id: 'tech-uuid-1',
@@ -414,9 +528,48 @@ describe('TechniciansService', () => {
       expect(mockPrisma.$transaction).toHaveBeenCalled();
     });
 
+    it('should return 0 transferredCount when there are no active tickets', async () => {
+      mockPrisma.technician.findUnique
+        .mockResolvedValueOnce({ id: 'tech-1', user: { name: 'Tech One' } })
+        .mockResolvedValueOnce({ id: 'tech-2', user: { name: 'Tech Two' } });
+      mockPrisma.repairTicket.findMany.mockResolvedValue([]);
+
+      const result = await service.transferTickets('tech-1', 'tech-2');
+      expect(result.transferredCount).toBe(0);
+      expect(result.message).toBe('No active tickets to transfer');
+    });
+
+    it('should throw NotFoundException if source technician not found', async () => {
+      mockPrisma.technician.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 'tech-2', user: { name: 'Tech Two' } });
+
+      await expect(service.transferTickets('tech-1', 'tech-2')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw NotFoundException if target technician not found', async () => {
+      mockPrisma.technician.findUnique
+        .mockResolvedValueOnce({ id: 'tech-1', user: { name: 'Tech One' } })
+        .mockResolvedValueOnce(null);
+
+      await expect(service.transferTickets('tech-1', 'tech-2')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
     it('should reject if source and target technicians are the same', async () => {
       await expect(service.transferTickets('tech-1', 'tech-1')).rejects.toThrow(
         BadRequestException,
+      );
+    });
+
+    it('should catch unexpected errors and throw InternalServerErrorException', async () => {
+      mockPrisma.technician.findUnique.mockRejectedValue(new Error('Crash'));
+
+      await expect(service.transferTickets('tech-1', 'tech-2')).rejects.toThrow(
+        InternalServerErrorException,
       );
     });
   });

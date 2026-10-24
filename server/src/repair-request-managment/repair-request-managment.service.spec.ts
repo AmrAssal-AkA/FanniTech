@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { RepairRequestManagmentService } from './repair-request-managment.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
@@ -17,15 +17,20 @@ describe('RepairRequestManagmentService', () => {
     repairRequest: {
       findUnique: any;
       findUniqueOrThrow: any;
+      findMany: any;
+      count: any;
       updateMany: any;
     };
     repairTicket: {
       findUnique: any;
+      findMany: any;
+      count: any;
       create: any;
       update: any;
     };
     repairStatusHistory: {
       create: any;
+      findMany: any;
     };
     technician: {
       findUnique: any;
@@ -41,15 +46,20 @@ describe('RepairRequestManagmentService', () => {
       repairRequest: {
         findUnique: vi.fn(),
         findUniqueOrThrow: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn(),
         updateMany: vi.fn(),
       },
       repairTicket: {
         findUnique: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
       },
       repairStatusHistory: {
         create: vi.fn(),
+        findMany: vi.fn(),
       },
       technician: {
         findUnique: vi.fn(),
@@ -350,6 +360,208 @@ describe('RepairRequestManagmentService', () => {
         repairRequestId: 'req-1',
         status: RepairTicketStatus.CANCELLED,
       },
+    });
+  });
+
+  describe('listRequests & getRequestById', () => {
+    it('lists requests with pagination', async () => {
+      prisma.repairRequest.count.mockResolvedValue(1);
+      prisma.repairRequest.findMany.mockResolvedValue([{ id: 'r1' }]);
+
+      const result = await service.listRequests({ page: 1, limit: 10, status: RepairRequestStatus.PENDING });
+      expect(result.items).toHaveLength(1);
+      expect(result.pagination.total).toBe(1);
+    });
+
+    it('returns a request by ID if found', async () => {
+      prisma.repairRequest.findUnique.mockResolvedValue({ id: 'r1' });
+      const result = await service.getRequestById('r1');
+      expect(result).toEqual({ id: 'r1' });
+    });
+
+    it('throws NotFoundException if request not found', async () => {
+      prisma.repairRequest.findUnique.mockResolvedValue(null);
+      await expect(service.getRequestById('non-existent')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('listTickets, getTicketById & getTicketHistory', () => {
+    it('lists tickets for admin', async () => {
+      prisma.repairTicket.count.mockResolvedValue(1);
+      prisma.repairTicket.findMany.mockResolvedValue([{ id: 't1' }]);
+
+      const result = await service.listTickets(
+        { page: 1, limit: 10, status: RepairTicketStatus.ACCEPTED, priority: RepairTicketPriority.HIGH, technicianId: 'tech-1' },
+        { sub: 'admin-1', role: 'ADMIN' },
+      );
+      expect(result.items).toHaveLength(1);
+    });
+
+    it('lists tickets for technician defaults to assigned to me', async () => {
+      prisma.repairTicket.count.mockResolvedValue(1);
+      prisma.repairTicket.findMany.mockResolvedValue([{ id: 't1' }]);
+
+      const result = await service.listTickets(
+        { page: 1, limit: 10 },
+        { sub: 'tech-1', role: 'TECHNICIAN' },
+      );
+      expect(result.items).toHaveLength(1);
+    });
+
+    it('throws NotFoundException if ticket not found', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue(null);
+      await expect(service.getTicketById('t1', { sub: 'tech-1', role: 'TECHNICIAN' })).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ForbiddenException if technician tries to access ticket of another technician', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({
+        id: 't1',
+        technicianId: 'other-tech',
+      });
+      await expect(service.getTicketById('t1', { sub: 'tech-1', role: 'TECHNICIAN' })).rejects.toThrow(ForbiddenException);
+    });
+
+    it('returns ticket history if technician has access', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({
+        id: 't1',
+        technicianId: 'tech-1',
+      });
+      prisma.repairStatusHistory.findMany.mockResolvedValue([{ id: 'h1' }]);
+      const history = await service.getTicketHistory('t1', { sub: 'tech-1', role: 'TECHNICIAN' });
+      expect(history).toHaveLength(1);
+    });
+  });
+
+  describe('assignTechnician and unassignTechnician', () => {
+    it('throws NotFoundException if technician does not exist', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ id: 't1' });
+      prisma.technician.findUnique.mockResolvedValue(null);
+
+      await expect(service.assignTechnician('t1', { technicianId: 'tech-1' })).rejects.toThrow(NotFoundException);
+    });
+
+    it('assigns technician and sends notification', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ id: 't1' });
+      prisma.technician.findUnique.mockResolvedValue({ id: 'tech-1' });
+      const updatedTicket = {
+        id: 't1',
+        ticketNumber: 'TK-1',
+        requestId: 'req-1',
+        status: RepairTicketStatus.ACCEPTED,
+        technicianId: 'tech-1',
+        request: { device: { customerId: 'cust-1' } },
+      };
+      prisma.repairTicket.update.mockResolvedValue(updatedTicket);
+
+      const res = await service.assignTechnician('t1', { technicianId: 'tech-1' });
+      expect(res).toEqual(updatedTicket);
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.TECHNICIAN_ASSIGNED,
+        }),
+      );
+    });
+
+    it('unassignTechnician throws BadRequestException if ticket is not assigned', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ id: 't1', technicianId: null });
+      await expect(service.unassignTechnician('t1')).rejects.toThrow(BadRequestException);
+    });
+
+    it('unassignTechnician clears technician and creates history record', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({
+        id: 't1',
+        technicianId: 'tech-1',
+        status: RepairTicketStatus.ACCEPTED,
+        technician: { user: { name: 'Bob' } },
+      });
+      prisma.repairTicket.update.mockResolvedValue({ id: 't1', technicianId: null });
+
+      const res = await service.unassignTechnician('t1');
+      expect(res.technicianId).toBeNull();
+      expect(prisma.repairStatusHistory.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('startRepair, markReadyForPickup, completeTicket, markUnrepairable, cancelTicket', () => {
+    const baseTicket = {
+      id: 't1',
+      ticketNumber: 'TK-1',
+      requestId: 'req-1',
+      technicianId: 'tech-1',
+      request: { device: { customerId: 'cust-1' } },
+    };
+
+    it('startRepair throws ConflictException if ticket is not DIAGNOSING', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.ACCEPTED });
+      await expect(service.startRepair('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { diagnosis: 'fixed' }))
+        .rejects.toThrow(ConflictException);
+    });
+
+    it('startRepair succeeds and notifies customer', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.DIAGNOSING });
+      prisma.repairTicket.update.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.IN_REPAIR });
+
+      const res = await service.startRepair('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { diagnosis: 'Fixed part' });
+      expect(res.status).toBe(RepairTicketStatus.IN_REPAIR);
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Repair In Progress' }),
+      );
+    });
+
+    it('markReadyForPickup throws ConflictException if not IN_REPAIR', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.ACCEPTED });
+      await expect(service.markReadyForPickup('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { repairNotes: 'Done' }))
+        .rejects.toThrow(ConflictException);
+    });
+
+    it('markReadyForPickup succeeds and notifies customer', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.IN_REPAIR });
+      prisma.repairTicket.update.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.READY_FOR_PICKUP });
+
+      const res = await service.markReadyForPickup('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { repairNotes: 'Done' });
+      expect(res.status).toBe(RepairTicketStatus.READY_FOR_PICKUP);
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.REPAIR_READY_FOR_PICKUP }),
+      );
+    });
+
+    it('completeTicket throws ConflictException if not READY_FOR_PICKUP', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.IN_REPAIR });
+      await expect(service.completeTicket('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, {}))
+        .rejects.toThrow(ConflictException);
+    });
+
+    it('completeTicket succeeds and notifies customer', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.READY_FOR_PICKUP });
+      prisma.repairTicket.update.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.COMPLETED });
+
+      const res = await service.completeTicket('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, {});
+      expect(res.status).toBe(RepairTicketStatus.COMPLETED);
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.REPAIR_COMPLETED }),
+      );
+    });
+
+    it('markUnrepairable throws ConflictException if ticket is already completed or closed', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.COMPLETED });
+      await expect(service.markUnrepairable('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { reason: 'Cannot fix' }))
+        .rejects.toThrow(ConflictException);
+    });
+
+    it('markUnrepairable succeeds from active status', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.DIAGNOSING });
+      prisma.repairTicket.update.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.UNREPAIRABLE });
+
+      const res = await service.markUnrepairable('t1', { sub: 'tech-1', role: 'TECHNICIAN' }, { reason: 'Water damage' });
+      expect(res.status).toBe(RepairTicketStatus.UNREPAIRABLE);
+      expect(notificationsService.createAndSend).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Repair Cannot Be Completed' }),
+      );
+    });
+
+    it('cancelTicket throws ConflictException if ticket is already closed', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({ ...baseTicket, status: RepairTicketStatus.CANCELLED });
+      await expect(service.cancelTicket('t1', {})).rejects.toThrow(ConflictException);
     });
   });
 });

@@ -11,6 +11,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { AuthenticationService } from './authentication.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { Prisma } from '../prisma/generated/client.js';
 import * as passwordHash from '../utils/password-hash.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -30,6 +31,15 @@ const makeUser = (overrides = {}) => ({
 const makeTokenPair = () => ({
   accessToken: 'mock-access-token',
   refreshToken: 'mock-refresh-token',
+});
+
+const makeStoredToken = (overrides = {}) => ({
+  token: 'mock-refresh-token',
+  revoke: false,
+  expiresAt: new Date(Date.now() + 60_000),
+  deviceInfo: 'iPhone 15',
+  user: makeUser(),
+  ...overrides,
 });
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -191,15 +201,6 @@ describe('AuthenticationService', () => {
   describe('refreshTokens', () => {
     const refreshToken = 'valid-refresh-token';
 
-    const makeStoredToken = (overrides = {}) => ({
-      token: refreshToken,
-      revoke: false,
-      expiresAt: new Date(Date.now() + 60_000),
-      deviceInfo: 'iPhone 15',
-      user: makeUser(),
-      ...overrides,
-    });
-
     it('should return new tokens for a valid refresh token', async () => {
       mockJwt.verify.mockReturnValue({ sub: 'user-id-1' });
       mockPrisma.refreshToken.findUnique.mockResolvedValue(makeStoredToken());
@@ -264,6 +265,93 @@ describe('AuthenticationService', () => {
         where: { token },
         data: { revoke: true },
       });
+    });
+  });
+
+  // ─── P2002 error handling ───────────────────────────────────────────────────
+
+  describe('Prisma P2002 error handling', () => {
+    it('registerUser throws ConflictException on P2002', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: '7',
+        }),
+      );
+
+      await expect(
+        service.registerUser({
+          email: 'test@example.com',
+          name: 'Test',
+          password: 'Password1',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('loginUser throws ConflictException on P2002', async () => {
+      mockPrisma.user.findUnique.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: '7',
+        }),
+      );
+
+      await expect(
+        service.loginUser({ email: 'test@example.com', password: 'Password1' }, 'web'),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('refreshTokens throws ConflictException on P2002', async () => {
+      mockJwt.verify.mockReturnValue({ sub: 'user-id-1' });
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(makeStoredToken());
+      mockPrisma.refreshToken.updateMany.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: '7',
+        }),
+      );
+
+      await expect(service.refreshTokens('some-token', 'mobile')).rejects.toThrow(
+        ConflictException,
+      );
+    });
+  });
+
+  // ─── me ─────────────────────────────────────────────────────────────────────
+
+  describe('me', () => {
+    it('returns public user when user exists', async () => {
+      const dbUser = makeUser({ id: 'u1', name: 'Alice', email: 'alice@test.com' });
+      mockPrisma.user.findUnique.mockResolvedValue(dbUser);
+
+      const result = await service.me('u1');
+      expect(result).toHaveProperty('id', 'u1');
+      expect(result).toHaveProperty('name', 'Alice');
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('throws InternalServerErrorException when user is not found', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.me('non-existent')).rejects.toThrow(InternalServerErrorException);
+    });
+
+    it('throws ConflictException on Prisma P2002 error in me', async () => {
+      mockPrisma.user.findUnique.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Conflict', {
+          code: 'P2002',
+          clientVersion: '7',
+        }),
+      );
+
+      await expect(service.me('u1')).rejects.toThrow(ConflictException);
+    });
+
+    it('throws InternalServerErrorException on unexpected error in me', async () => {
+      mockPrisma.user.findUnique.mockRejectedValue(new Error('Unknown DB error'));
+
+      await expect(service.me('u1')).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

@@ -7,12 +7,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RepairRequestsService } from './repair-requests.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { RepairRequestStatus } from '../prisma/generated/client.js';
 
 describe('RepairRequestsService', () => {
   let service: RepairRequestsService;
   let prisma: PrismaService;
   let storageService: StorageService;
+  let notificationsService: NotificationsService;
 
   beforeEach(() => {
     prisma = {
@@ -26,6 +28,9 @@ describe('RepairRequestsService', () => {
         findUnique: vi.fn(),
         update: vi.fn(),
       },
+      repairTicket: {
+        findFirst: vi.fn(),
+      },
     } as unknown as PrismaService;
 
     storageService = {
@@ -33,7 +38,12 @@ describe('RepairRequestsService', () => {
       deleteImages: vi.fn(),
     } as unknown as StorageService;
 
-    service = new RepairRequestsService(prisma, storageService);
+    notificationsService = {
+      createAndSend: vi.fn().mockResolvedValue({}),
+      broadcastToAdmins: vi.fn(),
+    } as unknown as NotificationsService;
+
+    service = new RepairRequestsService(prisma, storageService, notificationsService);
   });
 
   const createMockFile = (
@@ -311,6 +321,14 @@ describe('RepairRequestsService', () => {
       );
     });
 
+    it('should throw NotFoundException if request does not exist', async () => {
+      vi.mocked(prisma.repairRequest.findUnique).mockResolvedValue(null);
+
+      await expect(service.cancelRequest('cust-1', 'req-non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
     it('should throw ForbiddenException if device belongs to another customer', async () => {
       vi.mocked(prisma.repairRequest.findUnique).mockResolvedValue({
         id: 'req-1',
@@ -320,6 +338,51 @@ describe('RepairRequestsService', () => {
 
       await expect(service.cancelRequest('cust-1', 'req-1')).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+  });
+
+  describe('getCustomerTicketDetails', () => {
+    it('should find ticket with active/latest keyword', async () => {
+      const mockTicket = { id: 'tk-1', ticketNumber: '1001' };
+      vi.mocked(prisma.repairTicket.findFirst).mockResolvedValue(mockTicket as any);
+
+      const result = await service.getCustomerTicketDetails('cust-1', 'latest');
+      expect(result).toEqual(mockTicket);
+      expect(prisma.repairTicket.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            request: {
+              device: {
+                customerId: 'cust-1',
+              },
+            },
+          },
+        }),
+      );
+    });
+
+    it('should strip leading hash from ticketNumber and query', async () => {
+      const mockTicket = { id: 'tk-1', ticketNumber: '1001' };
+      vi.mocked(prisma.repairTicket.findFirst).mockResolvedValue(mockTicket as any);
+
+      const result = await service.getCustomerTicketDetails('cust-1', '#1001');
+      expect(result).toEqual(mockTicket);
+    });
+
+    it('should throw NotFoundException when ticket is not found', async () => {
+      vi.mocked(prisma.repairTicket.findFirst).mockResolvedValue(null);
+
+      await expect(service.getCustomerTicketDetails('cust-1', 'tk-unknown')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should wrap other errors into NotFoundException', async () => {
+      vi.mocked(prisma.repairTicket.findFirst).mockRejectedValue(new Error('DB failure'));
+
+      await expect(service.getCustomerTicketDetails('cust-1', 'tk-1')).rejects.toThrow(
+        NotFoundException,
       );
     });
   });

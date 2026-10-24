@@ -25,6 +25,7 @@ const mockAuthService = {
   loginUser: vi.fn(),
   refreshTokens: vi.fn(),
   logout: vi.fn(),
+  me: vi.fn(),
 };
 
 // ─── Test Suite ───────────────────────────────────────────────────────────────
@@ -253,6 +254,47 @@ describe('AuthenticationController', () => {
       await controller.logout(undefined as any);
 
       expect(mockAuthService.logout).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── GET me ────────────────────────────────────────────────────────────────
+
+  describe('getMe', () => {
+    it('should return current user when user sub is present', async () => {
+      const mockUser = { id: 'user-1', name: 'Alice' };
+      mockAuthService.me.mockResolvedValue(mockUser);
+
+      const req = { user: { sub: 'user-1' } } as any;
+      const res = makeRes() as any;
+
+      const result = await controller.getMe(res, req);
+      expect(result).toEqual(mockUser);
+      expect(mockAuthService.me).toHaveBeenCalledWith('user-1');
+    });
+
+    it('should throw BadRequestException when user sub is missing', async () => {
+      const req = {} as any;
+      const res = makeRes() as any;
+
+      await expect(controller.getMe(res, req)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should rethrow ForbiddenException from service', async () => {
+      mockAuthService.me.mockRejectedValue(new ForbiddenException('Forbidden'));
+      const req = { user: { sub: 'user-1' } } as any;
+      const res = makeRes() as any;
+
+      await expect(controller.getMe(res, req)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw HttpException 500 when service fails unexpectedly', async () => {
+      mockAuthService.me.mockRejectedValue(new Error('DB crash'));
+      const req = { user: { sub: 'user-1' } } as any;
+      const res = makeRes() as any;
+
+      await expect(controller.getMe(res, req)).rejects.toThrow(
+        new HttpException('Failed to get current user', HttpStatus.INTERNAL_SERVER_ERROR),
+      );
     });
   });
 });

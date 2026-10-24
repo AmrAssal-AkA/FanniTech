@@ -241,5 +241,41 @@ describe('TechnicianDashboardService', () => {
 
       expect(result).toBeDefined();
     });
+
+    it('should update repairNotes and catch notification errors gracefully', async () => {
+      prisma.repairTicket.findUnique.mockResolvedValue({
+        id: 'ticket-1',
+        technicianId: mockTechnicianId,
+        status: RepairTicketStatus.IN_REPAIR,
+      });
+
+      prisma.repairTicket.update.mockResolvedValue({
+        id: 'ticket-1',
+        ticketNumber: 'TK-1001',
+        requestId: 'req-1',
+        technicianId: mockTechnicianId,
+        status: RepairTicketStatus.IN_REPAIR,
+        repairNotes: 'Replaced thermal pad',
+        request: {
+          device: {
+            customerId: 'cust-1',
+          },
+        },
+      });
+
+      notificationsService.createAndSend.mockRejectedValue(new Error('Gateway down'));
+
+      const result = await service.updateTicketNotes('ticket-1', mockTechnicianId, {
+        repairNotes: 'Replaced thermal pad',
+      });
+
+      expect(prisma.repairTicket.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'ticket-1' },
+          data: { repairNotes: 'Replaced thermal pad' },
+        }),
+      );
+      expect(result).toBeDefined();
+    });
   });
 });

@@ -190,5 +190,26 @@ describe('StorageService', () => {
       );
       expect(cloudinary.uploader.destroy).toHaveBeenCalledWith('test-pub-1');
     });
+
+    it('should return empty array when files is empty or null', async () => {
+      const res = await service.uploadMultipleImages([]);
+      expect(res).toEqual([]);
+      const resNull = await service.uploadMultipleImages(null as any);
+      expect(resNull).toEqual([]);
+    });
+
+    it('should log warning when destroy fails in deleteImages', async () => {
+      const loggerWarn = vi
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      const destroyError = new Error('Destroy failed');
+      vi.mocked(cloudinary.uploader.destroy).mockRejectedValue(destroyError);
+
+      await service.deleteImages(['pub-fail']);
+      expect(loggerWarn).toHaveBeenCalledWith(
+        'Failed to destroy Cloudinary image: pub-fail',
+        destroyError,
+      );
+    });
   });
 });

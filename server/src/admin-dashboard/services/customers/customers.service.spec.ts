@@ -281,6 +281,46 @@ describe('CustomersService', () => {
         service.getCustomerById('00000000-0000-0000-0000-000000000001'),
       ).rejects.toThrow(InternalServerErrorException);
     });
+
+    it('should count completed tickets in stats', async () => {
+      const customerWithCompletedTicket = {
+        ...rawCustomerDetail,
+        devices: [
+          {
+            ...rawCustomerDetail.devices[0],
+            repairRequests: [
+              {
+                ...rawCustomerDetail.devices[0].repairRequests[0],
+                repairTicket: {
+                  ...rawCustomerDetail.devices[0].repairRequests[0].repairTicket,
+                  status: 'COMPLETED',
+                },
+              },
+            ],
+          },
+        ],
+      };
+      mockPrismaService.customer.findUnique.mockResolvedValue(customerWithCompletedTicket);
+
+      const result = await service.getCustomerById('00000000-0000-0000-0000-000000000001');
+      expect(result.stats.completedTickets).toBe(1);
+    });
+
+    it('should handle non-Error throw in getCustomerById', async () => {
+      mockPrismaService.customer.findUnique.mockRejectedValue('String DB crash');
+
+      await expect(
+        service.getCustomerById('00000000-0000-0000-0000-000000000001'),
+      ).rejects.toThrow('An unexpected error occurred while fetching the customer.');
+    });
+
+    it('should rethrow HttpException in getAllCustomers and handle non-Error throw', async () => {
+      mockPrismaService.customer.findMany.mockRejectedValue('string error');
+
+      await expect(
+        service.getAllCustomers({} as CustomerListQueryDto),
+      ).rejects.toThrow('An unexpected error occurred while fetching customers.');
+    });
   });
 });
 
