@@ -13,9 +13,9 @@ export interface AlertItem {
   id: string;
   category: 'repairs' | 'devices';
   type: AlertType;
-  referenceId: string; // e.g. "SR-1001", "REQ-8840", "ThinkPad T14", "Auth Audit"
-  tag: string; // e.g. "Diagnostics", "Approved", "Intake", "Report", "Security"
-  timeAgo: string; // e.g. "15m ago", "2h ago", "Oct 25, 09:15 AM", "Oct 24", "Oct 22"
+  referenceId: string; 
+  tag: string;
+  timeAgo: string;
   title: string;
   description: string;
   isUnread: boolean;

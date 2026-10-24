@@ -17,7 +17,6 @@ import {
   RepairTimelineStepper,
   BenchDiagnosticFeedCard,
   TechnicianAuditLogCard,
-  TicketActionButtons,
   ToastNotificationPill,
   RepairTicketLoading,
   RepairTicketError,
@@ -88,18 +87,6 @@ export default function RepairTicketScreen() {
     if (ticketId) {
       showToast(`Ticket #${ticketId} copied to clipboard`);
     }
-  };
-
-  const handleCall = () => {
-    const phone = ticket?.hubInfo?.phone || '+966114567890';
-    showToast('Calling FanniTech Central Hub...');
-    Linking.openURL(`tel:${phone.replace(/\s+/g, '')}`).catch(() => {
-      // Fallback if device cannot make phone calls
-    });
-  };
-
-  const handleMessage = () => {
-    showToast('Starting technician live chat...');
   };
 
   if (isLoading) {
@@ -186,11 +173,6 @@ export default function RepairTicketScreen() {
 
 
 
-        {/* Action Controls & Care Guarantee Footer */}
-        <TicketActionButtons
-          onCall={handleCall}
-          onMessage={handleMessage}
-        />
       </ScrollView>
 
       {/* Floating Interactive Toast Feedback Pill */}
