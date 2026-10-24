@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "FanniTech",
-    "slug": " Precision Computer & Laptop Diagnostic Hub",
+    "slug": "FanniTech",
     "version": "1.0.0",
     "scheme": "FanniTech",
     "orientation": "portrait",
@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amrassal.-Precision-Computer---Laptop-Diagnostic-Hub"
+      "bundleIdentifier": "com.amrassal.fannitech"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,9 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "package": "com.amrassal.fannitech",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -52,19 +54,27 @@
           }
         }
       ],
-      "expo-splash-screen",
-      {
-        "backgroundColor": "#ffffff",
-        "image": "./assets/icon.png",
-        "darkMode": {
-          "backgroundColor": "#000000",
-          "image": "./assets/icon.png"
-        },
-        "imageWidth": 200
-      }
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/icon.png",
+          "darkMode": {
+            "backgroundColor": "#000000",
+            "image": "./assets/icon.png"
+          },
+          "imageWidth": 200
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5bce49d6-a5d2-4121-ae55-1a045c1ba7fe"
+      }
     }
   }
 }

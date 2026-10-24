@@ -37,13 +37,26 @@ export const RepairTimelineStepper: React.FC<RepairTimelineStepperProps> = ({
 
   return (
     <View className="mx-4 my-2">
-      <View className="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-surface-container/80">
+      <View
+        className="bg-surface-container-lowest rounded-xl p-4 border border-surface-container"
+        style={{
+          borderColor: 'rgba(234, 237, 255, 0.8)',
+          shadowColor: '#00236f',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          elevation: 1,
+        }}
+      >
         {/* Header with step pill */}
         <View className="flex-row items-center justify-between pb-3">
           <Text className="text-base font-bold text-primary">
             Repair Timeline
           </Text>
-          <View className="bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+          <View
+            className="px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: 'rgba(219, 225, 255, 0.6)' }}
+          >
             <Text className="text-xs font-semibold text-secondary">
               Step {currentStage} of {totalStages}
             </Text>
@@ -61,9 +74,8 @@ export const RepairTimelineStepper: React.FC<RepairTimelineStepperProps> = ({
             return (
               <View
                 key={step.key}
-                className={`flex-row gap-3 relative ${isLast ? "" : "pb-6"} ${
-                  isPending ? "opacity-65" : ""
-                }`}
+                className={`flex-row gap-3 relative ${isLast ? "" : "pb-6"}`}
+                style={isPending ? { opacity: 0.65 } : undefined}
               >
                 {/* Connecting Track Line */}
                 {!isLast && (
@@ -78,13 +90,24 @@ export const RepairTimelineStepper: React.FC<RepairTimelineStepperProps> = ({
 
                 {/* Node Circle */}
                 <View
-                  className={`w-7 h-7 rounded-full items-center justify-center shrink-0 z-10 shadow-xs ${
+                  className={`w-7 h-7 rounded-full items-center justify-center shrink-0 z-10 ${
                     isCompleted
-                      ? "bg-secondary text-on-secondary"
+                      ? "bg-secondary"
                       : isActive
-                        ? "bg-secondary-container shadow-md"
+                        ? "bg-secondary-container"
                         : "bg-surface-container"
                   }`}
+                  style={
+                    isActive
+                      ? {
+                          shadowColor: "#0051d5",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 3,
+                          elevation: 2,
+                        }
+                      : undefined
+                  }
                 >
                   {getStepIcon(step)}
                 </View>
@@ -92,7 +115,10 @@ export const RepairTimelineStepper: React.FC<RepairTimelineStepperProps> = ({
                 {/* Node Content */}
                 {isActive ? (
                   /* Active Stage Highlight Card */
-                  <View className="flex-1 bg-surface-container-low p-3 rounded-lg -mt-1 border border-secondary/20">
+                  <View
+                    className="flex-1 bg-surface-container-low p-3 rounded-lg -mt-1 border border-secondary"
+                    style={{ borderColor: 'rgba(0, 81, 213, 0.2)' }}
+                  >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-row items-center gap-1.5">
                         <Text className="text-sm font-bold text-primary">
@@ -114,7 +140,10 @@ export const RepairTimelineStepper: React.FC<RepairTimelineStepperProps> = ({
                     </Text>
 
                     {step.stationNote ? (
-                      <View className="flex-row items-center gap-1.5 mt-2 pt-2 border-t border-surface-container-high/60">
+                      <View
+                        className="flex-row items-center gap-1.5 mt-2 pt-2 border-t border-surface-container-high"
+                        style={{ borderTopColor: 'rgba(226, 231, 255, 0.6)' }}
+                      >
                         <Cpu size={14} color="#0051d5" />
                         <Text className="text-[11px] font-medium text-on-surface-variant">
                           {step.stationNote}

@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 
 import {tokenStorage} from '../features/auth/services/tokenStorage'
 
-const baseURL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080').replace(/\/$/, '');
+const baseURL = process.env.EXPO_PUBLIC_API_URL
 
 export const serverClient: AxiosInstance = axios.create({
     baseURL: baseURL,

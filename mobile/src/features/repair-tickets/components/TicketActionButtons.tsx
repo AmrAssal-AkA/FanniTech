@@ -31,7 +31,7 @@ export const TicketActionButtons: React.FC<TicketActionButtonsProps> = ({
         <TouchableOpacity
           onPress={onMessage}
           activeOpacity={0.8}
-          className="flex-1 h-12 rounded-lg bg-surface-container-highest items-center justify-center flex-row gap-2 shadow-xs"
+          className="flex-1 h-12 rounded-lg bg-surface-container-highest items-center justify-center flex-row gap-2 shadow-sm"
           accessibilityLabel="Message support"
           accessibilityRole="button"
         >

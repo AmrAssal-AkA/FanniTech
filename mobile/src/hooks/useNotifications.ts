@@ -66,9 +66,25 @@ export function useNotifications() {
       invalidateRepairCaches(type, data);
     });
 
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const content = response.notification.request.content;
+      const data = (content.data ?? {}) as Record<string, unknown>;
+      const type = typeof data?.type === 'string' ? data.type : 'INFO';
+      addNotification({
+        id: response.notification.request.identifier,
+        type,
+        title: content.title ?? '',
+        body: content.body ?? '',
+        data,
+        createdAt: new Date().toISOString(),
+      });
+      invalidateRepairCaches(type, data);
+    });
+
     return () => {
       socketService.off('notification:new', handleNew);
       foregroundSub.remove();
+      responseSub.remove();
     };
   }, [addNotification, queryClient, setUnreadCount]);
 
