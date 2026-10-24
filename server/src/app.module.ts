@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
+import {ThrottlerModule} from "@nestjs/throttler";
+
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -28,6 +30,14 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     RepairRequestManagmentModule,
     AdminDashboardModule,
     TechnicianDashboardModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          limit: 50,
+          ttl: 60000
+        }
+      ]
+    })
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

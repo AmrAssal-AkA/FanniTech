@@ -9,6 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service.js'
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   NotificationType,
+  Prisma,
   RepairRequestStatus,
   RepairTicketPriority,
   RepairTicketStatus,
@@ -223,47 +224,96 @@ export class RepairRequestManagmentService {
   async acceptRequest(id: string, dto: AcceptRepairRequestDtoType) {
     const request = await this.getRequestById(id);
     this.assertRequestStatus(request.status, RepairRequestStatus.PENDING);
+    if (request.repairTicket) {
+      throw new ConflictException(
+        'A repair ticket already exists for this repair request',
+      );
+    }
     if (dto.technicianId) await this.getTechnician(dto.technicianId);
-    const result = await this.prisma.$transaction(async (tx) => {
-      const db = tx as unknown as PrismaService;
-      const updatedRequest = await db.repairRequest.update({
-        where: { id },
-        data: { status: RepairRequestStatus.ACCEPTED },
+
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const db = tx as unknown as PrismaService;
+        const updateResult = await db.repairRequest.updateMany({
+          where: { id, status: RepairRequestStatus.PENDING },
+          data: { status: RepairRequestStatus.ACCEPTED },
+        });
+
+        if (updateResult.count === 0) {
+          throw new ConflictException(
+            'Repair request has already been processed or is no longer pending',
+          );
+        }
+
+        const ticket = await db.repairTicket.create({
+          data: {
+            requestId: id,
+            technicianId: dto.technicianId,
+            priority: dto.priority ?? RepairTicketPriority.MEDIUM,
+            statusHistory: { create: { status: RepairTicketStatus.ACCEPTED } },
+          },
+          include: this.ticketInclude,
+        });
+
+        const updatedRequest = await db.repairRequest.findUniqueOrThrow({
+          where: { id },
+          include: this.requestInclude,
+        });
+
+        return { request: updatedRequest, ticket };
       });
-      const ticket = await db.repairTicket.create({
+
+      await this.notifyCustomer(result.ticket.request.device.customerId, {
+        type: NotificationType.REPAIR_REQUEST_ACCEPTED,
+        title: 'Repair Request Accepted',
+        body: `Your repair request was accepted. Ticket ${result.ticket.ticketNumber} was created.`,
         data: {
-          requestId: id,
-          technicianId: dto.technicianId,
-          priority: dto.priority ?? RepairTicketPriority.MEDIUM,
-          statusHistory: { create: { status: RepairTicketStatus.ACCEPTED } },
+          repairRequestId: id,
+          ticketId: result.ticket.id,
+          ticketNumber: result.ticket.ticketNumber,
+          status: result.ticket.status,
         },
-        include: this.ticketInclude,
       });
-      return { request: updatedRequest, ticket };
-    });
-    await this.notifyCustomer(result.ticket.request.device.customerId, {
-      type: NotificationType.REPAIR_REQUEST_ACCEPTED,
-      title: 'Repair Request Accepted',
-      body: `Your repair request was accepted. Ticket ${result.ticket.ticketNumber} was created.`,
-      data: {
-        repairRequestId: id,
-        ticketId: result.ticket.id,
-        ticketNumber: result.ticket.ticketNumber,
-        status: result.ticket.status,
-      },
-    });
-    if (dto.technicianId) await this.notifyTechnicianAssigned(result.ticket);
-    return result;
+      if (dto.technicianId) await this.notifyTechnicianAssigned(result.ticket);
+      return result;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'A repair ticket already exists for this repair request',
+        );
+      }
+      throw error;
+    }
   }
 
   async rejectRequest(id: string, dto: RejectRepairRequestDtoType) {
     const request = await this.getRequestById(id);
     this.assertRequestStatus(request.status, RepairRequestStatus.PENDING);
-    const updated = await this.prisma.repairRequest.update({
-      where: { id },
+    if (request.repairTicket) {
+      throw new ConflictException(
+        'Repair request already has an associated ticket and cannot be rejected',
+      );
+    }
+
+    const updateResult = await this.prisma.repairRequest.updateMany({
+      where: { id, status: RepairRequestStatus.PENDING },
       data: { status: RepairRequestStatus.REJECTED },
+    });
+
+    if (updateResult.count === 0) {
+      throw new ConflictException(
+        'Repair request has already been processed or is no longer pending',
+      );
+    }
+
+    const updated = await this.prisma.repairRequest.findUniqueOrThrow({
+      where: { id },
       include: this.requestInclude,
     });
+
     await this.notifyCustomer(updated.device.customerId, {
       type: NotificationType.REPAIR_REQUEST_REJECTED,
       title: 'Repair Request Rejected',

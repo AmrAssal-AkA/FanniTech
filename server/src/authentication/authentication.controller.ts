@@ -1,7 +1,8 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, UnauthorizedException, Res, Get, Req, UseGuards } from '@nestjs/common';
 import type {Request, Response} from 'express';
-import {AuthenticationGuard} from './authentication.guard.js'
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
+import {AuthenticationGuard} from './authentication.guard.js'
 import { AuthenticationService } from './authentication.service.js';
 import { CreateUserDtoSchema, type CreateUserDtoType } from './DTO/create-user.dto.js';
 import { LoginUserDtoSchema, type LoginUserDtoType } from './DTO/login-user.dto.js';
@@ -25,6 +26,7 @@ import {
 } from '../swagger/swagger.schemas.js';
 
 
+@SkipThrottle()
 @Controller('api/v1/auth')
 @ApiTags('Authentication')
 export class AuthenticationController {
@@ -48,7 +50,7 @@ export class AuthenticationController {
         })
     }
 
-
+    @Throttle({default: { limit: 10, ttl: 60000 }})
     // mobile
     @Post('mobile/register')
     @HttpCode(HttpStatus.CREATED)
@@ -60,7 +62,7 @@ export class AuthenticationController {
     async registerUser(@Body(new ZodValidationPipe(CreateUserDtoSchema)) dto: CreateUserDtoType, @Res({ passthrough: true }) res: Response) {
         return await this.authenticationService.registerUser(dto);
     }
-
+    @Throttle({default: { limit: 10, ttl: 60000 }})
     @Post('mobile/login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Log in a mobile customer' })
@@ -120,7 +122,7 @@ export class AuthenticationController {
         if (refreshToken) this.authenticationService.logout(refreshToken);
     }
 
-
+    @Throttle({default: { limit: 10, ttl: 60000 }})
     @Post('web/login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Log in a web user' })
