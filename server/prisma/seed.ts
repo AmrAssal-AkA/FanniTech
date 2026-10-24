@@ -11,20 +11,22 @@ const prisma = new PrismaClient({adapter});
 
 
 async function main() {
-    const password = await bcrypt.hash('Amr1292003', 10);
+    const password = await bcrypt.hash('amr123456', 10);
 
     await prisma.user.upsert({
-        where: { email: 'amrassal@gmail.com'},
+        where: { email: 'amr@fanniTech.com'},
         update: {
             password: password,
         },
         create: {
-            name: 'Amr Assal',
-            email: 'amrassal@gmail.com',
+            name: 'Amr-fanni',
+            email: 'amr@fanniTech.com',
             password: password,
-        }
-    })
-    console.log('user are updated or created successfully');
+            role: 'TECHNICIAN',
+            technician: {create: {}},
+        },
+    });
+    console.log('technician user created or updated successfully');
 }
 main().catch((e) => {
     console.error(e);

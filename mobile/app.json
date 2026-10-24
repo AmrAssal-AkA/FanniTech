@@ -26,6 +26,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.amrassal.fannitech",
+      "versionCode": 1,
       "googleServicesFile": "./google-services.json"
     },
     "web": {
