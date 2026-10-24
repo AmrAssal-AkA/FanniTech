@@ -9,5 +9,18 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'dist/**',
+        'node_modules/**',
+        'src/prisma/generated/**',
+        'src/swagger/**',
+        'test/**',
+        '**/*.module.ts',
+        'src/main.ts',
+      ],
+    },
   },
 });

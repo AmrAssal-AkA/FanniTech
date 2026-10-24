@@ -151,7 +151,7 @@ describe('HttpExceptionFilter', () => {
     const loggerError = vi
       .spyOn(Logger.prototype, 'error')
       .mockImplementation(() => undefined);
-    const { host, mockStatus, mockJson } = createMockHost();
+    const { host, mockStatus } = createMockHost();
 
     filter.catch('Some primitive string error', host);
 

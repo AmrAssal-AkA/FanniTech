@@ -12,7 +12,6 @@ import { TechniciansService } from './technicians.service.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import * as passwordHash from '../../../utils/password-hash.js';
 import { createTechnicianAccountSchema } from '../../dto/create-Technician-account.dto.js';
-import { ZodError } from 'zod';
 
 describe('TechniciansService', () => {
   let service: TechniciansService;

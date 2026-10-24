@@ -55,7 +55,22 @@ describe('Authentication (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [
+            () => ({
+              ACCESS_TOKEN_SECRET:
+                process.env['ACCESS_TOKEN_SECRET'] ||
+                'test-access-token-secret-for-e2e',
+              REFRESH_TOKEN_SECRET:
+                process.env['REFRESH_TOKEN_SECRET'] ||
+                'test-refresh-token-secret-for-e2e',
+              DATABASE_URL:
+                process.env['DATABASE_URL'] ||
+                'postgresql://postgres:postgres@localhost:5432/test?schema=public',
+            }),
+          ],
+        }),
         AuthenticationModule,
       ],
     })
@@ -75,7 +90,9 @@ describe('Authentication (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(() => {
