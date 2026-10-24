@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup environment:
+  setup-environment:
     name: Setup Environment
     runs-on: ubuntu-latest
     defaults:
@@ -33,36 +33,36 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-  server tests:
+  server-tests:
     name: Run nestjs server tests
     runs-on: ubuntu-latest
-    needs: setup environment
+    needs: setup-environment
     defaults:
       run:
         working-directory: ./server
 
-      steps:
-        - name: test server
-          run: npm run test
+    steps:
+      - name: test server
+        run: npm run test
 
-        - name: test endToEnd
-          run: npm run test:e2e
+      - name: test endToEnd
+        run: npm run test:e2e
 
-        - name: test coverage
-          run: npm run test:cov
+      - name: test coverage
+        run: npm run test:cov
 
-        - name: test lint
-          run: npm run lint
+      - name: test lint
+        run: npm run lint
 
-        - name: test build
-          run: npm run build
+      - name: test build
+        run: npm run build
 
   mobile-test:
     name: Run Mobile Tests
     runs-on: ubuntu-latest
     needs:
-      - setup environment
-      - server tests
+      - setupEnvironment
+      - serverTests
     defaults:
       run:
         working-directory: ./mobile
@@ -84,8 +84,8 @@ jobs:
     name: Run Web Tests
     runs-on: ubuntu-latest
     needs:
-      - setup environment
-      - server tests
+      - setupEnvironment
+      - serverTests
       - mobile-test
 
     defaults:
