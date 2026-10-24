@@ -4,10 +4,9 @@ import { Mail, Lock, Eye, EyeOff, Check, ArrowRight } from 'lucide-react-native'
 
 interface LoginFormProps {
   onSubmit?: (data: { email: string; pass: string; remember: boolean }) => void;
-  onForgotPassword?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onForgotPassword }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -96,15 +95,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onForgotPassword
           <Text className="text-xs text-on-surface">Remember me</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={onForgotPassword}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-        >
-          <Text className="text-xs font-semibold text-secondary">
-            Forgot password?
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* Sign In CTA */}

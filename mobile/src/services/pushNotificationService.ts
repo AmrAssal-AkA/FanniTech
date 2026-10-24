@@ -82,7 +82,6 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#0051D5',
       enableVibrate: true,
-      sound: 'default',
     });
   }
 

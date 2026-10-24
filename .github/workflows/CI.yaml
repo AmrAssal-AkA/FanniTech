@@ -80,6 +80,7 @@ jobs:
         run: npm run typecheck
 
       - name: run expo start
+        timeout-minutes: 2
         run: npx expo start
     
   web-test:
@@ -113,4 +114,5 @@ jobs:
         run: npm run typecheck
 
       - name: run build
+        timeout-minutes: 2
         run: npm run build

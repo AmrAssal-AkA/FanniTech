@@ -35,11 +35,6 @@ export default function LoginScreen() {
     } finally { setIsSubmitting(false); }
   };
 
-  const handleForgotPassword = () => {
-    // Navigate to forgot password / reset flow
-  };
-
-
   const handleNavigateSignup = () => {
     router.push('/(auth)/signup.screen');
   };
@@ -88,7 +83,6 @@ export default function LoginScreen() {
           {/* Authentication Form Component */}
           <LoginForm
             onSubmit={handleLoginSubmit}
-            onForgotPassword={handleForgotPassword}
           />
           {isSubmitting && <ActivityIndicator className="mt-4" color="#0051d5" />}
 
