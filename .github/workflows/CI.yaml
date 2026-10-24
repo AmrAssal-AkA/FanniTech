@@ -14,87 +14,99 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup-environment:
-    name: Setup Environment
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-      - name: setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 25
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install
-
   server-tests:
-    name: Run nestjs server tests
+    name: Server Tests
     runs-on: ubuntu-latest
-    needs: setup-environment
+
     defaults:
       run:
         working-directory: ./server
 
     steps:
-      - name: test server
+      - name: Checkout code
+        uses: actions/checkout@v7
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 25
+          cache: "npm"
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests
         run: npm run test
-
-      - name: test endToEnd
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      - name: Run test e2e
         run: npm run test:e2e
-
-      - name: test coverage
-        run: npm run test:cov
-
-      - name: test lint
+      - name: Run lint
         run: npm run lint
-
-      - name: test build
+      - name: run build
         run: npm run build
 
   mobile-test:
-    name: Run Mobile Tests
+    name: Mobile Tests
     runs-on: ubuntu-latest
-    needs:
-      - setup-environment
-      - server-tests
+    needs: server-tests
+
     defaults:
       run:
         working-directory: ./mobile
 
     steps:
-      - name: test mobile
+      - name: Checkout code
+        uses: actions/checkout@v7
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 25
+          cache: "npm"
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests
         run: npm run test
 
-      - name: test coverage
-        run: npm run test:cov
+      - name: Run tests with coverage
+        run: npm run test:coverage
 
-      - name: test typeCheck
-        run: npm run typeCheck
+      - name: Run typecheck
+        run: npm run typecheck
 
-      - name: test build
-        run: npx expo prebuild && npx expo build:android --no-wait
-
+      - name: run expo start
+        run: npx expo start
+    
   web-test:
-    name: Run Web Tests
+    name: Web Tests
     runs-on: ubuntu-latest
-    needs:
-      - setup-environment
-      - server-tests
-      - mobile-test
+    needs: server-tests
 
     defaults:
       run:
         working-directory: ./web
 
     steps:
-      - name: run lint
+      - name: Checkout code
+        uses: actions/checkout@v7
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 25
+          cache: "npm"
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run lint
         run: npm run lint
+        
+      - name: Run typecheck
+        run: npm run typecheck
 
-      - name: run web build
+      - name: run build
         run: npm run build

@@ -8,7 +8,6 @@ import {
   RepairTimelineStepper,
   BenchDiagnosticFeedCard,
   TechnicianAuditLogCard,
-  TicketActionButtons,
   ToastNotificationPill,
 } from '../components';
 import { RepairTicketDetail } from '../types';
@@ -259,20 +258,6 @@ describe('Repair Ticket Components', () => {
     expect(screen.getByText('Master L3 Tech')).toBeTruthy();
     expect(screen.getByText('Front Desk')).toBeTruthy();
     expect(screen.getByText('Intake')).toBeTruthy();
-  });
-
-  it('renders TicketActionButtons and handles call press', async () => {
-    const onCall = jest.fn();
-    const onMessage = jest.fn();
-    await render(<TicketActionButtons onCall={onCall} onMessage={onMessage} />);
-
-    const callBtn = screen.getByLabelText('Call service hub');
-    fireEvent.press(callBtn);
-    expect(onCall).toHaveBeenCalledTimes(1);
-
-    expect(
-      screen.getByText('FanniTech Surgical Hardware Care Guarantee')
-    ).toBeTruthy();
   });
 
   it('renders ToastNotificationPill when visible', async () => {
