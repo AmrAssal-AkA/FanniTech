@@ -79,10 +79,7 @@ jobs:
       - name: Run typecheck
         run: npm run typecheck
 
-      - name: run expo start
-        timeout-minutes: 2
-        run: npx expo start
-    
+
   web-test:
     name: Web Tests
     runs-on: ubuntu-latest
