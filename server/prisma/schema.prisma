@@ -1,6 +1,4 @@
 
-
-
 generator client {
   provider = "prisma-client"
   output   = "../src/prisma/generated"
@@ -8,12 +6,31 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+
 }
 
 enum UserRole {
   CUSTOMER @map("customer")
   ADMIN @map("admin")
   TECHNICIAN @map("technician")
+}
+
+enum AuthClient {
+  WEB @map("web")
+  MOBILE @map("mobile")
+}
+
+enum NotificationType {
+  REPAIR_REQUEST_RECEIVED
+  REPAIR_REQUEST_ACCEPTED
+  REPAIR_REQUEST_REJECTED
+  REPAIR_REQUEST_CANCELLED
+  TECHNICIAN_ASSIGNED
+  DIAGNOSTICS_COMPLETED
+  REPAIR_STATUS_UPDATED
+  REPAIR_READY_FOR_PICKUP
+  REPAIR_COMPLETED
+  NEW_REPAIR_REQUEST
 }
 
 
@@ -24,6 +41,176 @@ model User {
   password  String
   phone    String?
   role    UserRole   @default(CUSTOMER)
+  refreshTokens RefreshToken[]
+  customer Customer?
+  admin Admin?
+  technician Technician?
+  notifications Notification[]
+  EmailVerifyAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+model RefreshToken {
+  id     String  @id @default(uuid())
+  userId String
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId String
+  token   String @unique
+  deviceInfo String?
+  client AuthClient
+  revoke Boolean @default(false)
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+}
+
+enum RepairRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum RepairTicketStatus {
+  ACCEPTED
+  DIAGNOSING
+  IN_REPAIR
+  READY_FOR_PICKUP
+  COMPLETED
+  UNREPAIRABLE
+  CANCELLED
+}
+
+enum RepairTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Customer {
+  userId    String         @id
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     String?
+  devices   Device[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Device {
+  id             String          @id @default(uuid())
+  customerId     String
+  customer       Customer        @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  deviceType     String
+  brand          String
+  model          String
+  serialNumber   String?
+  repairRequests RepairRequest[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([customerId])
+}
+
+model RepairRequest {
+  id          String               @id @default(uuid())
+  deviceId    String
+  device      Device               @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  problem     String
+  description String
+  status      RepairRequestStatus  @default(PENDING)
+  images      RepairRequestImage[]
+  repairTicket RepairTicket?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([deviceId])
+  @@index([status])
+}
+
+model RepairRequestImage {
+  id        String        @id @default(uuid())
+  requestId String
+  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String
+  fileName  String
+  mimeType  String
+  size      Int
+  createdAt DateTime      @default(now())
+
+  @@index([requestId])
+}
+
+model Admin {
+  id String @id @default(uuid())
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+  employeeId String @unique @default(dbgenerated("next_admin_employee_id()"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Technician {
+  id String @id @default(uuid())
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+  employeeId String @unique @default(dbgenerated("next_technician_employee_id()"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  repairTickets RepairTicket[]
+
+  @@index([id])
+}
+
+model RepairTicket {
+  id            String               @id @default(uuid())
+  requestId     String               @unique
+  request       RepairRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  technicianId  String?
+  technician    Technician?          @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+  ticketNumber  String               @unique @default(dbgenerated("next_repair_ticket_number()"))
+  priority      RepairTicketPriority @default(MEDIUM)
+  status        RepairTicketStatus   @default(ACCEPTED)
+  diagnosis     String?
+  repairNotes   String?
+  statusHistory RepairStatusHistory[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  completedAt   DateTime?
+
+  @@index([technicianId])
+  @@index([status])
+  @@index([ticketNumber])
+  @@index([requestId])
+}
+
+model RepairStatusHistory {
+  id        String             @id @default(uuid())
+  ticketId  String
+  ticket    RepairTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  status    RepairTicketStatus
+  notes     String?
+  changedAt DateTime           @default(now())
+
+  @@index([ticketId])
 }

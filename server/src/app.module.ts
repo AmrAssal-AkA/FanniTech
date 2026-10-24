@@ -1,24 +1,43 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
+import {ThrottlerModule} from "@nestjs/throttler";
+
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { StorageModule } from './storage/storage.module.js';
+import { DevicesModule } from './devices/devices.module.js';
+import { RepairRequestsModule } from './repair-requests/repair-requests.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
+import { RepairRequestManagmentModule } from './repair-request-managment/repair-request-managment.module.js';
+import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module.js';
+import { TechnicianDashboardModule } from './technician-dashboard/technician-dashboard.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'server',
-    }),
+    ConfigModule.forRoot({isGlobal: true}),
     AuthenticationModule,
     PrismaModule,
+    StorageModule,
+    DevicesModule,
+    RepairRequestsModule,
+    NotificationsModule,
+    RepairRequestManagmentModule,
+    AdminDashboardModule,
+    TechnicianDashboardModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          limit: 50,
+          ttl: 60000
+        }
+      ]
+    })
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

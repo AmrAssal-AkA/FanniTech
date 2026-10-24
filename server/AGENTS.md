@@ -30,6 +30,7 @@ The Backend I Build using nestjs framework and TypeScript language. the nestjs p
 - `npm run start:dev` - Start the server in development mode with hot-reloading.
 - `npm run start:prod` - Start the server in production mode.
 - `npm run Start:debug` - Start the server in debug mode.
+- `nest generate <resource>` - Generate a new resource (module, controller, service, etc.) using the NestJS CLI.
 - `npm run lint` - Run the linter to check for code style and formatting issues.
 - `npm run test` - Run the unit tests using Jest.
 - `npm run test:watch` - Run the unit tests in watch mode, re-running tests on file changes.
@@ -301,3 +302,37 @@ src/
 └── utils/                 # Utility functions and helpers
 ```
 
+---
+
+# Best Practices for Backend Development
+
+- Use nestjs modules to organize the application into cohesive units of functionality, promoting maintainability and scalability.
+- generate resources using the NestJS CLI to ensure consistent code structure and adherence to best practices.
+- Use TypeScript for type safety and improved developer experience, leveraging its features to catch errors at compile time.
+- Implement authentication and authorization mechanisms to secure the application and protect sensitive data.
+- Use Prisma as the ORM for database management, providing a type-safe and efficient way to interact with the PostgreSQL database.
+- Implement unit and integration tests using Jest to ensure code quality and reliability, covering critical functionalities and edge cases.
+- Use Prettier and linting tools to enforce code style and formatting standards, promoting consistency across the codebase.
+
+---
+
+# General Rules
+
+**Must**:
+
+- MUST use TypeScript for all backend development to ensure type safety and improved developer experience.
+- MUST use NestJS framework for building the backend server, leveraging its modular architecture and features for scalability and maintainability.
+- MUST use Prisma as the ORM for database management, providing a type-safe and efficient way to interact with the PostgreSQL database.
+- MUST implement authentication and authorization mechanisms to secure the application and protect sensitive data, ensuring that only authorized users can access specific resources and functionalities.
+- MUST implement unit and integration tests using Jest to ensure code quality and reliability, covering critical functionalities and edge cases, and providing confidence in the correctness of the application.
+- MUST use Prettier and linting tools to enforce code style and formatting standards, promoting consistency across the codebase and improving readability for developers.
+- MUST follow best practices for backend development, including modular architecture, consistent code structure, and adherence to coding standards, to ensure maintainability, scalability, and ease of collaboration among developers.
+- MUST use DTOs (Data Transfer Objects) and zod validation pipes to handle request data parsing and validation, ensuring that incoming data is properly validated and sanitized before being processed by the application.
+
+**MUSTN'T**:
+
+- MUST NOT make helper function or utilities `parseBody` or `parseQuery` or `parseParams` in the controller layer, instead use DTOs and validation pipes to handle request data parsing and validation, ensuring that the application adheres to best practices for data handling and security.
+- MUST NOT use any third-party libraries for request data parsing or validation, as NestJS provides built-in mechanisms for handling these tasks through DTOs and validation pipes, promoting consistency and maintainability in the codebase.
+- MUST NOT expose sensitive information in API responses, such as passwords, tokens, or internal server errors, to protect user privacy and maintain the security of the application.
+- MUST NOT hardcode configuration values or secrets in the codebase, instead use environment variables and configuration files to manage sensitive information and application settings, ensuring that the application can be easily configured for different environments and deployments.
+- MUST NOT ignore error handling and logging, as proper error handling and logging are essential for diagnosing issues, monitoring application performance, and ensuring a smooth user experience. Implement comprehensive error handling and logging mechanisms to capture and report errors effectively.

@@ -16,3 +16,59 @@ export const UserRole = {
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const AuthClient = {
+  WEB: 'WEB',
+  MOBILE: 'MOBILE'
+} as const
+
+export type AuthClient = (typeof AuthClient)[keyof typeof AuthClient]
+
+
+export const NotificationType = {
+  REPAIR_REQUEST_RECEIVED: 'REPAIR_REQUEST_RECEIVED',
+  REPAIR_REQUEST_ACCEPTED: 'REPAIR_REQUEST_ACCEPTED',
+  REPAIR_REQUEST_REJECTED: 'REPAIR_REQUEST_REJECTED',
+  REPAIR_REQUEST_CANCELLED: 'REPAIR_REQUEST_CANCELLED',
+  TECHNICIAN_ASSIGNED: 'TECHNICIAN_ASSIGNED',
+  DIAGNOSTICS_COMPLETED: 'DIAGNOSTICS_COMPLETED',
+  REPAIR_STATUS_UPDATED: 'REPAIR_STATUS_UPDATED',
+  REPAIR_READY_FOR_PICKUP: 'REPAIR_READY_FOR_PICKUP',
+  REPAIR_COMPLETED: 'REPAIR_COMPLETED',
+  NEW_REPAIR_REQUEST: 'NEW_REPAIR_REQUEST'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const RepairRequestStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RepairRequestStatus = (typeof RepairRequestStatus)[keyof typeof RepairRequestStatus]
+
+
+export const RepairTicketStatus = {
+  ACCEPTED: 'ACCEPTED',
+  DIAGNOSING: 'DIAGNOSING',
+  IN_REPAIR: 'IN_REPAIR',
+  READY_FOR_PICKUP: 'READY_FOR_PICKUP',
+  COMPLETED: 'COMPLETED',
+  UNREPAIRABLE: 'UNREPAIRABLE',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RepairTicketStatus = (typeof RepairTicketStatus)[keyof typeof RepairTicketStatus]
+
+
+export const RepairTicketPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH'
+} as const
+
+export type RepairTicketPriority = (typeof RepairTicketPriority)[keyof typeof RepairTicketPriority]

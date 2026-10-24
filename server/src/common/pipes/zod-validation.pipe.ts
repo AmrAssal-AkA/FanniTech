@@ -5,10 +5,9 @@ import  * as zod from "zod"
 export class ZodValidationPipe implements PipeTransform {
     constructor(private readonly schema: zod.ZodSchema) {}
 
-    transform(value: any, metadata: ArgumentMetadata) {
+    transform(value: any, _metadata: ArgumentMetadata) {
         try {
-            this.schema.parse(value)
-            return value;
+            return this.schema.parse(value);
         }catch (error) {
             if (error instanceof zod.ZodError) {
                 throw new BadRequestException({

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "137790395488",
+    "project_id": "fannitech-bc4d6",
+    "storage_bucket": "fannitech-bc4d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137790395488:android:2707ea8ec91dde45039f05",
+        "android_client_info": {
+          "package_name": "com.amrassal.fannitech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9UCGcld3JXsW-KQitjBnrBKPUB841gJg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

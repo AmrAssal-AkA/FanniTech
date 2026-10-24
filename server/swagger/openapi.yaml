@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: FanniTech API
+  description: Authentication and application API documentation
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: System
+  - name: Authentication
+paths:
+  /:
+    get:
+      tags: [System]
+      summary: Check that the API is running
+      responses:
+        '200':
+          description: The API is online.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Hello World!
+  /api/v1/auth/mobile/register:
+    post:
+      tags: [Authentication]
+      summary: Register a mobile customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Customer registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: A user with this email already exists.
+  /api/v1/auth/mobile/login:
+    post:
+      tags: [Authentication]
+      summary: Log in a mobile customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login succeeded. Access and refresh tokens are set as HttpOnly cookies.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/auth/mobile/refresh:
+    post:
+      tags: [Authentication]
+      summary: Rotate mobile access and refresh tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Tokens were rotated and set as HttpOnly cookies.
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/auth/mobile/logout:
+    post:
+      tags: [Authentication]
+      summary: Revoke a mobile refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: The refresh token was revoked.
+components:
+  securitySchemes:
+    access-token:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    web-access-cookie:
+      type: apiKey
+      in: cookie
+      name: x-access-token
+    refresh-cookie:
+      type: apiKey
+      in: cookie
+      name: x-refresh-token
+  responses:
+    BadRequest:
+      description: The request body failed validation.
+    ServerError:
+      description: The operation failed.
+  schemas:
+    CreateUserRequest:
+      type: object
+      required: [email, name, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: newuser@example.com
+        name:
+          type: string
+          minLength: 2
+          maxLength: 20
+          example: New User
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 20
+          example: Password1
+        phone:
+          type: string
+          pattern: '^\+?\d{8,15}$'
+          example: '+201012345678'
+        deviceInfo:
+          type: string
+          maxLength: 200
+          example: iPhone 15
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 20
+          example: Password1
+        deviceInfo:
+          type: string
+          maxLength: 200
+          example: Android Pixel 8
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    RegisterResponse:
+      type: object
+      required: [user, accessToken, refreshToken]
+      properties:
+        user:
+          $ref: '#/components/schemas/PublicUser'
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    PublicUser:
+      type: object
+      required: [id, email, name, role, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [CUSTOMER]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

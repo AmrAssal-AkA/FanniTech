@@ -22,3 +22,53 @@ export * from './enums.js';
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model Customer
+ * 
+ */
+export type Customer = Prisma.CustomerModel
+/**
+ * Model Device
+ * 
+ */
+export type Device = Prisma.DeviceModel
+/**
+ * Model RepairRequest
+ * 
+ */
+export type RepairRequest = Prisma.RepairRequestModel
+/**
+ * Model RepairRequestImage
+ * 
+ */
+export type RepairRequestImage = Prisma.RepairRequestImageModel
+/**
+ * Model Admin
+ * 
+ */
+export type Admin = Prisma.AdminModel
+/**
+ * Model Technician
+ * 
+ */
+export type Technician = Prisma.TechnicianModel
+/**
+ * Model RepairTicket
+ * 
+ */
+export type RepairTicket = Prisma.RepairTicketModel
+/**
+ * Model RepairStatusHistory
+ * 
+ */
+export type RepairStatusHistory = Prisma.RepairStatusHistoryModel
