@@ -13,8 +13,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 
 
 
-const PORT = process.env.PORT || 8080;
-const HOST = process.env.HOST || '192.168.1.108';
+const PORT = Number(process.env.PORT) || 8080;
+const HOST = '0.0.0.0';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
