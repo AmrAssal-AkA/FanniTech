@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     const response = NextResponse.json({ success: true, data });
     response.cookies.set("x-access-token", data.accessToken, accessCookie);
     response.cookies.set("x-refresh-token", data.refreshToken, refreshCookie);
+
     return response;
   } catch (error: unknown) {
     const message =

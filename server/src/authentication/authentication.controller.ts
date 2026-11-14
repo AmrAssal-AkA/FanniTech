@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, UnauthorizedException, Res, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, ForbiddenException, BadRequestException, UnauthorizedException, Res, Get, Req, UseGuards, Logger } from '@nestjs/common';
 import type {Request, Response} from 'express';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
@@ -30,6 +30,8 @@ import {
 @Controller('api/v1/auth')
 @ApiTags('Authentication')
 export class AuthenticationController {
+    private readonly logger = new Logger();
+
     constructor(private readonly authenticationService: AuthenticationService) {}
 
     private setCookies(res: Response, t: { accessToken: string; refreshToken: string }, service: 'mobile' | 'web' = 'web') {
@@ -148,6 +150,7 @@ export class AuthenticationController {
             })
             return tokens;
         }catch (error) {
+            this.logger.error('Error during web login:', error);
             if (error instanceof ForbiddenException) {
                 throw error;
             }
