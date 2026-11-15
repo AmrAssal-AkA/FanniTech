@@ -16,13 +16,20 @@ import { useRouter } from "expo-router";
 import { ShieldCheck, Cpu, MailCheck } from "lucide-react-native";
 
 import { AuthHeader } from "../../components/common/AuthHeader";
-import { FanniTechLogo } from "../../components/common/FanniTechLogo";
 import { SignupForm } from "../../features/auth/components/SignupForm";
 import { useAuthSession } from "../../features/auth/session/AuthSession";
+import { useResponsive } from "../../hooks/useResponsive";
 
 export default function SignupScreen() {
   const router = useRouter();
   const { signUp } = useAuthSession();
+  const {
+    horizontalPaddingClass,
+    contentContainerClass,
+    headingTextClass,
+    bodyTextClass,
+    screenBottomPadding,
+  } = useResponsive();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSignupSubmit = (data: {
@@ -63,24 +70,26 @@ export default function SignupScreen() {
       <AuthHeader title="Sign Up" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-          className="flex-1 px-4"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: screenBottomPadding }}
+          className={`flex-1 ${horizontalPaddingClass}`}
         >
+          <View className={contentContainerClass}>
           {/* Header & Brand Intro */}
           <View className="items-center text-center mt-5 mb-5">
-            <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-2xl bg-surface-container-low p-2 shadow-sm border border-slate-100">
-              <Image source={require('../../../assets/icon.png')} className="h-20 w-20" />
+            <View className="mb-2.5 h-20 w-20 items-center justify-center rounded-2xl bg-surface-container-low p-2 shadow-sm border border-slate-100">
+              <Image source={require('../../../assets/icon.png')} className="h-16 w-16" />
             </View>
 
-            <Text className="text-2xl font-bold tracking-tight text-on-surface">
+            <Text className={`${headingTextClass} font-bold tracking-tight text-on-surface text-center`}>
               Create Customer Account
             </Text>
-            <Text className="mt-1 max-w-[320px] text-center text-sm leading-5 text-on-surface-variant">
+            <Text className={`mt-1 max-w-[320px] text-center ${bodyTextClass} leading-5 text-on-surface-variant`}>
               Register to submit repair requests and track diagnostics in real
               time
             </Text>
@@ -129,6 +138,7 @@ export default function SignupScreen() {
               <Text className="text-sm font-bold text-secondary">Log In</Text>
             </TouchableOpacity>
           </View>
+        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

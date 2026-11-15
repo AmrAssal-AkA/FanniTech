@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useResponsive } from '../../hooks/useResponsive';
 
 import { HomeHeader } from '../../features/home';
 import {
@@ -27,6 +28,7 @@ import {
 
 export default function DeviceScreen() {
   const router = useRouter();
+  const { horizontalPaddingClass, contentContainerClass, tabBarBottomPadding } = useResponsive();
   const {
     devices,
     registeredCount,
@@ -89,16 +91,18 @@ export default function DeviceScreen() {
   };
 
   const renderDevice: ListRenderItem<DeviceWithRepairState> = ({ item }) => (
-    <DeviceCard
-      device={item}
-      onViewDetails={openDeviceDetails}
-      onPrimaryAction={handlePrimaryAction}
-      onOpenMenu={openDeviceMenu}
-    />
+    <View className={contentContainerClass}>
+      <DeviceCard
+        device={item}
+        onViewDetails={openDeviceDetails}
+        onPrimaryAction={handlePrimaryAction}
+        onOpenMenu={openDeviceMenu}
+      />
+    </View>
   );
 
   const listHeader = (
-    <View className="gap-4 mb-4">
+    <View className={`gap-4 mb-4 ${contentContainerClass}`}>
       <DevicesHeader registeredCount={registeredCount} />
       <RegisterDeviceButton onPress={handleRegisterDevice} />
     </View>
@@ -138,8 +142,9 @@ export default function DeviceScreen() {
           ListHeaderComponent={listHeader}
           ListEmptyComponent={listEmpty}
           showsVerticalScrollIndicator={false}
-          className="flex-1 px-4"
-          contentContainerStyle={{ paddingBottom: 112, paddingTop: 16 }}
+          className={`flex-1 ${horizontalPaddingClass}`}
+          contentContainerStyle={{ paddingBottom: tabBarBottomPadding, paddingTop: 16 }}
+          ListHeaderComponentStyle={{ width: '100%' }}
           ItemSeparatorComponent={() => <View className="h-4" />}
           refreshControl={
             <RefreshControl

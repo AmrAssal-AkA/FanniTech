@@ -18,9 +18,11 @@ import {
   AlertItem,
 } from "../../features/alerts";
 import { HomeHeader } from "../../features/home";
+import { useResponsive } from "../../hooks/useResponsive";
 
 export default function AlertScreen() {
   const router = useRouter();
+  const { horizontalPaddingClass, contentContainerClass, tabBarBottomPadding } = useResponsive();
   const {
     todayAlerts,
     earlierAlerts,
@@ -85,7 +87,7 @@ export default function AlertScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 112 }}
+        contentContainerStyle={{ paddingBottom: tabBarBottomPadding }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -95,42 +97,44 @@ export default function AlertScreen() {
           />
         }
       >
-        {/* Title, Unread Counter & Mark All Read */}
-        <AlertHeader unreadCount={unreadCount} onMarkAllRead={markAllAsRead} />
+        <View className={contentContainerClass}>
+          {/* Title, Unread Counter & Mark All Read */}
+          <AlertHeader unreadCount={unreadCount} onMarkAllRead={markAllAsRead} />
 
-        {/* Filter Category Tabs */}
-        <AlertFilterTabs
-          activeFilter={activeFilter}
-          counts={counts}
-          onSelectFilter={setActiveFilter}
-        />
-
-        {/* Alerts List by Section */}
-        <View className="px-4 mt-2 flex-col gap-5">
-          {/* Today Section */}
-          <AlertSectionGroup
-            title="Today"
-            badge={
-              activeTodayCount > 0
-                ? `${activeTodayCount} Active Updates`
-                : undefined
-            }
-            alerts={todayAlerts}
-            onAlertPress={handleAlertPress}
-            onActionPress={handleActionPress}
+          {/* Filter Category Tabs */}
+          <AlertFilterTabs
+            activeFilter={activeFilter}
+            counts={counts}
+            onSelectFilter={setActiveFilter}
           />
 
-          {/* Earlier This Week Section */}
-          <AlertSectionGroup
-            title="Earlier This Week"
-            alerts={earlierAlerts}
-            onAlertPress={handleAlertPress}
-            onActionPress={handleActionPress}
-          />
+          {/* Alerts List by Section */}
+          <View className={`${horizontalPaddingClass} mt-2 flex-col gap-5`}>
+            {/* Today Section */}
+            <AlertSectionGroup
+              title="Today"
+              badge={
+                activeTodayCount > 0
+                  ? `${activeTodayCount} Active Updates`
+                  : undefined
+              }
+              alerts={todayAlerts}
+              onAlertPress={handleAlertPress}
+              onActionPress={handleActionPress}
+            />
+
+            {/* Earlier This Week Section */}
+            <AlertSectionGroup
+              title="Earlier This Week"
+              alerts={earlierAlerts}
+              onAlertPress={handleAlertPress}
+              onActionPress={handleActionPress}
+            />
+          </View>
+
+          {/* All Caught Up Status Micro-Card */}
+          <AllCaughtUp isFiltered={activeFilter !== "all"} />
         </View>
-
-        {/* All Caught Up Status Micro-Card */}
-        <AllCaughtUp isFiltered={activeFilter !== "all"} />
       </ScrollView>
     </SafeAreaView>
   );

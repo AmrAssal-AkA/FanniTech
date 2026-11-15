@@ -30,9 +30,16 @@ import {
   useProfile,
 } from "../../features/profile";
 import { HomeHeader } from "../../features/home";
+import { useResponsive } from "../../hooks/useResponsive";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const {
+    horizontalPaddingClass,
+    contentContainerClass,
+    captionTextClass,
+    tabBarBottomPadding,
+  } = useResponsive();
   const {
     name,
     email,
@@ -89,11 +96,10 @@ export default function ProfileScreen() {
       {/* Scrollable Profile Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className="flex-1"
+        className={`flex-1 ${horizontalPaddingClass}`}
         contentContainerStyle={{
-          paddingHorizontal: 16,
           paddingTop: 16,
-          paddingBottom: 120,
+          paddingBottom: tabBarBottomPadding,
         }}
         refreshControl={
           <RefreshControl
@@ -104,7 +110,7 @@ export default function ProfileScreen() {
           />
         }
       >
-        <View className="gap-5">
+        <View className={`gap-5 ${contentContainerClass}`}>
           {/* Profile Header Card */}
           <ProfileHeaderCard
             profile={{ name, email, phone, initials, isVerified, memberSince }}
@@ -197,11 +203,11 @@ export default function ProfileScreen() {
           <View className="items-center py-1 gap-1">
             <View className="flex-row items-center gap-1.5">
               <Terminal size={12} color="#757682" />
-              <Text className="text-outline text-xs font-bold tracking-wider">
+              <Text className={`text-outline ${captionTextClass} font-bold tracking-wider`}>
                 FanniTech Mobile V1.0.0
               </Text>
             </View>
-            <Text className="text-on-surface-variant text-xs">
+            <Text className={`text-on-surface-variant ${captionTextClass} text-center`}>
               Surgical Hardware Tracking & Diagnostics Engine
             </Text>
           </View>

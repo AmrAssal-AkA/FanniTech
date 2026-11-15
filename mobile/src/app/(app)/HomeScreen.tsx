@@ -15,9 +15,11 @@ import {
 } from '../../features/home';
 
 import { useNotificationStore } from '../../stores/notificationStore';
+import { useResponsive } from '../../hooks/useResponsive';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { horizontalPaddingClass, contentContainerClass, tabBarBottomPadding } = useResponsive();
   const { unreadCount } = useNotificationStore();
   const {
     userName,
@@ -99,8 +101,8 @@ export default function HomeScreen() {
       {/* Main Scrollable Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className="flex-1 px-4"
-        contentContainerStyle={{ paddingBottom: 112, paddingTop: 8 }}
+        className={`flex-1 ${horizontalPaddingClass}`}
+        contentContainerStyle={{ paddingBottom: tabBarBottomPadding, paddingTop: 8 }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -110,7 +112,7 @@ export default function HomeScreen() {
           />
         }
       >
-        <View className="space-y-5">
+        <View className={`gap-5 ${contentContainerClass}`}>
           {/* Top Greeting & Lab Status */}
           <LabStatusHeader
             userName={userName}

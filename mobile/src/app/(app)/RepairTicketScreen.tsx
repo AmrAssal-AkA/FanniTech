@@ -4,9 +4,11 @@ import {
   StatusBar,
   RefreshControl,
   Linking,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useResponsive } from '../../hooks/useResponsive';
 
 import {
   useRepairTicket,
@@ -24,6 +26,7 @@ import {
 
 export default function RepairTicketScreen() {
   const router = useRouter();
+  const { contentContainerClass, screenBottomPadding } = useResponsive();
   const params = useLocalSearchParams<{
     ticketNumber?: string | string[];
     ticketId?: string | string[];
@@ -127,7 +130,7 @@ export default function RepairTicketScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: screenBottomPadding }}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
@@ -137,42 +140,41 @@ export default function RepairTicketScreen() {
           />
         }
       >
-        {/* Ticket Reference & Live Status Header */}
-        <TicketMetaHeader
-          ticketNumber={ticket.ticketNumber}
-          requestNumber={ticket.requestNumber}
-          isLiveConnected={isLiveConnected}
-          onCopyTicket={handleCopyTicket}
-        />
+        <View className={contentContainerClass}>
+          {/* Ticket Reference & Live Status Header */}
+          <TicketMetaHeader
+            ticketNumber={ticket.ticketNumber}
+            requestNumber={ticket.requestNumber}
+            isLiveConnected={isLiveConnected}
+            onCopyTicket={handleCopyTicket}
+          />
 
-        {/* Hero Diagnostic Status Banner */}
-        <DiagnosticHeroCard
-          status={ticket.status}
-          statusDescription={ticket.statusDescription}
-        />
+          {/* Hero Diagnostic Status Banner */}
+          <DiagnosticHeroCard
+            status={ticket.status}
+            statusDescription={ticket.statusDescription}
+          />
 
-        {/* Device Summary Card with Reported Issue and Specs */}
-        <DeviceSummaryCard
-          device={ticket.device}
-          problem={ticket.problem}
-          description={ticket.description}
-        />
+          {/* Device Summary Card with Reported Issue and Specs */}
+          <DeviceSummaryCard
+            device={ticket.device}
+            problem={ticket.problem}
+            description={ticket.description}
+          />
 
-        {/* Visual 5-Stage Repair Timeline Stepper */}
-        <RepairTimelineStepper
-          timeline={ticket.timeline}
-          currentStage={ticket.currentStage}
-          totalStages={ticket.totalStages}
-        />
+          {/* Visual 5-Stage Repair Timeline Stepper */}
+          <RepairTimelineStepper
+            timeline={ticket.timeline}
+            currentStage={ticket.currentStage}
+            totalStages={ticket.totalStages}
+          />
 
-        {/* Bench Diagnostic Feed Photo & Telemetry (if available) */}
-        <BenchDiagnosticFeedCard feed={ticket.diagnosticFeed} />
+          {/* Bench Diagnostic Feed Photo & Telemetry (if available) */}
+          <BenchDiagnosticFeedCard feed={ticket.diagnosticFeed} />
 
-        {/* Technician Audit Log */}
-        <TechnicianAuditLogCard logs={ticket.auditLogs} />
-
-
-
+          {/* Technician Audit Log */}
+          <TechnicianAuditLogCard logs={ticket.auditLogs} />
+        </View>
       </ScrollView>
 
       {/* Floating Interactive Toast Feedback Pill */}

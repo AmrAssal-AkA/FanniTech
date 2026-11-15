@@ -46,6 +46,7 @@ import {
   RegisterDeviceSheet,
   useGetDevices,
 } from "../../features/devices";
+import { useResponsive } from "../../hooks/useResponsive";
 
 interface QuickIssueChip {
   id: string;
@@ -81,6 +82,7 @@ const NAV_BAR_TOTAL_HEIGHT = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM;
 
 export default function RepairRequestScreen() {
   const router = useRouter();
+  const { horizontalPaddingClass, subheadingTextClass, screenBottomPadding } = useResponsive();
   const insets = useSafeAreaInsets();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
@@ -332,12 +334,12 @@ export default function RepairRequestScreen() {
       edges={["top", "left", "right"]}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 w-full"
       >
         {/* TOP APP HEADER */}
-        <View className="w-full border-b border-surface-container-high/60 bg-surface/90 px-4">
-          <View className="h-14 w-full max-w-md mx-auto flex-row items-center justify-between">
+        <View className={`w-full border-b border-surface-container-high/60 bg-surface/90 ${horizontalPaddingClass}`}>
+          <View className="h-14 w-full max-w-2xl mx-auto flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <TouchableOpacity
                 onPress={() => router.back()}
@@ -348,7 +350,7 @@ export default function RepairRequestScreen() {
               >
                 <ArrowLeft size={22} color="#131b2e" />
               </TouchableOpacity>
-              <Text className="text-lg font-bold tracking-tight text-on-surface">
+              <Text className={`${subheadingTextClass} font-bold tracking-tight text-on-surface`}>
                 Book Service
               </Text>
             </View>
@@ -366,16 +368,15 @@ export default function RepairRequestScreen() {
 
         {/* SCROLLABLE FORM CONTENT */}
         <ScrollView
-          className="flex-1 w-full"
+          className={`flex-1 w-full ${horizontalPaddingClass}`}
           contentContainerStyle={{
-            paddingHorizontal: 16,
             paddingTop: 14,
-            paddingBottom: 24,
+            paddingBottom: screenBottomPadding,
           }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="w-full max-w-md mx-auto">
+          <View className="w-full max-w-2xl mx-auto">
           {/* STEPPER & PROGRESS HEADER */}
           <View className="mb-5">
             <View className="flex-row items-center justify-between">

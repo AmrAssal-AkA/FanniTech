@@ -16,13 +16,21 @@ import { useRouter } from 'expo-router';
 import { ShieldCheck } from 'lucide-react-native';
 
 import { AuthHeader } from '../../components/common/AuthHeader';
-import { FanniTechLogo } from '../../components/common/FanniTechLogo';
 import { LoginForm } from '../../features/auth/components/LoginForm';
 import { useAuthSession } from '../../features/auth/session/AuthSession';
+import { useResponsive } from '../../hooks/useResponsive';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { signIn } = useAuthSession();
+  const {
+    horizontalPaddingClass,
+    contentContainerClass,
+    headingTextClass,
+    bodyTextClass,
+    captionTextClass,
+    screenBottomPadding,
+  } = useResponsive();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleLoginSubmit = async (data: { email: string; pass: string; remember: boolean }) => {
@@ -47,14 +55,16 @@ export default function LoginScreen() {
       <AuthHeader title="Login" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-          className="flex-1 px-4"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: screenBottomPadding }}
+          className={`flex-1 ${horizontalPaddingClass}`}
         >
+          <View className={contentContainerClass}>
           {/* Brand & Intro Section */}
           <View className="items-center text-center mt-6 mb-6">
             <View className="relative mb-3.5 items-center justify-center rounded-2xl bg-surface-container p-3 shadow-sm border border-slate-100">
@@ -72,10 +82,10 @@ export default function LoginScreen() {
               </Text>
             </View>
 
-            <Text className="text-2xl font-bold tracking-tight text-on-surface">
+            <Text className={`${headingTextClass} font-bold tracking-tight text-on-surface`}>
               Welcome Back
             </Text>
-            <Text className="mt-1.5 max-w-[280px] text-center text-sm leading-5 text-on-surface-variant">
+            <Text className={`mt-1.5 max-w-[300px] text-center ${bodyTextClass} leading-5 text-on-surface-variant`}>
               Sign in to track your computer repairs and manage registered devices
             </Text>
           </View>
@@ -94,7 +104,7 @@ export default function LoginScreen() {
             </View>
             <View className="flex-1">
               <View className="flex-row items-center gap-1.5">
-                <Text className="text-xs font-semibold text-on-surface">
+                <Text className={`${captionTextClass} font-semibold text-on-surface`}>
                   Authorized Security Protocol
                 </Text>
                 <View className="h-1.5 w-1.5 rounded-full bg-secondary" />
@@ -107,7 +117,7 @@ export default function LoginScreen() {
 
           {/* Sign Up Prompt Footer */}
           <View className="my-8 flex-row items-center justify-center gap-1.5">
-            <Text className="text-sm text-on-surface-variant">
+            <Text className={`${bodyTextClass} text-on-surface-variant`}>
               Don't have an account?
             </Text>
             <TouchableOpacity
@@ -116,8 +126,9 @@ export default function LoginScreen() {
               className="py-1 px-1"
               accessibilityRole="button"
             >
-              <Text className="text-sm font-bold text-secondary">Sign Up</Text>
+              <Text className={`${bodyTextClass} font-bold text-secondary`}>Sign Up</Text>
             </TouchableOpacity>
+          </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
