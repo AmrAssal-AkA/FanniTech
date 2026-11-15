@@ -7,19 +7,35 @@ export class AuthenticationGuard implements CanActivate {
   constructor(private jwt: JwtService) {}
 
 
-  canActivate(ctx: ExecutionContext ){
+  canActivate(ctx: ExecutionContext) {
     const req = ctx.switchToHttp().getRequest();
-    const cookie = req.cookies['x-access-token'];
-    const Barear = req.headers?.authorization?.replace('Bearer ', '');
-    const token = cookie ?? Barear;
-    if (!token) throw new UnauthorizedException();
+    const cookie = req.cookies?.['x-access-token'];
+    const authHeader: string | undefined = req.headers?.authorization;
+    const bearer = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : authHeader?.replace('Bearer ', '');
 
-    try {
-      const payload = this.jwt.verify(token, {audience: cookie ? 'web' : 'mobile'});
-      req.user = payload;
-      return true;
-    }catch (error) {
-      throw new UnauthorizedException();
+    if (!cookie && !bearer) throw new UnauthorizedException();
+
+    if (cookie) {
+      try {
+        req.user = this.jwt.verify(cookie, { audience: 'web' });
+        return true;
+      } catch {
+        // React Native persists Set-Cookie from mobile/login; fall back to Bearer when present
+        if (!bearer) throw new UnauthorizedException();
+      }
     }
+
+    if (bearer) {
+      try {
+        req.user = this.jwt.verify(bearer, { audience: 'mobile' });
+        return true;
+      } catch {
+        throw new UnauthorizedException();
+      }
+    }
+
+    throw new UnauthorizedException();
   }
 }

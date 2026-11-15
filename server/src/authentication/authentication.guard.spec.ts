@@ -99,4 +99,21 @@ describe('AuthenticationGuard', () => {
     // Cookie → audience 'web'
     expect(jwtService.verify).toHaveBeenCalledWith('cookie-token', { audience: 'web' });
   });
+
+  it('should fall back to Bearer token (mobile) when cookie fails web audience verification', () => {
+    vi.spyOn(jwtService, 'verify')
+      .mockImplementationOnce(() => {
+        throw new Error('jwt audience invalid. expected: web');
+      })
+      .mockReturnValueOnce({ sub: 'user-id', role: 'CUSTOMER' } as any);
+
+    const ctx = makeContext({ cookie: 'mobile-cookie-token', authHeader: 'valid-mobile-bearer' });
+
+    const result = guard.canActivate(ctx);
+
+    expect(result).toBe(true);
+    expect(jwtService.verify).toHaveBeenNthCalledWith(1, 'mobile-cookie-token', { audience: 'web' });
+    expect(jwtService.verify).toHaveBeenNthCalledWith(2, 'valid-mobile-bearer', { audience: 'mobile' });
+    expect(ctx.req.user).toEqual({ sub: 'user-id', role: 'CUSTOMER' });
+  });
 });

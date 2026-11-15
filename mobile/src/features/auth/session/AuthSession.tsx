@@ -30,11 +30,19 @@ export function AuthSessionProvider({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     let mounted = true;
-    void tokenStorage.getUser<AuthUser>().then((storedUser) => {
+    void Promise.all([
+      tokenStorage.getUser<AuthUser>(),
+      tokenStorage.getAccess(),
+      tokenStorage.getRefresh(),
+    ]).then(([storedUser, accessToken, refreshToken]) => {
       if (!mounted) return;
-      setUser(storedUser);
-      setStatus(storedUser ? 'authenticated' : 'unauthenticated');
-      if (storedUser) {
+      const hasSession = Boolean(storedUser && (accessToken || refreshToken));
+      if (!hasSession && storedUser) {
+        void tokenStorage.clear();
+      }
+      setUser(hasSession ? storedUser : null);
+      setStatus(hasSession ? 'authenticated' : 'unauthenticated');
+      if (hasSession) {
         void initRealtime();
       }
     });

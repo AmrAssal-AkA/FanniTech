@@ -15,7 +15,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 
 const PORT = Number(process.env.PORT) || 8080;
 const HOST = '0.0.0.0';
-const corsOrigin = process.env.WEB_URL && process.env.MOBILE_URL;
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -23,7 +23,7 @@ async function bootstrap() {
   });
   app.useWebSocketAdapter(new IoAdapter(app));
   app.enableCors({
-    origin:  corsOrigin,
+    origin:  [process.env.WEB_URL as string],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

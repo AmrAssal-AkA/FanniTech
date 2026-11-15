@@ -6,7 +6,10 @@ export const DevicesService = {
   getDevices: () =>
     serverClient
       .get<ApiResponse<ApiDevice[]>>('/api/v1/devices')
-      .then((response) => response.data.data),
+      .then((response) => response.data.data).catch((error) => {
+        console.error('Error fetching devices:', error);
+        throw error;
+      }),
 
   registerDevice: (input: RegisterDeviceInput) => {
     const { serialNumber, ...requiredFields } = input;
