@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/prisma/generated"
@@ -6,17 +5,174 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
 
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  password      String
+  phone         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  role          UserRole       @default(CUSTOMER)
+  EmailVerifyAt DateTime?
+  admin         Admin?
+  customer      Customer?
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+  technician    Technician?
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+model RefreshToken {
+  id         String     @id @default(uuid())
+  userId     String
+  familyId   String
+  deviceInfo String?
+  expiresAt  DateTime
+  createdAt  DateTime   @default(now())
+  client     AuthClient
+  usedAt     DateTime?
+  token      String     @unique
+  revoke     Boolean    @default(false)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+}
+
+model Customer {
+  userId    String   @id
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  devices   Device[]
+}
+
+model Device {
+  id             String          @id @default(uuid())
+  customerId     String
+  deviceType     String
+  brand          String
+  model          String
+  serialNumber   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  customer       Customer        @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  repairRequests RepairRequest[]
+
+  @@index([customerId])
+}
+
+model RepairRequest {
+  id           String               @id @default(uuid())
+  deviceId     String
+  problem      String
+  description  String
+  status       RepairRequestStatus  @default(PENDING)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  device       Device               @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  images       RepairRequestImage[]
+  repairTicket RepairTicket?
+
+  @@index([deviceId])
+  @@index([status])
+}
+
+model RepairRequestImage {
+  id        String        @id @default(uuid())
+  requestId String
+  url       String
+  publicId  String
+  fileName  String
+  mimeType  String
+  size      Int
+  createdAt DateTime      @default(now())
+  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+}
+
+model Admin {
+  id         String   @id @default(uuid())
+  employeeId String   @unique @default(dbgenerated("next_admin_employee_id()"))
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@index([id])
+}
+
+model Technician {
+  id            String         @id @default(uuid())
+  employeeId    String         @unique @default(dbgenerated("next_technician_employee_id()"))
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  repairTickets RepairTicket[]
+  user          User           @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@index([id])
+}
+
+model RepairTicket {
+  id            String                @id @default(uuid())
+  requestId     String                @unique
+  technicianId  String?
+  ticketNumber  String                @unique @default(dbgenerated("next_repair_ticket_number()"))
+  priority      RepairTicketPriority  @default(MEDIUM)
+  status        RepairTicketStatus    @default(ACCEPTED)
+  diagnosis     String?
+  repairNotes   String?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  completedAt   DateTime?
+  statusHistory RepairStatusHistory[]
+  request       RepairRequest         @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  technician    Technician?           @relation(fields: [technicianId], references: [id])
+
+  @@index([technicianId])
+  @@index([status])
+  @@index([ticketNumber])
+  @@index([requestId])
+}
+
+model RepairStatusHistory {
+  id        String             @id @default(uuid())
+  ticketId  String
+  status    RepairTicketStatus
+  notes     String?
+  changedAt DateTime           @default(now())
+  ticket    RepairTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
 }
 
 enum UserRole {
-  CUSTOMER @map("customer")
-  ADMIN @map("admin")
+  CUSTOMER   @map("customer")
+  ADMIN      @map("admin")
   TECHNICIAN @map("technician")
 }
 
 enum AuthClient {
-  WEB @map("web")
+  WEB    @map("web")
   MOBILE @map("mobile")
 }
 
@@ -31,57 +187,6 @@ enum NotificationType {
   REPAIR_READY_FOR_PICKUP
   REPAIR_COMPLETED
   NEW_REPAIR_REQUEST
-}
-
-
-model User {
-  id       String   @id @default(uuid())
-  email     String   @unique
-  name     String
-  password  String
-  phone    String?
-  role    UserRole   @default(CUSTOMER)
-  refreshTokens RefreshToken[]
-  customer Customer?
-  admin Admin?
-  technician Technician?
-  notifications Notification[]
-  EmailVerifyAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      NotificationType
-  title     String
-  body      String
-  data      Json?
-  readAt    DateTime?
-  createdAt DateTime         @default(now())
-
-  @@index([userId])
-  @@index([userId, readAt])
-}
-
-model RefreshToken {
-  id     String  @id @default(uuid())
-  userId String
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  familyId String
-  token   String @unique
-  deviceInfo String?
-  client AuthClient
-  revoke Boolean @default(false)
-  expiresAt DateTime
-  usedAt DateTime?
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([familyId])
-  @@index([expiresAt])
 }
 
 enum RepairRequestStatus {
@@ -105,112 +210,4 @@ enum RepairTicketPriority {
   LOW
   MEDIUM
   HIGH
-}
-
-model Customer {
-  userId    String         @id
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes     String?
-  devices   Device[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-}
-
-model Device {
-  id             String          @id @default(uuid())
-  customerId     String
-  customer       Customer        @relation(fields: [customerId], references: [userId], onDelete: Cascade)
-  deviceType     String
-  brand          String
-  model          String
-  serialNumber   String?
-  repairRequests RepairRequest[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-
-  @@index([customerId])
-}
-
-model RepairRequest {
-  id          String               @id @default(uuid())
-  deviceId    String
-  device      Device               @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  problem     String
-  description String
-  status      RepairRequestStatus  @default(PENDING)
-  images      RepairRequestImage[]
-  repairTicket RepairTicket?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-
-  @@index([deviceId])
-  @@index([status])
-}
-
-model RepairRequestImage {
-  id        String        @id @default(uuid())
-  requestId String
-  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  url       String
-  publicId  String
-  fileName  String
-  mimeType  String
-  size      Int
-  createdAt DateTime      @default(now())
-
-  @@index([requestId])
-}
-
-model Admin {
-  id String @id @default(uuid())
-  user User @relation(fields: [id], references: [id], onDelete: Cascade)
-  employeeId String @unique @default(dbgenerated("next_admin_employee_id()"))
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([id])
-}
-
-model Technician {
-  id String @id @default(uuid())
-  user User @relation(fields: [id], references: [id], onDelete: Cascade)
-  employeeId String @unique @default(dbgenerated("next_technician_employee_id()"))
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  repairTickets RepairTicket[]
-
-  @@index([id])
-}
-
-model RepairTicket {
-  id            String               @id @default(uuid())
-  requestId     String               @unique
-  request       RepairRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  technicianId  String?
-  technician    Technician?          @relation(fields: [technicianId], references: [id], onDelete: SetNull)
-  ticketNumber  String               @unique @default(dbgenerated("next_repair_ticket_number()"))
-  priority      RepairTicketPriority @default(MEDIUM)
-  status        RepairTicketStatus   @default(ACCEPTED)
-  diagnosis     String?
-  repairNotes   String?
-  statusHistory RepairStatusHistory[]
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  completedAt   DateTime?
-
-  @@index([technicianId])
-  @@index([status])
-  @@index([ticketNumber])
-  @@index([requestId])
-}
-
-model RepairStatusHistory {
-  id        String             @id @default(uuid())
-  ticketId  String
-  ticket    RepairTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  status    RepairTicketStatus
-  notes     String?
-  changedAt DateTime           @default(now())
-
-  @@index([ticketId])
 }

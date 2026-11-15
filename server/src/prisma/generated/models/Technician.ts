@@ -174,8 +174,8 @@ export type TechnicianWhereInput = {
   employeeId?: Prisma.StringFilter<"Technician"> | string
   createdAt?: Prisma.DateTimeFilter<"Technician"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Technician"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   repairTickets?: Prisma.RepairTicketListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type TechnicianOrderByWithRelationInput = {
@@ -183,8 +183,8 @@ export type TechnicianOrderByWithRelationInput = {
   employeeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   repairTickets?: Prisma.RepairTicketOrderByRelationAggregateInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type TechnicianWhereUniqueInput = Prisma.AtLeast<{
@@ -195,8 +195,8 @@ export type TechnicianWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TechnicianWhereInput | Prisma.TechnicianWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"Technician"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Technician"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   repairTickets?: Prisma.RepairTicketListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "employeeId">
 
 export type TechnicianOrderByWithAggregationInput = {
@@ -223,8 +223,8 @@ export type TechnicianCreateInput = {
   employeeId?: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  user?: Prisma.UserCreateNestedOneWithoutTechnicianInput
   repairTickets?: Prisma.RepairTicketCreateNestedManyWithoutTechnicianInput
+  user?: Prisma.UserCreateNestedOneWithoutTechnicianInput
 }
 
 export type TechnicianUncheckedCreateInput = {
@@ -239,8 +239,8 @@ export type TechnicianUpdateInput = {
   employeeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutTechnicianNestedInput
   repairTickets?: Prisma.RepairTicketUpdateManyWithoutTechnicianNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutTechnicianNestedInput
 }
 
 export type TechnicianUncheckedUpdateInput = {
@@ -469,8 +469,8 @@ export type TechnicianSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   employeeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   repairTickets?: boolean | Prisma.Technician$repairTicketsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TechnicianCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["technician"]>
 
@@ -499,8 +499,8 @@ export type TechnicianSelectScalar = {
 
 export type TechnicianOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeId" | "createdAt" | "updatedAt", ExtArgs["result"]["technician"]>
 export type TechnicianInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   repairTickets?: boolean | Prisma.Technician$repairTicketsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TechnicianCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TechnicianIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -513,8 +513,8 @@ export type TechnicianIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 export type $TechnicianPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Technician"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     repairTickets: Prisma.$RepairTicketPayload<ExtArgs>[]
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -915,8 +915,8 @@ readonly fields: TechnicianFieldRefs;
  */
 export interface Prisma__TechnicianClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   repairTickets<T extends Prisma.Technician$repairTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Technician$repairTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepairTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

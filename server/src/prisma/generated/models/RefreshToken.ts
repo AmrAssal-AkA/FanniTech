@@ -28,39 +28,39 @@ export type RefreshTokenMinAggregateOutputType = {
   id: string | null
   userId: string | null
   familyId: string | null
-  token: string | null
   deviceInfo: string | null
-  client: $Enums.AuthClient | null
-  revoke: boolean | null
   expiresAt: Date | null
-  usedAt: Date | null
   createdAt: Date | null
+  client: $Enums.AuthClient | null
+  usedAt: Date | null
+  token: string | null
+  revoke: boolean | null
 }
 
 export type RefreshTokenMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   familyId: string | null
-  token: string | null
   deviceInfo: string | null
-  client: $Enums.AuthClient | null
-  revoke: boolean | null
   expiresAt: Date | null
-  usedAt: Date | null
   createdAt: Date | null
+  client: $Enums.AuthClient | null
+  usedAt: Date | null
+  token: string | null
+  revoke: boolean | null
 }
 
 export type RefreshTokenCountAggregateOutputType = {
   id: number
   userId: number
   familyId: number
-  token: number
   deviceInfo: number
-  client: number
-  revoke: number
   expiresAt: number
-  usedAt: number
   createdAt: number
+  client: number
+  usedAt: number
+  token: number
+  revoke: number
   _all: number
 }
 
@@ -69,39 +69,39 @@ export type RefreshTokenMinAggregateInputType = {
   id?: true
   userId?: true
   familyId?: true
-  token?: true
   deviceInfo?: true
-  client?: true
-  revoke?: true
   expiresAt?: true
-  usedAt?: true
   createdAt?: true
+  client?: true
+  usedAt?: true
+  token?: true
+  revoke?: true
 }
 
 export type RefreshTokenMaxAggregateInputType = {
   id?: true
   userId?: true
   familyId?: true
-  token?: true
   deviceInfo?: true
-  client?: true
-  revoke?: true
   expiresAt?: true
-  usedAt?: true
   createdAt?: true
+  client?: true
+  usedAt?: true
+  token?: true
+  revoke?: true
 }
 
 export type RefreshTokenCountAggregateInputType = {
   id?: true
   userId?: true
   familyId?: true
-  token?: true
   deviceInfo?: true
-  client?: true
-  revoke?: true
   expiresAt?: true
-  usedAt?: true
   createdAt?: true
+  client?: true
+  usedAt?: true
+  token?: true
+  revoke?: true
   _all?: true
 }
 
@@ -181,13 +181,13 @@ export type RefreshTokenGroupByOutputType = {
   id: string
   userId: string
   familyId: string
-  token: string
   deviceInfo: string | null
-  client: $Enums.AuthClient
-  revoke: boolean
   expiresAt: Date
-  usedAt: Date | null
   createdAt: Date
+  client: $Enums.AuthClient
+  usedAt: Date | null
+  token: string
+  revoke: boolean
   _count: RefreshTokenCountAggregateOutputType | null
   _min: RefreshTokenMinAggregateOutputType | null
   _max: RefreshTokenMaxAggregateOutputType | null
@@ -215,13 +215,13 @@ export type RefreshTokenWhereInput = {
   id?: Prisma.StringFilter<"RefreshToken"> | string
   userId?: Prisma.StringFilter<"RefreshToken"> | string
   familyId?: Prisma.StringFilter<"RefreshToken"> | string
-  token?: Prisma.StringFilter<"RefreshToken"> | string
   deviceInfo?: Prisma.StringNullableFilter<"RefreshToken"> | string | null
-  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
-  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
   expiresAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
-  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
+  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
+  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
+  token?: Prisma.StringFilter<"RefreshToken"> | string
+  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -229,13 +229,13 @@ export type RefreshTokenOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   familyId?: Prisma.SortOrder
-  token?: Prisma.SortOrder
   deviceInfo?: Prisma.SortOrderInput | Prisma.SortOrder
-  client?: Prisma.SortOrder
-  revoke?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  client?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  token?: Prisma.SortOrder
+  revoke?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -248,11 +248,11 @@ export type RefreshTokenWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"RefreshToken"> | string
   familyId?: Prisma.StringFilter<"RefreshToken"> | string
   deviceInfo?: Prisma.StringNullableFilter<"RefreshToken"> | string | null
-  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
-  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
   expiresAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
-  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
+  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
+  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
+  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "token">
 
@@ -260,13 +260,13 @@ export type RefreshTokenOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   familyId?: Prisma.SortOrder
-  token?: Prisma.SortOrder
   deviceInfo?: Prisma.SortOrderInput | Prisma.SortOrder
-  client?: Prisma.SortOrder
-  revoke?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  client?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  token?: Prisma.SortOrder
+  revoke?: Prisma.SortOrder
   _count?: Prisma.RefreshTokenCountOrderByAggregateInput
   _max?: Prisma.RefreshTokenMaxOrderByAggregateInput
   _min?: Prisma.RefreshTokenMinOrderByAggregateInput
@@ -279,25 +279,25 @@ export type RefreshTokenScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"RefreshToken"> | string
   userId?: Prisma.StringWithAggregatesFilter<"RefreshToken"> | string
   familyId?: Prisma.StringWithAggregatesFilter<"RefreshToken"> | string
-  token?: Prisma.StringWithAggregatesFilter<"RefreshToken"> | string
   deviceInfo?: Prisma.StringNullableWithAggregatesFilter<"RefreshToken"> | string | null
-  client?: Prisma.EnumAuthClientWithAggregatesFilter<"RefreshToken"> | $Enums.AuthClient
-  revoke?: Prisma.BoolWithAggregatesFilter<"RefreshToken"> | boolean
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"RefreshToken"> | Date | string
-  usedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RefreshToken"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RefreshToken"> | Date | string
+  client?: Prisma.EnumAuthClientWithAggregatesFilter<"RefreshToken"> | $Enums.AuthClient
+  usedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RefreshToken"> | Date | string | null
+  token?: Prisma.StringWithAggregatesFilter<"RefreshToken"> | string
+  revoke?: Prisma.BoolWithAggregatesFilter<"RefreshToken"> | boolean
 }
 
 export type RefreshTokenCreateInput = {
   id?: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
   user: Prisma.UserCreateNestedOneWithoutRefreshTokensInput
 }
 
@@ -305,25 +305,25 @@ export type RefreshTokenUncheckedCreateInput = {
   id?: string
   userId: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
 }
 
 export type RefreshTokenUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutRefreshTokensNestedInput
 }
 
@@ -331,51 +331,51 @@ export type RefreshTokenUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type RefreshTokenCreateManyInput = {
   id?: string
   userId: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
 }
 
 export type RefreshTokenUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type RefreshTokenUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type RefreshTokenListRelationFilter = {
@@ -392,39 +392,39 @@ export type RefreshTokenCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   familyId?: Prisma.SortOrder
-  token?: Prisma.SortOrder
   deviceInfo?: Prisma.SortOrder
-  client?: Prisma.SortOrder
-  revoke?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  client?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
+  token?: Prisma.SortOrder
+  revoke?: Prisma.SortOrder
 }
 
 export type RefreshTokenMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   familyId?: Prisma.SortOrder
-  token?: Prisma.SortOrder
   deviceInfo?: Prisma.SortOrder
-  client?: Prisma.SortOrder
-  revoke?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  client?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
+  token?: Prisma.SortOrder
+  revoke?: Prisma.SortOrder
 }
 
 export type RefreshTokenMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   familyId?: Prisma.SortOrder
-  token?: Prisma.SortOrder
   deviceInfo?: Prisma.SortOrder
-  client?: Prisma.SortOrder
-  revoke?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  client?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
+  token?: Prisma.SortOrder
+  revoke?: Prisma.SortOrder
 }
 
 export type RefreshTokenCreateNestedManyWithoutUserInput = {
@@ -480,25 +480,25 @@ export type BoolFieldUpdateOperationsInput = {
 export type RefreshTokenCreateWithoutUserInput = {
   id?: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
 }
 
 export type RefreshTokenUncheckedCreateWithoutUserInput = {
   id?: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
 }
 
 export type RefreshTokenCreateOrConnectWithoutUserInput = {
@@ -534,61 +534,61 @@ export type RefreshTokenScalarWhereInput = {
   id?: Prisma.StringFilter<"RefreshToken"> | string
   userId?: Prisma.StringFilter<"RefreshToken"> | string
   familyId?: Prisma.StringFilter<"RefreshToken"> | string
-  token?: Prisma.StringFilter<"RefreshToken"> | string
   deviceInfo?: Prisma.StringNullableFilter<"RefreshToken"> | string | null
-  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
-  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
   expiresAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
-  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RefreshToken"> | Date | string
+  client?: Prisma.EnumAuthClientFilter<"RefreshToken"> | $Enums.AuthClient
+  usedAt?: Prisma.DateTimeNullableFilter<"RefreshToken"> | Date | string | null
+  token?: Prisma.StringFilter<"RefreshToken"> | string
+  revoke?: Prisma.BoolFilter<"RefreshToken"> | boolean
 }
 
 export type RefreshTokenCreateManyUserInput = {
   id?: string
   familyId: string
-  token: string
   deviceInfo?: string | null
-  client: $Enums.AuthClient
-  revoke?: boolean
   expiresAt: Date | string
-  usedAt?: Date | string | null
   createdAt?: Date | string
+  client: $Enums.AuthClient
+  usedAt?: Date | string | null
+  token: string
+  revoke?: boolean
 }
 
 export type RefreshTokenUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type RefreshTokenUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type RefreshTokenUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   familyId?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
   deviceInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
-  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.EnumAuthClientFieldUpdateOperationsInput | $Enums.AuthClient
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  revoke?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -597,13 +597,13 @@ export type RefreshTokenSelect<ExtArgs extends runtime.Types.Extensions.Internal
   id?: boolean
   userId?: boolean
   familyId?: boolean
-  token?: boolean
   deviceInfo?: boolean
-  client?: boolean
-  revoke?: boolean
   expiresAt?: boolean
-  usedAt?: boolean
   createdAt?: boolean
+  client?: boolean
+  usedAt?: boolean
+  token?: boolean
+  revoke?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshToken"]>
 
@@ -611,13 +611,13 @@ export type RefreshTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   userId?: boolean
   familyId?: boolean
-  token?: boolean
   deviceInfo?: boolean
-  client?: boolean
-  revoke?: boolean
   expiresAt?: boolean
-  usedAt?: boolean
   createdAt?: boolean
+  client?: boolean
+  usedAt?: boolean
+  token?: boolean
+  revoke?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshToken"]>
 
@@ -625,13 +625,13 @@ export type RefreshTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   userId?: boolean
   familyId?: boolean
-  token?: boolean
   deviceInfo?: boolean
-  client?: boolean
-  revoke?: boolean
   expiresAt?: boolean
-  usedAt?: boolean
   createdAt?: boolean
+  client?: boolean
+  usedAt?: boolean
+  token?: boolean
+  revoke?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshToken"]>
 
@@ -639,16 +639,16 @@ export type RefreshTokenSelectScalar = {
   id?: boolean
   userId?: boolean
   familyId?: boolean
-  token?: boolean
   deviceInfo?: boolean
-  client?: boolean
-  revoke?: boolean
   expiresAt?: boolean
-  usedAt?: boolean
   createdAt?: boolean
+  client?: boolean
+  usedAt?: boolean
+  token?: boolean
+  revoke?: boolean
 }
 
-export type RefreshTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "familyId" | "token" | "deviceInfo" | "client" | "revoke" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["refreshToken"]>
+export type RefreshTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "familyId" | "deviceInfo" | "expiresAt" | "createdAt" | "client" | "usedAt" | "token" | "revoke", ExtArgs["result"]["refreshToken"]>
 export type RefreshTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -668,13 +668,13 @@ export type $RefreshTokenPayload<ExtArgs extends runtime.Types.Extensions.Intern
     id: string
     userId: string
     familyId: string
-    token: string
     deviceInfo: string | null
-    client: $Enums.AuthClient
-    revoke: boolean
     expiresAt: Date
-    usedAt: Date | null
     createdAt: Date
+    client: $Enums.AuthClient
+    usedAt: Date | null
+    token: string
+    revoke: boolean
   }, ExtArgs["result"]["refreshToken"]>
   composites: {}
 }
@@ -1102,13 +1102,13 @@ export interface RefreshTokenFieldRefs {
   readonly id: Prisma.FieldRef<"RefreshToken", 'String'>
   readonly userId: Prisma.FieldRef<"RefreshToken", 'String'>
   readonly familyId: Prisma.FieldRef<"RefreshToken", 'String'>
-  readonly token: Prisma.FieldRef<"RefreshToken", 'String'>
   readonly deviceInfo: Prisma.FieldRef<"RefreshToken", 'String'>
-  readonly client: Prisma.FieldRef<"RefreshToken", 'AuthClient'>
-  readonly revoke: Prisma.FieldRef<"RefreshToken", 'Boolean'>
   readonly expiresAt: Prisma.FieldRef<"RefreshToken", 'DateTime'>
-  readonly usedAt: Prisma.FieldRef<"RefreshToken", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"RefreshToken", 'DateTime'>
+  readonly client: Prisma.FieldRef<"RefreshToken", 'AuthClient'>
+  readonly usedAt: Prisma.FieldRef<"RefreshToken", 'DateTime'>
+  readonly token: Prisma.FieldRef<"RefreshToken", 'String'>
+  readonly revoke: Prisma.FieldRef<"RefreshToken", 'Boolean'>
 }
     
 

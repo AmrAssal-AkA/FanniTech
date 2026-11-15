@@ -86,10 +86,10 @@ export const UserScalarFieldEnum = {
   name: 'name',
   password: 'password',
   phone: 'phone',
-  role: 'role',
-  EmailVerifyAt: 'EmailVerifyAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  role: 'role',
+  EmailVerifyAt: 'EmailVerifyAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -113,13 +113,13 @@ export const RefreshTokenScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   familyId: 'familyId',
-  token: 'token',
   deviceInfo: 'deviceInfo',
-  client: 'client',
-  revoke: 'revoke',
   expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  client: 'client',
   usedAt: 'usedAt',
-  createdAt: 'createdAt'
+  token: 'token',
+  revoke: 'revoke'
 } as const
 
 export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]

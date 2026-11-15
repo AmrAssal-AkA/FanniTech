@@ -230,9 +230,9 @@ export type RepairTicketWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"RepairTicket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RepairTicket"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"RepairTicket"> | Date | string | null
+  statusHistory?: Prisma.RepairStatusHistoryListRelationFilter
   request?: Prisma.XOR<Prisma.RepairRequestScalarRelationFilter, Prisma.RepairRequestWhereInput>
   technician?: Prisma.XOR<Prisma.TechnicianNullableScalarRelationFilter, Prisma.TechnicianWhereInput> | null
-  statusHistory?: Prisma.RepairStatusHistoryListRelationFilter
 }
 
 export type RepairTicketOrderByWithRelationInput = {
@@ -247,9 +247,9 @@ export type RepairTicketOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusHistory?: Prisma.RepairStatusHistoryOrderByRelationAggregateInput
   request?: Prisma.RepairRequestOrderByWithRelationInput
   technician?: Prisma.TechnicianOrderByWithRelationInput
-  statusHistory?: Prisma.RepairStatusHistoryOrderByRelationAggregateInput
 }
 
 export type RepairTicketWhereUniqueInput = Prisma.AtLeast<{
@@ -267,9 +267,9 @@ export type RepairTicketWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"RepairTicket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RepairTicket"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"RepairTicket"> | Date | string | null
+  statusHistory?: Prisma.RepairStatusHistoryListRelationFilter
   request?: Prisma.XOR<Prisma.RepairRequestScalarRelationFilter, Prisma.RepairRequestWhereInput>
   technician?: Prisma.XOR<Prisma.TechnicianNullableScalarRelationFilter, Prisma.TechnicianWhereInput> | null
-  statusHistory?: Prisma.RepairStatusHistoryListRelationFilter
 }, "id" | "requestId" | "ticketNumber">
 
 export type RepairTicketOrderByWithAggregationInput = {
@@ -316,9 +316,9 @@ export type RepairTicketCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   completedAt?: Date | string | null
+  statusHistory?: Prisma.RepairStatusHistoryCreateNestedManyWithoutTicketInput
   request: Prisma.RepairRequestCreateNestedOneWithoutRepairTicketInput
   technician?: Prisma.TechnicianCreateNestedOneWithoutRepairTicketsInput
-  statusHistory?: Prisma.RepairStatusHistoryCreateNestedManyWithoutTicketInput
 }
 
 export type RepairTicketUncheckedCreateInput = {
@@ -346,9 +346,9 @@ export type RepairTicketUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusHistory?: Prisma.RepairStatusHistoryUpdateManyWithoutTicketNestedInput
   request?: Prisma.RepairRequestUpdateOneRequiredWithoutRepairTicketNestedInput
   technician?: Prisma.TechnicianUpdateOneWithoutRepairTicketsNestedInput
-  statusHistory?: Prisma.RepairStatusHistoryUpdateManyWithoutTicketNestedInput
 }
 
 export type RepairTicketUncheckedUpdateInput = {
@@ -574,8 +574,8 @@ export type RepairTicketCreateWithoutRequestInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   completedAt?: Date | string | null
-  technician?: Prisma.TechnicianCreateNestedOneWithoutRepairTicketsInput
   statusHistory?: Prisma.RepairStatusHistoryCreateNestedManyWithoutTicketInput
+  technician?: Prisma.TechnicianCreateNestedOneWithoutRepairTicketsInput
 }
 
 export type RepairTicketUncheckedCreateWithoutRequestInput = {
@@ -618,8 +618,8 @@ export type RepairTicketUpdateWithoutRequestInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  technician?: Prisma.TechnicianUpdateOneWithoutRepairTicketsNestedInput
   statusHistory?: Prisma.RepairStatusHistoryUpdateManyWithoutTicketNestedInput
+  technician?: Prisma.TechnicianUpdateOneWithoutRepairTicketsNestedInput
 }
 
 export type RepairTicketUncheckedUpdateWithoutRequestInput = {
@@ -646,8 +646,8 @@ export type RepairTicketCreateWithoutTechnicianInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   completedAt?: Date | string | null
-  request: Prisma.RepairRequestCreateNestedOneWithoutRepairTicketInput
   statusHistory?: Prisma.RepairStatusHistoryCreateNestedManyWithoutTicketInput
+  request: Prisma.RepairRequestCreateNestedOneWithoutRepairTicketInput
 }
 
 export type RepairTicketUncheckedCreateWithoutTechnicianInput = {
@@ -802,8 +802,8 @@ export type RepairTicketUpdateWithoutTechnicianInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  request?: Prisma.RepairRequestUpdateOneRequiredWithoutRepairTicketNestedInput
   statusHistory?: Prisma.RepairStatusHistoryUpdateManyWithoutTicketNestedInput
+  request?: Prisma.RepairRequestUpdateOneRequiredWithoutRepairTicketNestedInput
 }
 
 export type RepairTicketUncheckedUpdateWithoutTechnicianInput = {
@@ -876,9 +876,9 @@ export type RepairTicketSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   completedAt?: boolean
+  statusHistory?: boolean | Prisma.RepairTicket$statusHistoryArgs<ExtArgs>
   request?: boolean | Prisma.RepairRequestDefaultArgs<ExtArgs>
   technician?: boolean | Prisma.RepairTicket$technicianArgs<ExtArgs>
-  statusHistory?: boolean | Prisma.RepairTicket$statusHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.RepairTicketCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["repairTicket"]>
 
@@ -930,9 +930,9 @@ export type RepairTicketSelectScalar = {
 
 export type RepairTicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "requestId" | "technicianId" | "ticketNumber" | "priority" | "status" | "diagnosis" | "repairNotes" | "createdAt" | "updatedAt" | "completedAt", ExtArgs["result"]["repairTicket"]>
 export type RepairTicketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  statusHistory?: boolean | Prisma.RepairTicket$statusHistoryArgs<ExtArgs>
   request?: boolean | Prisma.RepairRequestDefaultArgs<ExtArgs>
   technician?: boolean | Prisma.RepairTicket$technicianArgs<ExtArgs>
-  statusHistory?: boolean | Prisma.RepairTicket$statusHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.RepairTicketCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RepairTicketIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -947,9 +947,9 @@ export type RepairTicketIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type $RepairTicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RepairTicket"
   objects: {
+    statusHistory: Prisma.$RepairStatusHistoryPayload<ExtArgs>[]
     request: Prisma.$RepairRequestPayload<ExtArgs>
     technician: Prisma.$TechnicianPayload<ExtArgs> | null
-    statusHistory: Prisma.$RepairStatusHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1357,9 +1357,9 @@ readonly fields: RepairTicketFieldRefs;
  */
 export interface Prisma__RepairTicketClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  statusHistory<T extends Prisma.RepairTicket$statusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairTicket$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepairStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   request<T extends Prisma.RepairRequestDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairRequestDefaultArgs<ExtArgs>>): Prisma.Prisma__RepairRequestClient<runtime.Types.Result.GetResult<Prisma.$RepairRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   technician<T extends Prisma.RepairTicket$technicianArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairTicket$technicianArgs<ExtArgs>>): Prisma.Prisma__TechnicianClient<runtime.Types.Result.GetResult<Prisma.$TechnicianPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  statusHistory<T extends Prisma.RepairTicket$statusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RepairTicket$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepairStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1801,25 +1801,6 @@ export type RepairTicketDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
- * RepairTicket.technician
- */
-export type RepairTicket$technicianArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Technician
-   */
-  select?: Prisma.TechnicianSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Technician
-   */
-  omit?: Prisma.TechnicianOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TechnicianInclude<ExtArgs> | null
-  where?: Prisma.TechnicianWhereInput
-}
-
-/**
  * RepairTicket.statusHistory
  */
 export type RepairTicket$statusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1841,6 +1822,25 @@ export type RepairTicket$statusHistoryArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.RepairStatusHistoryScalarFieldEnum | Prisma.RepairStatusHistoryScalarFieldEnum[]
+}
+
+/**
+ * RepairTicket.technician
+ */
+export type RepairTicket$technicianArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Technician
+   */
+  select?: Prisma.TechnicianSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Technician
+   */
+  omit?: Prisma.TechnicianOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TechnicianInclude<ExtArgs> | null
+  where?: Prisma.TechnicianWhereInput
 }
 
 /**
