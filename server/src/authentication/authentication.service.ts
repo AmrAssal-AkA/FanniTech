@@ -137,6 +137,7 @@ export class AuthenticationService {
       if (error instanceof ForbiddenException) {
         throw error;
       }
+      this.logger.error('loginUser failed', error);
       throw new InternalServerErrorException();
     }
   }

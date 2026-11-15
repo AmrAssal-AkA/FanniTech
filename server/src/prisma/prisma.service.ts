@@ -12,15 +12,22 @@ export class PrismaService
         const adapter = new PrismaPg({
             connectionString: process.env.DATABASE_URL,
             ssl: {rejectUnauthorized: false},
-            max: 5
+            max: 5,
+            connectionTimeoutMillis: 15000,
+            idleTimeoutMillis: 30000,
+            keepAlive: true
         });
         super({adapter});
     }
     async onModuleInit() {
-        this.$connect();
-        this.logger.log('PrismaService initialized and connected to the database.');
+        try {
+            await this.$connect();
+            this.logger.log('PrismaService initialized and connected to the database.');
+        } catch (error) {
+            this.logger.error('PrismaService failed to connect to the database', error);
+        }
     }
     async onModuleDestroy() {
-        this.$disconnect();
+        await this.$disconnect();
     }
   }
